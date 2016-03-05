@@ -3,11 +3,11 @@ minfo = {
   "Atomizer" :
   {
     "type"        : "c_module",
-    "modpath"     : "StandardFragmenters.so",
+    "modpath"     : "SystemFragmenters.so",
     "version"     : "0.1a",
     "description" : "Atomizes a molecule",
     "authors"     : ["Ben Pritchard"],
-    "refs"        : [""]
+    "refs"        : [""],
     "options"     : {
                         # No options
                     }
