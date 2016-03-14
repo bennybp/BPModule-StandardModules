@@ -28,13 +28,13 @@ TestExtLib::~TestExtLib()
 
 void TestExtLib::RunTest_(void)
 {
-    Output("+++ In TestExtLib: RunTest. Info: (%1%) %2% %3% v%4%\n", ID(), Key(), Name(), Version());
-    Output("*** Testing calling other libraries\n");
+    out.Output("+++ In TestExtLib: RunTest. Info: (%?) %? %? v%?\n", ID(), Key(), Name(), Version());
+    out.Output("*** Testing calling other libraries\n");
     std::string sstr = Static_GetString();
     std::string dstr = Dynamic_GetString();
 
-    Output("       From static: %1%\n", sstr);
-    Output("      From dynamic: %1%\n", dstr);
+    out.Output("       From static: %?\n", sstr);
+    out.Output("      From dynamic: %?\n", dstr);
 }
 
 
