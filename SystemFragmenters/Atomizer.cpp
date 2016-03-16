@@ -2,12 +2,12 @@
 
 using namespace bpmodule::system;
 
-MoleculeMap Atomizer::Fragmentize_(const Molecule & mol)
+SystemMap Atomizer::Fragmentize_(const System & mol)
 {
-    MoleculeMap ret;
+    SystemMap ret;
 
     //! \todo best way to do this? Could we copy
-    //        the molecule (universe only) and then
+    //        the System (universe only) and then
     //        insert?
     for(const auto & atom : mol)
     {
