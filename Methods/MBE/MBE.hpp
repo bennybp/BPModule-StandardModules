@@ -15,9 +15,9 @@
 #define MBE_HPP
 
 #include <vector>
-#include "bpmodule/modulebase/EnergyMethod.hpp"
+#include <bpmodule/modulebase/EnergyMethod.hpp>
 
-namespace LibMBE{
+namespace bpmethods{
 class MBE : public bpmodule::modulebase::EnergyMethod{
     private:
         typedef bpmodule::modulebase::EnergyMethod Base_t;

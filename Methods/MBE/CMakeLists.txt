@@ -1,17 +1,9 @@
-set(MBE_FILES creator.cpp
-              MBE.cpp
-   )
+set(MBE_FILES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/MBE.cpp
+ )
 
-add_library(MBE MODULE ${MBE_FILES})
-
-target_link_libraries(MBE bpmodule)
-
-#set_target_properties(MBE PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-
-install(TARGETS MBE
-        LIBRARY DESTINATION MBE
-        RUNTIME DESTINATION MBE)
-
-install(FILES "__init__.py" DESTINATION MBE)
-install(FILES "modinfo.py"  DESTINATION MBE)
+set(BPMETHODS_SRC
+       ${BPMETHODS_SRC}
+       ${MBE_FILES}
+    PARENT_SCOPE
+)
