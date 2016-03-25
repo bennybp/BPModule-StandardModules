@@ -1,9 +1,12 @@
+#include <stack>
 #include "Methods/MIM/MIM.hpp" //Note that MIM.hpp is not in a folder yet b/c I can't figure out how to make folders on GitHub
 
 using bpmodule::modulemanager::ModuleManager;
 using bpmodule::system::System;
+using bpmodule::system::SystemMap;
 
 typedef bpmodule::modulemanager::ModulePtr<EnergyMethod> EMethod_t;
+typedef bpmodule::modulemanager::ModulePtr<SystemFragmenter> Fragmenter_;
 typedef std::vector<double> Return_t;
 typedef std::map<std::string,Return_t> DerivMap;
 
@@ -59,10 +62,10 @@ void FillDeriv(Result_t& Result,
             SuperStride*=3*SuperAtomMap.size();
             SubStride*=3*SubAtomMap.size();
          }
-         SuperOff+=SuperAtomMap[Idx[i]]*SuperStride+Comp[i];
-         SubOff+=SubAtomMap[Idx[i]]*SubStride+Comp[i];
+         SuperOff+=(SuperAtomMap[Idx[i]]+Comp[i])*SuperStride;
+         SubOff+=(SubAtomMap[Idx[i]]+Comp[i])*SubStride;
       }
-      for(const Atom& AtomI: Sys){
+      for(const Atom& AtomI: Sys){//Unrolled loop
          //Second offsets
          size_t SuperOff2=SuperAtomMap[AtomI]*3;
          size_t SubOff2=SubAtomMap[AtomI]*3;
@@ -98,7 +101,8 @@ Return_t MIM::DerivImpl(size_t Order)const{
    //Get the options
    const OptionMap& DaOptions=Options();
    std::vector<std::string> MethodNames=DaOptions.Get<std::vector<std::string>>("METHODS");
-   std::map<std::string,bpmodule::system::System> Systems;//TODO: figure out how to get these, can't pass through options
+   Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>("FRAG");
+   SystemMap Systems=Fragger->Fragmentize(Mol);
    std::vector<double> Coeffs=DaOptions.Get<std::vector<double>>("WEIGHTS");
    
    //For the time-being the user is required to give us a coefficient for each task
