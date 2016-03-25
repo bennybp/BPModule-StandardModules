@@ -31,6 +31,16 @@ typedef std::vector<double> Return_t;
 typedef std::vector<std::string> String_t;
 typedef std::map<std::string,Return_t> DerivMap;
 
+/*
+ * TODO when I can compile and know I didn't break things:
+ * - Remove task iteration and derivative putting together
+ *   and write in terms of MIM
+ * - Make N-Mer formation an option of the system fragmenter
+ *   - Put it in base fragmenter
+ * - Once computations cache results, compute interactions by
+ *   "Re-running" the computations and then assembling derivatives
+ */
+
 namespace bpmethods{
 
     class Task{
