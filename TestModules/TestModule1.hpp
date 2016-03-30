@@ -6,7 +6,7 @@
 class TestModule1 : public bpmodule::modulebase::Test_Base
 {
 public:
-    TestModule1(unsigned long id);
+    TestModule1(ID_t id);
 
     virtual void RunTest_(void);
 

@@ -17,10 +17,10 @@ class Task{
    private:
       ModuleManager& MM_;
       std::string Key_;
-      unsigned long ID_;
+      ID_t ID_;
       const System& Sys_;
    public:
-      Task(ModuleManager& MM, const std::string& Key, unsigned long ID, const System& Sys):
+      Task(ModuleManager& MM, const std::string& Key, ID_t ID, const System& Sys):
          MM_(MM),Key_(Key),ID_(ID),Sys_(Sys){}
       Return_t operator()(size_t Order)const{
          EMethod_t DaMethod=MM_.GetModule<EnergyMethod>(Key_,ID_);

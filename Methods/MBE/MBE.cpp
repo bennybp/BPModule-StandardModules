@@ -47,14 +47,14 @@ namespace bpmethods{
     private:
         ModuleManager& MM_;
         std::string Key_;
-        unsigned long ID_;
+        ID_t ID_;
         const System& Sys_;  //! \todo Could be made a shared pointer,
                              //        so it isn't copied in operator()?
                              // ie, Constructor would have to take a shared pointer
     public:
         Task(ModuleManager& MM,
              std::string Key,
-             unsigned long ID,
+             ID_t ID,
              const System& Sys):
                 MM_(MM),Key_(Key),ID_(ID),Sys_(Sys){ }
         Return_t operator()(size_t DerivOrder)const{

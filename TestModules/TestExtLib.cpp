@@ -13,7 +13,7 @@ using namespace bpmodule::exception;
 
 
 
-TestExtLib::TestExtLib(unsigned long id)
+TestExtLib::TestExtLib(ID_t id)
                : Test_Base(id)
 {
 }

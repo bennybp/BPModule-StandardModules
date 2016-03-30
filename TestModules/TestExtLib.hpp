@@ -6,7 +6,7 @@
 class TestExtLib : public bpmodule::modulebase::Test_Base
 {
 public:
-    TestExtLib(unsigned long id);
+    TestExtLib(ID_t id);
 
     virtual void RunTest_(void);
 
