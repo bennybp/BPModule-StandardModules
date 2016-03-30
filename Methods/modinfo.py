@@ -14,14 +14,27 @@ minfo = {
                     "METHOD":(OptionType.String,None,True,None,
                     'The key of the method that should be used to compute the '\
                     'energy derivative.'),
-                    "TRUNCATION_ORDER":(OptionType.Int,3,False,None,
-                    "The order at which the MBE should be truncated"),
-                    "DISTANCE_THRESHOLDS":(OptionType.DictIntFloat,{},False,
-                    None,'A int->float dictionary where the int, call it n, is'\
-                    ' the MBE order and the float is the maximum distance '\
-                    'that the n monomers can be apart, e.g. {2:3.14} means '\
-                    'that dimers whose centers of mass are more than 3.14 '\
-                    'Angstroms apart are excluded.')
+                    "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
+                    'The key used to fragment the system'),
+                    }
+  },
+  "MIM" :
+  {
+    "type"        : "c_module",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Performs a Molecules in Molecules (MIM) computation",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                    "WEIGHTS":(OptionType.ListFloat,None,True,None,
+                    'WEIGHTS[i] is the i-th weight of the i-th system using '\
+                    'the i-th method.'),
+                    "METHODS":(OptionType.ListString,None,True,None,
+                    "METHODS[i] is the i-th method's key, you may provide only"\
+                    ' one key if it is the systems that are changing'),
+                    "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
+                    'The key used to fragment the system'),
                     }
   },
   "SCF" :

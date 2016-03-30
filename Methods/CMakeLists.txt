@@ -5,6 +5,7 @@ set(BPMETHODS_SRC creator.cpp)
 set(BPMETHODS_INC "")
 
 add_subdirectory(MBE)
+add_subdirectory(MIM)
 add_subdirectory(SCF)
 
 add_library(Methods MODULE ${BPMETHODS_SRC})

@@ -6,7 +6,7 @@
 #include <vector>
 #include <bpmodule/modulebase/EnergyMethod.hpp>
 
-namespace bpmethod{
+namespace bpmethods{
 
 /** \brief This is a class that implements the Molecules in Molecules (MIM) method of Mayhall and Rahavachari (sp)
  *
@@ -40,9 +40,10 @@ class MIM : public bpmodule::modulebase::EnergyMethod {
       using Base_t::EnergyMethod;
       
       ///The method that the base class will actually call
-      std::vector<double> Deriv_(size_t Order)const{
+      std::vector<double> Deriv_(size_t Order){
          if(Order>=1)return Base_t::Deriv_(Order);
          return DerivImpl(Order);
+      }
 };
 
 }//End namespace

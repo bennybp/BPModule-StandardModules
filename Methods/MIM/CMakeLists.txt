@@ -1,0 +1,9 @@
+set(MIM_FILES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/MIM.cpp
+ )
+
+set(BPMETHODS_SRC
+       ${BPMETHODS_SRC}
+       ${MIM_FILES}
+    PARENT_SCOPE
+)
