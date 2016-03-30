@@ -48,7 +48,9 @@ namespace bpmethods{
         ModuleManager& MM_;
         std::string Key_;
         unsigned long ID_;
-        const System& Sys_;
+        const System& Sys_;  //! \todo Could be made a shared pointer,
+                             //        so it isn't copied in operator()?
+                             // ie, Constructor would have to take a shared pointer
     public:
         Task(ModuleManager& MM,
              std::string Key,
@@ -57,7 +59,7 @@ namespace bpmethods{
                 MM_(MM),Key_(Key),ID_(ID),Sys_(Sys){ }
         Return_t operator()(size_t DerivOrder)const{
             EMethod_t Method=MM_.GetModule<EnergyMethod>(Key_,ID_);
-            Method->Wfn().system.Set(Sys_);
+            Method->Wfn().system = std::make_shared<const System>(Sys_);
             return Method->Deriv(DerivOrder);
         }
     };
@@ -83,9 +85,9 @@ namespace bpmethods{
                 DaOptions.Get<std::map<size_t,double>>("DISTANCE_THRESHOLDS");
 
         //Compute size of super system basis
-        const System& Mol=*Wfn().system;
+        const System& Mol=*(Wfn().system);
         size_t DoF=1;
-        for(size_t i=0;i<Order;++i)DoF*=3*Mol.NAtoms();
+        for(size_t i=0;i<Order;++i)DoF*=3*Mol.Size();
 
 
         //Make N-Mers
