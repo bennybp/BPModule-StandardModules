@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <limits>
 #include <algorithm>
+#include <memory>
 #include <bpmodule/system/System.hpp>
 #include <bpmodule/exception/Exceptions.hpp>
 #include <bpmodule/modulebase/SystemFragmenter.hpp>
@@ -9,6 +10,7 @@
 #include <bpmodule/parallel/InitFinalize.hpp>
 #include <LibTaskForce.hpp>
 #include <bpmodule/output/Table.hpp>
+#include <bpmodule/output/GlobalOutput.hpp>
 #include "Methods/MIM/MIM.hpp" 
 
 using bpmodule::modulemanager::ModuleManager;
@@ -47,7 +49,7 @@ class Task{
          MM_(MM),Key_(Key),ID_(ID),Sys_(Sys){}
       Return_t operator()(size_t Order)const{
          EMethod_t DaMethod=MM_.GetModule<EnergyMethod>(Key_,ID_);
-         DaMethod->Wfn().system.Set(Sys_);
+         DaMethod->Wfn().system=std::make_shared<System>(Sys_);
          return DaMethod->Deriv(Order);
       }
 };
@@ -77,7 +79,7 @@ void FillDeriv(Return_t& Result,
                vector<size_t> Comp=vector<size_t>()){
    //Handle energy
    if(Order==0)Result[0]+=Coeff*SubResult[0];
-   else if(Idx.size()==(Order-1)){//Gradient lands here, Hessian and higer, land here on recursion
+   else if(Idx.size()==(Order-1)){//Gradient lands here, Hessian and higher on recursion
       size_t SuperOff=0,SubOff=0;
       for(size_t i=0;i<Order-1;++i){//First offset
          size_t SuperStride=1,SubStride=1;
@@ -85,8 +87,8 @@ void FillDeriv(Return_t& Result,
             SuperStride*=3*SuperAtomMap.size();
             SubStride*=3*SubAtomMap.size();
          }
-         SuperOff+=(SuperAtomMap.at(Idx[i])+Comp[i])*SuperStride;
-         SubOff+=(SubAtomMap.at(Idx[i])+Comp[i])*SubStride;
+         SuperOff+=(SuperAtomMap.at(Idx[i])*3+Comp[i])*SuperStride;
+         SubOff+=(SubAtomMap.at(Idx[i])*3+Comp[i])*SubStride;
       }
       for(const Atom& AtomI: Sys){//Unrolled loop
          //Second offsets
@@ -111,10 +113,12 @@ void FillDeriv(Return_t& Result,
    
 }
 
-void PrintTable(const vector<string>& Rows,const DerivMap& Derivs);
+void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs);
+void PrintGradTable(const vector<string>& Rows,const DerivMap& Derivs,
+                    const SystemMap& Systems);
 
 AtomMap_t MapAtoms(const System& Mol){
-   unordered_map<Atom,size_t> AtomMap;
+   AtomMap_t AtomMap;
    size_t counter=0;
    for(const Atom& AtomI : Mol)AtomMap[AtomI]=counter++;
    return AtomMap;
@@ -124,7 +128,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
    //Get the system and compute the number of degrees of freedom for the result
    const System& Mol=*Wfn().system;
    size_t DoF=1;
-   for(size_t i=0;i<Order;++i)DoF*=3*Mol.NAtoms();
+   for(size_t i=0;i<Order;++i)DoF*=3*Mol.Size();
    
    //Establish an atom order
    AtomMap_t AtomMap=MapAtoms(Mol);
@@ -186,14 +190,15 @@ Return_t MIM::DerivImpl(size_t Order)const{
                 AtomMap,MapAtoms(SubSys),Order);
       if(!SameSystem)++SysI;
    }
-   if(Order==0)PrintTable(RowTitles,Derivs);
+   if(Order==0)PrintEgyTable(RowTitles,Derivs);
+   else if(Order==1)PrintGradTable(RowTitles,Derivs,Systems);
    return TotalDeriv;
 }
 
-void PrintTable(const vector<string>& Rows,const DerivMap& Derivs){
+void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs){
    const size_t NCols=2,NRows=Rows.size()+1;
    bpmodule::output::Table ResultTable(NRows,NCols);
-   std::array<string,NCols> ColTitles={"System","Energy"};
+   std::array<string,NCols> ColTitles={"System","Energy (a.u.)"};
    ResultTable.SetHBorder(0,'*');
    ResultTable.SetHBorder(1,'-');
    ResultTable.SetHBorder(NRows,'*');
@@ -202,7 +207,36 @@ void PrintTable(const vector<string>& Rows,const DerivMap& Derivs){
    ResultTable.FillCol(Rows,0,1,NRows);
    for(size_t i=0;i<Rows.size();++i)
          ResultTable.FillRow(&Derivs.at(Rows[i])[0],i+1,1,NCols);
-   //bpmodule::output::GetGlobalOut()<<ResultTable<<std::endl;
+   bpmodule::output::GetGlobalOut()<<ResultTable<<std::endl;
+}
+
+void PrintGradTable(const vector<string>& Rows,
+                    const DerivMap& Derivs,
+                    const SystemMap& Systems){
+    
+   const size_t NCols=4;
+   size_t NRows=1;
+   for(const SystemMap::value_type& Sys: Systems)NRows+=Sys.second.Size();
+   bpmodule::output::Table ResultTable(NRows,NCols);
+   std::array<string,NCols> ColTitles=
+            {"System","x (a.u.)","y (a.u.)","z (a.u.)"};
+   ResultTable.SetHBorder(0,'*');
+   ResultTable.SetHBorder(NRows,'*');
+   ResultTable.SetVBorder(1,'|');
+   ResultTable.FillRow(ColTitles,0,0,NCols);
+   size_t counter=0;
+   vector<string>::const_iterator RowI=Rows.begin();
+   for(const SystemMap::value_type& Sys: Systems){
+       ResultTable.SetHBorder(counter+1,'-');
+       size_t NAtoms=Sys.second.Size();
+       for(size_t AtomI=0;AtomI<NAtoms;++AtomI){
+           if(AtomI==(NAtoms-NAtoms%2)/2)
+               ResultTable.GetCell(counter+1,0).AddData(*RowI);
+           ResultTable.FillRow(&Derivs.at(*RowI)[AtomI*3],++counter,1,NCols);
+       }
+       ++RowI;
+   }
+   bpmodule::output::GetGlobalOut()<<ResultTable<<std::endl;
 }
 
 

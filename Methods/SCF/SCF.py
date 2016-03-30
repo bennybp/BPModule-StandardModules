@@ -5,27 +5,47 @@ class SCF(bp.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(SCF, self).__init__(myid)
   
+  def MaxOrder(self):
+      return 1
+
   def Deriv_(self,order):
       Mol=self.Wfn().system
       f=open("MBE.in","w")
       f.write("molecule{\n")
       f.write("units=bohr\n")
+      f.write("no_reorient\n")
+      f.write("no_com\n")
+      NAtoms=0
       for atom in Mol:
           f.write(str(atom.GetSymbol())+" "+str(atom[0])+" "+str(atom[1])+
                     " "+str(atom[2])+"\n")
+          NAtoms+=1
       f.write("}\n")
       f.write("memory 10 gb\n")
       f.write("set{\n")
       f.write("basis sto-3g\n")
       f.write("}\n")
-      f.write("energy(\"SCF\")\n")
+      if order==0:
+          f.write("energy(\"SCF\")\n")
+      elif order==1:
+          f.write("gradient(\"SCF\")\n")
       f.close()
       call(["/theoryfs2/ds/richard/SrcFiles/psi4/objdir/bin/psi4","MBE.in"])
       f=open("MBE.out","r")
-      egy=0.0
+      egy=[]
       for line in f:
-         if line.split()[0:3]==["@DF-RHF","Final","Energy:"]:
-             egy=line.split()[3]
+         if order==0 and line.split()[0:3]==["@DF-RHF","Final","Energy:"]:
+             egy.append(float(line.split()[3]))
+             break
+         elif order==1 and line.split()[0:2]==["-Total","Gradient:"]:
+             line=next(f)
+             line=next(f)
+             line=next(f)
+             for x in range(0,NAtoms):
+                 for y in range(1,4):
+                    egy.append(float(line.split()[y]))
+                 line=next(f)
+             break
       f.close()
-      return [float(egy)]
+      return egy
      

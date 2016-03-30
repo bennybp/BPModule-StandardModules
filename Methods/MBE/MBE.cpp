@@ -106,6 +106,7 @@ namespace bpmethods{
         Return_t SortedWeights;
         for(const auto& NMerI: NMers)
             SortedWeights.push_back(Weights[NMerI.first]);
+            
         
         //Pass info to MIM
         MManager().ChangeOption("MIM","METHODS",String_t({MethodName}));

@@ -41,7 +41,6 @@ class MIM : public bpmodule::modulebase::EnergyMethod {
       
       ///The method that the base class will actually call
       std::vector<double> Deriv_(size_t Order){
-         if(Order>=1)return Base_t::Deriv_(Order);
          return DerivImpl(Order);
       }
 };

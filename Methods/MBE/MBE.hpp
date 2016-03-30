@@ -27,7 +27,6 @@ class MBE : public bpmodule::modulebase::EnergyMethod{
         using Base_t::EnergyMethod;
         
         virtual std::vector<double> Deriv_(size_t Order){
-            if(Order>0)return Base_t::Deriv_(Order);
             return DerivImpl(Order);
         }
 

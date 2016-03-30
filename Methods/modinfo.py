@@ -16,6 +16,9 @@ minfo = {
                     'energy derivative.'),
                     "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
                     'The key used to fragment the system'),
+                    "MAX_DERIV":(OptionType.Int,255,False,None,
+                    'What order analytic derivatives are available (actually '\
+                    'have arbitrary order available)'),
                     }
   },
   "MIM" :
@@ -35,6 +38,9 @@ minfo = {
                     ' one key if it is the systems that are changing'),
                     "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
                     'The key used to fragment the system'),
+                    "MAX_DERIV":(OptionType.Int,255,False,None,
+                    'What order analytic derivatives are available (actually '\
+                    'have arbitrary order available)'),
                     }
   },
   "SCF" :
@@ -44,7 +50,10 @@ minfo = {
     "description" : "Calls Psi4 via a system call and then runs an SCF",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""], 
-    "options"     : {}
+    "options"     : {
+                    "MAX_DERIV":(OptionType.Int,1,False,None,
+                    'What order analytic derivatives are available.'),
+                    }
   },
 
 }
