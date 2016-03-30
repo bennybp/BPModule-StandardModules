@@ -22,7 +22,7 @@ void Recurse(size_t depth,
     if(MaxBonds==depth)return;
     for(const Atom& AnAtom: Conns.at(CurrAtom)){//Loop atoms attached to CurrAtm
         //Ensure we didn't find an atom we already knew about
-        if(NewFrag.HasAtom(AnAtom))continue;
+        if(NewFrag.Contains(AnAtom))continue;
         NewFrag.Insert(AnAtom);//It's good
         Recurse(depth+1,NewFrag,AnAtom,MaxBonds,Conns);
     }//End loop over attached atoms

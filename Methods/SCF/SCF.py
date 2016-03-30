@@ -6,7 +6,7 @@ class SCF(bp.modulebase.EnergyMethod):
     super(SCF, self).__init__(myid)
   
   def Deriv_(self,order):
-      Mol=self.Wfn().system.Get()
+      Mol=self.Wfn().system
       f=open("MBE.in","w")
       f.write("molecule{\n")
       f.write("units=bohr\n")

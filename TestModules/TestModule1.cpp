@@ -8,7 +8,7 @@ using namespace bpmodule::exception;
 
 
 
-TestModule1::TestModule1(unsigned long id)
+TestModule1::TestModule1(ID_t id)
     : Test_Base(id)
 {
 }

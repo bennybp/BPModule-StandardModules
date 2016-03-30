@@ -40,6 +40,7 @@ typedef vector<map<SN_t,string>> SNList_t;//Type of binned SNs
  */
 
 namespace bpmethods{
+
     
     //Splits the nmer names up
     String_t split(const string &s){
