@@ -1,5 +1,6 @@
 set(MBE_FILES 
         ${CMAKE_CURRENT_SOURCE_DIR}/MBE.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/MBEUtils.cpp
  )
 
 set(BPMETHODS_SRC

@@ -7,6 +7,7 @@ set(BPMETHODS_INC "")
 add_subdirectory(MBE)
 add_subdirectory(MIM)
 add_subdirectory(SCF)
+add_subdirectory(VMFC)
 
 add_library(Methods MODULE ${BPMETHODS_SRC})
 

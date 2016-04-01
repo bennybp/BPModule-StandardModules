@@ -55,6 +55,25 @@ minfo = {
                     'What order analytic derivatives are available.'),
                     }
   },
+  "VMFC" :
+  {
+    "type"        : "c_module",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Performs a Valiron-Mayer Functional Counterpoise correction",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                    "METHOD":(OptionType.String,None,True,None,
+                    'The key of the method that should be used to compute the '\
+                    'energy derivative.'),
+                    "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
+                    'The key used to fragment the system'),
+                    "MAX_DERIV":(OptionType.Int,255,False,None,
+                    'What order analytic derivatives are available (actually '\
+                    'have arbitrary order available)'),
+                    }
+  },
 
 }
 

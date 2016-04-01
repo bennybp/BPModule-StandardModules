@@ -1,0 +1,9 @@
+set(VMFC_FILES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/VMFC.cpp
+ )
+
+set(BPMETHODS_SRC
+       ${BPMETHODS_SRC}
+       ${VMFC_FILES}
+    PARENT_SCOPE
+)
