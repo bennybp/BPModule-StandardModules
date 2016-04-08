@@ -1,5 +1,7 @@
 set(VMFC_FILES 
         ${CMAKE_CURRENT_SOURCE_DIR}/VMFC.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/BSSEKernel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/CP.cpp
  )
 
 set(BPMETHODS_SRC

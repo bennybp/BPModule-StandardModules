@@ -1,2 +1,2 @@
 from .modinfo import *
-from .SCF.creator import *
+from .creator import *

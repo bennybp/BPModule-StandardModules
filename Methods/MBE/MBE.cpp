@@ -4,13 +4,13 @@
  * and open the template in the editor.
  */
 #include <string>
-#include <bpmodule/system/System.hpp>
-#include <bpmodule/modulebase/SystemFragmenter.hpp>
-#include <bpmodule/datastore/OptionMap.hpp>
 #include <bpmodule/math/PowerSetItr.hpp>
 #include <bpmodule/math/Binomial.hpp>
 #include "Methods/MBE/MBE.hpp"
+#include "Methods/MBE/MBECommon.hpp"
 #include "Methods/MBE/MBEUtils.hpp"
+
+
 
 using std::string;
 using std::vector;
@@ -18,17 +18,8 @@ using std::map;
 using std::set;
 using std::stringstream;
 
-using bpmodule::datastore::OptionMap;
-using bpmodule::system::Atom;
-using bpmodule::system::System;
 using bpmodule::modulemanager::ModuleManager;
-using bpmodule::modulebase::SystemFragmenter;
-using bpmodule::modulebase::EnergyMethod;
-using bpmodule::system::SystemMap;
 
-
-typedef bpmodule::modulemanager::ModulePtr<SystemFragmenter> Fragmenter_t;
-typedef bpmodule::modulemanager::ModulePtr<EnergyMethod> EMethod_t;
 typedef vector<double> Return_t;
 typedef map<string,Return_t> DerivMap;
 
@@ -38,20 +29,6 @@ typedef map<string,Return_t> DerivMap;
  */
 
 namespace bpmethods{
-    //Computes the MBE coefficients by recursion
-    void GetCoef(bool Even,const SN_t& NMer,const SNList_t& SNs,
-                 map<string,double>& Coeffs){
-        //If we don't have the NMer it's because we're assuming it's n-body
-        //interaction is negligible, so don't follow that recursion
-        size_t n=NMer.size()-1;
-        if(SNs[n].count(NMer)==0)return;
-        Coeffs[SNs[n].at(NMer)]+=(Even?1.0:-1.0);
-        bpmodule::math::PowerSetItr<SN_t> Frags(NMer,1,n);//no empty sets
-        while(!Frags.Done()){
-            GetCoef(!Even,*Frags,SNs,Coeffs);
-            ++Frags;
-        }
-    }
     
     Return_t MBE::Deriv_(size_t Order){
         //Load options
@@ -60,7 +37,7 @@ namespace bpmethods{
         string Fragmentizer=DaOptions.Get<string>("FRAGMENTIZER");
 
         //Make N-Mers
-        const System& Mol=*Wfn().system;
+        const System& Mol=*InitialWfn().system;
         Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(Fragmentizer);
         SystemMap NMers=Fragger->Fragmentize(Mol);
         

@@ -38,7 +38,8 @@ class UserDefined : public bpmodule::modulebase::SystemFragmenter
 public:
 using SystemFragmenter::SystemFragmenter;
 
-virtual bpmodule::system::SystemMap Fragmentize_(const bpmodule::system::System & mol);
+virtual bpmodule::system::SystemMap 
+    Fragmentize_(const bpmodule::system::System & mol);
 
 };
 

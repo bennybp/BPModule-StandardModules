@@ -26,8 +26,13 @@ namespace bpmethods{
  *  In particular, this class factors out the code required to submit the various computations in parallel and will
  *  then also handle "stitching" the results together.
  *
- *  This class needs three things from you: a list of systems to run, the weight of each system in the resulting expansion,
- *  and the keys for each method that should be run.  Respectively, these options are SYSTEMS, WEIGHTS, and METHODS.
+ *  This class needs minimally three things from you: a list of systems to run, 
+ *  the weight of each system in the resulting expansion,
+ *  and the keys for each method that should be run.  
+ *  Respectively, these options are SYSTEMS, WEIGHTS, and METHODS.  Optionally,
+ *  you may specify the basis set for each system to use.  If this option is
+ *  not set, it will be assumed that "PRIMARY" is to be used.  The keyword
+ *  for this is BASIS_SETS.
  */
 class MIM : public bpmodule::modulebase::EnergyMethod {
    private:

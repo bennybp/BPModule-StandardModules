@@ -1,6 +1,8 @@
 set(SYSTEMFRAG_FILES creator.cpp
                      Atomizer.cpp
                      Bondizer.cpp
+                     UserDefined.cpp
+                     Null.cpp
    )
 
 add_library(SystemFragmenters MODULE ${SYSTEMFRAG_FILES})

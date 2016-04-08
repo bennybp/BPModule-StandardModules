@@ -1,0 +1,47 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+#include "Methods/BSSE/CP.hpp"
+#include "Methods/BSSE/BSSEKernel.hpp"
+#include "Methods/MBE/MBECommon.hpp"
+
+namespace bpmethods{
+    
+using std::vector;    
+using std::string;    
+
+vector<double> CP::Deriv_(size_t Order){
+        const System& Mol=*InitialWfn().system;
+        RealGhostData NewSys=GhostTheSystem(Mol);
+        Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(
+                                   Options().Get<string>("FRAGMENTIZER"));
+        SystemMap NMers=Fragger->Fragmentize(Mol);        
+        SNList_t SNs=BinNMers(NMers);
+        size_t NFrags=SNs[0].size();
+        
+        //Make supersytem SN and name
+
+        std::stringstream ss;
+        for(size_t i=0;i<NFrags;++i){
+            ss<<i;
+            if(i<NFrags-1)ss<<"_";
+        }
+        std::map<string,double> Coeffs=SSFCKernel(NMers,NewSys,1,1,
+                                                  NFrags-1,NFrags-1);
+        
+        NMers.emplace(ss.str(),*NewSys.RealSystem);
+        Coeffs.emplace(ss.str(),1.0);
+                
+        return RunCalcs(NMers,Coeffs,NewSys,Order,ID(),MManager(),
+                        Options().Get<string>("METHOD"));
+        
+        
+        
+        
+}    
+    
+    
+}//End namespace

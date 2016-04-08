@@ -10,6 +10,7 @@ using std::vector;
 using std::string;
 
 using bpmodule::system::System;
+using bpmodule::system::Atom;
 using bpmodule::system::SystemMap;
 using bpmodule::datastore::OptionMap;
 using bpmodule::exception::GeneralException;
@@ -18,7 +19,7 @@ SystemMap UserDefined::Fragmentize_(const System & mol){
     SystemMap NMers;
     const OptionMap& DaOptions=Options();
     vector<string> Names=
-            DaOptions.Get<vector<string>("FRAGMENT_NAMES");
+            DaOptions.Get<vector<string>>("FRAGMENT_NAMES");
     vector<int> AtomsPerFrag=DaOptions.Get<vector<int>>("ATOMS_PER_FRAG");
     vector<int> Frags=DaOptions.Get<vector<int>>("FRAGMENTS");
     
@@ -28,13 +29,15 @@ SystemMap UserDefined::Fragmentize_(const System & mol){
                 "NNames",Names.size(),
                  "NSizes",AtomsPerFrag.size());
     
-    std::vector<Atom> Atoms(mol.begin(),mol.end());
+    std::vector<Atom> Atoms;
+    for(const Atom& AtomI: mol)Atoms.push_back(AtomI);
+        
     System Empty=mol.Partition([](const Atom&){return false;});
     
     for(size_t i=0,counter=0;i<Names.size();++i){
-        NMers[Names[i]]=Empty;
+        NMers.emplace(Names[i],Empty);
         for(size_t j=0;j<AtomsPerFrag[i];++j)
-            NMers[Names[i]].Insert(Atoms[Frags[counter++]]);
+            NMers.at(Names[i]).Insert(Atoms[Frags[counter++]]);
     }
     return NMers;
 }

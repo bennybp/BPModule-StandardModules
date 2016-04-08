@@ -4,12 +4,10 @@ from subprocess import call
 class SCF(bp.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(SCF, self).__init__(myid)
-  
-  def MaxOrder(self):
-      return 1
 
   def Deriv_(self,order):
-      Mol=self.Wfn().system
+      print("Hello")
+      Mol=self.InitialWfn().system
       f=open("MBE.in","w")
       f.write("molecule{\n")
       f.write("units=bohr\n")
@@ -17,13 +15,23 @@ class SCF(bp.modulebase.EnergyMethod):
       f.write("no_com\n")
       NAtoms=0
       for atom in Mol:
-          f.write(str(atom.GetSymbol())+" "+str(atom[0])+" "+str(atom[1])+
-                    " "+str(atom[2])+"\n")
-          NAtoms+=1
+        Symbol=atom.GetSymbol()
+        if Symbol == "Gho" :
+           if NAtoms%3==0:
+              f.write("@O")
+           else:
+              f.write("@H")
+            
+        else:
+           f.write(Symbol)
+        f.write(" "+str(atom[0])+" "+str(atom[1])+" "+str(atom[2])+"\n")
+        NAtoms+=1
       f.write("}\n")
       f.write("memory 10 gb\n")
       f.write("set{\n")
-      f.write("basis sto-3g\n")
+      f.write("freeze_core true\n")
+      name=self.Options().Get("BASIS_SET")
+      f.write("basis "+name+"\n")
       f.write("}\n")
       if order==0:
           f.write("energy(\"SCF\")\n")

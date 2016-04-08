@@ -1,5 +1,25 @@
 from bpmodule.datastore import OptionType
 
+MethodOption=(OptionType.String,None,True,None,
+                    'The key of the method that should be used to compute the '\
+                    'energy derivative.')
+FraggerOption=(OptionType.String,"BP_BOND_FRAG",False,None,
+               'The key used to fragment the system')
+
+DerivOption=(OptionType.Int,255,False,None,
+                    'What order analytic derivatives are available (actually '\
+                    'have arbitrary order available)')
+
+BasisOption=(OptionType.String,"Primary",False,None,
+                    'What basis set tag should be used')
+
+
+CommonBSSEOptions={
+                    "METHOD": MethodOption,
+                    "FRAGMENTIZER":FraggerOption,
+                    "MAX_DERIV":DerivOption,
+                    }
+
 minfo = {
 
   "MBE" :
@@ -11,14 +31,7 @@ minfo = {
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
-                    "METHOD":(OptionType.String,None,True,None,
-                    'The key of the method that should be used to compute the '\
-                    'energy derivative.'),
-                    "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
-                    'The key used to fragment the system'),
-                    "MAX_DERIV":(OptionType.Int,255,False,None,
-                    'What order analytic derivatives are available (actually '\
-                    'have arbitrary order available)'),
+                      "MAX_DERIV":DerivOption
                     }
   },
   "MIM" :
@@ -36,11 +49,12 @@ minfo = {
                     "METHODS":(OptionType.ListString,None,True,None,
                     "METHODS[i] is the i-th method's key, you may provide only"\
                     ' one key if it is the systems that are changing'),
-                    "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
+                    "FRAGMENTIZER":(OptionType.String,"BP_NULL_FRAG",False,None,
                     'The key used to fragment the system'),
-                    "MAX_DERIV":(OptionType.Int,255,False,None,
-                    'What order analytic derivatives are available (actually '\
-                    'have arbitrary order available)'),
+                    "MAX_DERIV":DerivOption,
+                    "BASIS_SETS":(OptionType.ListString,["Primary"],False,None,
+                    'What basis set tags should be used.  If you only '\
+                    ' specify one, that basis will be used for all systems.')
                     }
   },
   "SCF" :
@@ -51,8 +65,8 @@ minfo = {
     "authors"     : ["Ryan Richard"],
     "refs"        : [""], 
     "options"     : {
-                    "MAX_DERIV":(OptionType.Int,1,False,None,
-                    'What order analytic derivatives are available.'),
+                    "MAX_DERIV":DerivOption,
+                    "BASIS_SET":BasisOption
                     }
   },
   "VMFC" :
@@ -63,18 +77,34 @@ minfo = {
     "description" : "Performs a Valiron-Mayer Functional Counterpoise correction",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
+    "options"     : CommonBSSEOptions
+  },
+  "CP" :
+  {
+    "type"        : "c_module",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Performs a Boys and Bernardi Counterpoise correction",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : CommonBSSEOptions
+  },
+  "HelgakerCBS" :
+    {
+    "type"        : "python_module",
+    "version"     : "0.1a",
+    "description" : "Performs a Complete Basis Set Extrapolation using the two"\
+                    "-point Helgaker formula",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
     "options"     : {
-                    "METHOD":(OptionType.String,None,True,None,
-                    'The key of the method that should be used to compute the '\
-                    'energy derivative.'),
-                    "FRAGMENTIZER":(OptionType.String,"FRAG",False,None,
-                    'The key used to fragment the system'),
-                    "MAX_DERIV":(OptionType.Int,255,False,None,
-                    'What order analytic derivatives are available (actually '\
-                    'have arbitrary order available)'),
+                    "MAX_DERIV":DerivOption,
+                    "BASIS_CARDINAL_NUMS":(OptionType.ListInt,None,True,None,
+                    "The cardinal numbers of the two basis sets."),
+                    "MIM_KEY":(OptionType.String,"BP_MIM",False,None,
+                    "A way for changing which MIM module is called.")
                     }
   },
-
 }
 
 
