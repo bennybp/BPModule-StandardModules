@@ -10,6 +10,7 @@
 #include <bpmodule/math/PowerSetItr.hpp>
 #include <bpmodule/math/Binomial.hpp>
 #include "Methods/MBE/MBE.hpp"
+#include "Methods/MBE/MBEUtils.hpp"
 
 using std::string;
 using std::vector;
@@ -29,10 +30,7 @@ using bpmodule::system::SystemMap;
 typedef bpmodule::modulemanager::ModulePtr<SystemFragmenter> Fragmenter_t;
 typedef bpmodule::modulemanager::ModulePtr<EnergyMethod> EMethod_t;
 typedef vector<double> Return_t;
-typedef vector<string> String_t;
 typedef map<string,Return_t> DerivMap;
-typedef set<size_t> SN_t;//NMer's serial number
-typedef vector<map<SN_t,string>> SNList_t;//Type of binned SNs
 
 /*
  * TODO once computations cache results, compute interactions by
@@ -40,17 +38,6 @@ typedef vector<map<SN_t,string>> SNList_t;//Type of binned SNs
  */
 
 namespace bpmethods{
-
-    
-    //Splits the nmer names up
-    String_t split(const string &s){
-        String_t elems;
-        stringstream ss(s);
-        string item;
-        while(std::getline(ss,item,'_'))elems.push_back(item);
-        return elems;
-    }
-    
     //Computes the MBE coefficients by recursion
     void GetCoef(bool Even,const SN_t& NMer,const SNList_t& SNs,
                  map<string,double>& Coeffs){
@@ -66,7 +53,7 @@ namespace bpmethods{
         }
     }
     
-    Return_t MBE::DerivImpl(size_t Order)const{
+    Return_t MBE::Deriv_(size_t Order){
         //Load options
         const OptionMap& DaOptions=Options();
         string MethodName=DaOptions.Get<string>("METHOD");
@@ -78,19 +65,10 @@ namespace bpmethods{
         SystemMap NMers=Fragger->Fragmentize(Mol);
         
         //Parse the names, bin n-mers by size, zero weights
-        SNList_t SNs;
+        SNList_t SNs=BinNMers(NMers);
         map<string,double> Weights;
-        for(const auto& NMerI: NMers){
-            const string Tag=NMerI.first;
-            String_t StrBuffer=split(Tag);
-            size_t N=StrBuffer.size();
-            if(N>SNs.size())SNs.resize(N);
-            SN_t SN;
-            for(const string& Frag: StrBuffer)
-                SN.insert(std::stoi(Frag));
-            SNs[N-1][SN]=Tag;
-            Weights[Tag]=0.0;
-        }
+        for(const auto& NMerI:NMers)Weights[NMerI.first]=0.0;
+
         
         /* For the MBE we have the sum of all one-body interactions, the
          * sum of all two-body interactions, etc.  For each n-mer, GetCoef
@@ -109,7 +87,7 @@ namespace bpmethods{
             
         
         //Pass info to MIM
-        MManager().ChangeOption("MIM","METHODS",String_t({MethodName}));
+        MManager().ChangeOption("MIM","METHODS",vector<string>({MethodName}));
         MManager().ChangeOption("MIM","FRAGMENTIZER",Fragmentizer);
         MManager().ChangeOption("MIM","WEIGHTS",SortedWeights);
         EMethod_t MIM=CreateChildModule<EnergyMethod>("MIM");

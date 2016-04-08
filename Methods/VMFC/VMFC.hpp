@@ -4,7 +4,7 @@
 #include<vector>
 #include<bpmodule/modulebase/EnergyMethod.hpp>
 
-namespace bpmethod{
+namespace bpmethods{
 /** \brief This class computes the derivatives of the Valiron-Mayer functional counterpoise procedure
  *
  *  VMFC is arguably the correct way to counterpoise correct a system; however, it is very
@@ -35,7 +35,7 @@ class VMFC : public bpmodule::modulebase::EnergyMethod {
       typedef bpmodule::modulebase::EnergyMethod Base_t;
    public:
       using Base_t::EnergyMethod;
-      std::vector<double> Deriv_(size_t Order)const;
+      virtual std::vector<double> Deriv_(size_t Order);
 };
 
 }//End namespace

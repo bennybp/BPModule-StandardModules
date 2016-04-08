@@ -21,14 +21,11 @@ namespace bpmethods{
 class MBE : public bpmodule::modulebase::EnergyMethod{
     private:
         typedef bpmodule::modulebase::EnergyMethod Base_t;
-        std::vector<double> DerivImpl(size_t Order)const;
     public:
         //Pull in energy method's constructors
         using Base_t::EnergyMethod;
         
-        virtual std::vector<double> Deriv_(size_t Order){
-            return DerivImpl(Order);
-        }
+        virtual std::vector<double> Deriv_(size_t Order);
 
 };
 }
