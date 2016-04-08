@@ -69,6 +69,19 @@ void TestModule1::CallRunTest_(const std::string & other)
 }
 
 
+void TestModule1::CallRunTest2_(const std::string & other1, const std::string & other2)
+{
+    out.Output("+++ In TestModule1: CallRunTest with %? %?\n", other1, other2);
+
+    ModulePtr<Test_Base> tb2 = CreateChildModule<Test_Base>(other1);
+    out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
+    tb2->CallRunTest(other2);
+    out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
+
+    out.Output("+++Done\n");
+}
+
+
 
 void TestModule1::TestThrow_(void)
 {

@@ -43,6 +43,10 @@ void TestExtLib::CallRunTest_(const std::string & other)
 {
 }
 
+void TestExtLib::CallRunTest2_(const std::string & other1, const std::string & other2)
+{
+}
+
 
 
 void TestExtLib::TestThrow_(void)

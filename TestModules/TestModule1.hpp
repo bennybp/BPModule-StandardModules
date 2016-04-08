@@ -12,6 +12,8 @@ public:
 
     virtual void CallRunTest_(const std::string & other);
 
+    virtual void CallRunTest2_(const std::string & other1, const std::string & other2);
+
     virtual void TestThrow_(void);
 
     virtual void CallThrow_(const std::string & other);
