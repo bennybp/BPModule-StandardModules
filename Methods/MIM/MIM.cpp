@@ -49,7 +49,7 @@ class Task{
          MM_(MM),Key_(Key),ID_(ID),Sys_(Sys){}
       Return_t operator()(size_t Order)const{
          EMethod_t DaMethod=MM_.GetModule<EnergyMethod>(Key_,ID_);
-         DaMethod->Wfn().system=std::make_shared<System>(Sys_);
+         DaMethod->InitialWfn().system=std::make_shared<System>(Sys_);
          return DaMethod->Deriv(Order);
       }
 };
@@ -126,7 +126,7 @@ AtomMap_t MapAtoms(const System& Mol){
 
 Return_t MIM::DerivImpl(size_t Order)const{
    //Get the system and compute the number of degrees of freedom for the result
-   const System& Mol=*Wfn().system;
+   const System& Mol=*InitialWfn().system;
    size_t DoF=1;
    for(size_t i=0;i<Order;++i)DoF*=3*Mol.Size();
    

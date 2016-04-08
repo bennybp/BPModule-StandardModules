@@ -25,7 +25,7 @@ void TestModule1::RunTest_(void)
 {
     out.Output("+++ In TestModule1: RunTest. Info: (%?) %? %? v%?\n", ID(), Key(), Name(), Version());
 
-    out.Output("    Wavefunction: %?\n", Wfn().UniqueString());
+    out.Output("    Wavefunction: %?\n", InitialWfn().UniqueString());
     out.Output("   Cache entries: %?\n", Cache().Size());
     for(const auto & it : Cache().GetKeys())
         out.Output("                  > %?\n", it);
@@ -63,6 +63,19 @@ void TestModule1::CallRunTest_(const std::string & other)
     ModulePtr<Test_Base> tb2 = CreateChildModule<Test_Base>(other);
     out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
     tb2->RunTest();
+    out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
+
+    out.Output("+++Done\n");
+}
+
+
+void TestModule1::CallRunTest2_(const std::string & other1, const std::string & other2)
+{
+    out.Output("+++ In TestModule1: CallRunTest with %? %?\n", other1, other2);
+
+    ModulePtr<Test_Base> tb2 = CreateChildModule<Test_Base>(other1);
+    out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
+    tb2->CallRunTest(other2);
     out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
 
     out.Output("+++Done\n");

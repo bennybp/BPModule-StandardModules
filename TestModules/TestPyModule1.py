@@ -8,7 +8,7 @@ class TestPyModule1(bp.modulebase.Test_Base):
   def RunTest_(self):
     bp.output.GlobalOutput("+++ In TestPyModule1: RunTest. Info: ({}) {} {} v{}\n".format(self.ID(), self.Key(), self.Name(), self.Version()))
 
-    bp.output.GlobalOutput("    Wavefunction: {}\n".format(self.Wfn().UniqueString()))
+    bp.output.GlobalOutput("    Wavefunction: {}\n".format(self.InitialWfn().UniqueString()))
     bp.output.GlobalOutput("   Cache entries: {}\n".format(self.Cache().Size()))
 
     for it in self.Cache().GetKeys():
@@ -35,12 +35,23 @@ class TestPyModule1(bp.modulebase.Test_Base):
     self.Cache().Set( "Element 3", 42.0)
     self.Cache().Set( "Element 4", [ 1, 2, 3, 4 ])
 
-  def CallRunTest_(self, s):
-    bp.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(s))
+  def CallRunTest_(self, other):
+    bp.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(other))
 
-    tb = self.CreateChildModule(s)
+    tb = self.CreateChildModule(other)
     bp.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
     tb.RunTest()
+    bp.output.GlobalOutput("  + Finished with scoped module {}. Deleting automatically\n".format(tb.ID()))
+
+    bp.output.GlobalOutput("+++Done\n")
+
+
+  def CallRunTest2_(self, other1, other2):
+    bp.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {} {}\n".format(other1, other2))
+
+    tb = self.CreateChildModule(other1)
+    bp.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
+    tb.CallRunTest(other2)
     bp.output.GlobalOutput("  + Finished with scoped module {}. Deleting automatically\n".format(tb.ID()))
 
     bp.output.GlobalOutput("+++Done\n")
@@ -51,10 +62,10 @@ class TestPyModule1(bp.modulebase.Test_Base):
     #self.Throw("This is a test exception from python")
 
 
-  def CallThrow_(self, s):
-    bp.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(s))
+  def CallThrow_(self, other):
+    bp.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(other))
 
-    tb = self.CreateChildModule(s)
+    tb = self.CreateChildModule(other)
     bp.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
     tb.TestThrow()
 

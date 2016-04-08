@@ -73,7 +73,7 @@ namespace bpmethods{
         string Fragmentizer=DaOptions.Get<string>("FRAGMENTIZER");
 
         //Make N-Mers
-        const System& Mol=*Wfn().system;
+        const System& Mol=*(InitialWfn().system);
         Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(Fragmentizer);
         SystemMap NMers=Fragger->Fragmentize(Mol);
         
