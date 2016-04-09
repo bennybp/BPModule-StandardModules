@@ -17,7 +17,6 @@ BasisOption=(OptionType.String,"Primary",False,None,
 CommonBSSEOptions={
                     "METHOD": MethodOption,
                     "FRAGMENTIZER":FraggerOption,
-                    "MAX_DERIV":DerivOption,
                     }
 
 minfo = {
@@ -25,18 +24,20 @@ minfo = {
   "MBE" :
   {
     "type"        : "c_module",
+    "base"        : "EnergyMethod",
     "modpath"     : "Methods.so",
     "version"     : "0.1a",
     "description" : "Performs a many-body expansion on a system",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
-                      "MAX_DERIV":DerivOption
+                    "METHOD": MethodOption,
                     }
   },
   "MIM" :
   {
     "type"        : "c_module",
+    "base"        : "EnergyMethod",
     "modpath"     : "Methods.so",
     "version"     : "0.1a",
     "description" : "Performs a Molecules in Molecules (MIM) computation",
@@ -51,7 +52,6 @@ minfo = {
                     ' one key if it is the systems that are changing'),
                     "FRAGMENTIZER":(OptionType.String,"BP_NULL_FRAG",False,None,
                     'The key used to fragment the system'),
-                    "MAX_DERIV":DerivOption,
                     "BASIS_SETS":(OptionType.ListString,["Primary"],False,None,
                     'What basis set tags should be used.  If you only '\
                     ' specify one, that basis will be used for all systems.')
@@ -60,18 +60,18 @@ minfo = {
   "SCF" :
   {
     "type"         : "python_module",
+    "base"        : "EnergyMethod",
     "version"     : "0.1a",
     "description" : "Calls Psi4 via a system call and then runs an SCF",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""], 
     "options"     : {
-                    "MAX_DERIV":DerivOption,
-                    "BASIS_SET":BasisOption
                     }
   },
   "VMFC" :
   {
     "type"        : "c_module",
+    "base"        : "EnergyMethod",
     "modpath"     : "Methods.so",
     "version"     : "0.1a",
     "description" : "Performs a Valiron-Mayer Functional Counterpoise correction",
@@ -82,6 +82,7 @@ minfo = {
   "CP" :
   {
     "type"        : "c_module",
+    "base"        : "EnergyMethod",
     "modpath"     : "Methods.so",
     "version"     : "0.1a",
     "description" : "Performs a Boys and Bernardi Counterpoise correction",
@@ -92,13 +93,13 @@ minfo = {
   "HelgakerCBS" :
     {
     "type"        : "python_module",
+    "base"        : "EnergyMethod",
     "version"     : "0.1a",
     "description" : "Performs a Complete Basis Set Extrapolation using the two"\
                     "-point Helgaker formula",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
-                    "MAX_DERIV":DerivOption,
                     "BASIS_CARDINAL_NUMS":(OptionType.ListInt,None,True,None,
                     "The cardinal numbers of the two basis sets."),
                     "MIM_KEY":(OptionType.String,"BP_MIM",False,None,
