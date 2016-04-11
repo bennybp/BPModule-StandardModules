@@ -1,3 +1,5 @@
+install(FILES "FPA.py"  DESTINATION Methods/MIM)
+
 set(MIM_FILES 
         ${CMAKE_CURRENT_SOURCE_DIR}/MIM.cpp
  )

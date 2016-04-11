@@ -34,16 +34,14 @@ class Task{
       string Key_;
       ULI ID_;
       const System& Sys_;
-      string Basis_;
       size_t TaskNum_;
    public:
       Task(ModuleManager& MM, const string& Key, ULI ID, const System& Sys,
-           const string& Basis,size_t TaskNum=0):
-         MM_(MM),Key_(Key),ID_(ID),Sys_(Sys),Basis_(Basis),TaskNum_(TaskNum){}
+           size_t TaskNum=0):
+         MM_(MM),Key_(Key),ID_(ID),Sys_(Sys),TaskNum_(TaskNum){}
       Return_t operator()(size_t Order)const{ 
           std::cout<<Key_<<std::endl;
         EMethod_t DaMethod=MM_.GetModule<EnergyMethod>(Key_,ID_);
-        DaMethod->Options().Change("BASIS_SET",Basis_);
         DaMethod->InitialWfn().system=std::make_shared<System>(Sys_);
         return DaMethod->Deriv(Order);
       }
@@ -72,8 +70,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
    AtomMap_t AtomMap=MapAtoms(Mol);
    
    const OptionMap& DaOptions=Options();
-   vector<string> MethodNames=DaOptions.Get<vector<string>>("METHODS"),
-                  BasisNames=DaOptions.Get<vector<string>>("BASIS_SETS");
+   vector<string> MethodNames=DaOptions.Get<vector<string>>("METHODS");
    Return_t Coeffs=DaOptions.Get<Return_t>("WEIGHTS");
    
 
@@ -90,15 +87,12 @@ Return_t MIM::DerivImpl(size_t Order)const{
    bool SameMethod=MethodNames.size()==1;
    //True if we are using the same system for all methods
    bool SameSystem=Systems.size()==1;
-   //True if we are using the same basis set for all methods
-   bool SameBasis=BasisNames.size()==1;
    
    //TODO: move check to options
-   if(SameSystem && SameMethod && SameBasis && (NTasks>1))
+   if(SameSystem && SameMethod && (NTasks>1))
        throw bpmodule::exception::GeneralException(
-               "Minimally, either the number of systems, the number of basis "
-               "sets, or the number of "
-               "methods must equal the number of coefficients");
+               "Minimally, either the number of systems "
+               " or the number of methods must equal the number of coefficients");
    
    //Set-up parallel and our buffer
    const Communicator& ParentComm=bpmodule::parallel::GetEnv().Comm();
@@ -114,8 +108,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
             Task(MManager(),
                 MethodNames[SameMethod?0:TaskI],
                 ID(),
-                SysI->second,
-                BasisNames[SameBasis?0:TaskI]
+                SysI->second
                 //,NewComm.NTasks()
             ),
             Order

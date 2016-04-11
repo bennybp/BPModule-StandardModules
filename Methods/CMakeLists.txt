@@ -8,6 +8,7 @@ add_subdirectory(BSSE)
 add_subdirectory(CBS)
 add_subdirectory(MBE)
 add_subdirectory(MIM)
+add_subdirectory(MP2)
 add_subdirectory(SCF)
 
 

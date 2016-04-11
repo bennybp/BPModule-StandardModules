@@ -12,6 +12,8 @@ DerivOption=(OptionType.Int,255,False,None,
 
 BasisOption=(OptionType.String,"Primary",False,None,
                     'What basis set tag should be used')
+MIMOption=(OptionType.String,"BP_MIM",False,None,
+                    "A way for changing which MIM module is called.")
 
 
 CommonBSSEOptions={
@@ -69,6 +71,18 @@ minfo = {
                     "BASIS_SET":BasisOption
                     }
   },
+  "MP2" :
+  {
+    "type"         : "python_module",
+    "version"     : "0.1a",
+    "description" : "Calls Psi4 via a system call and then runs MP2",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""], 
+    "options"     : {
+                    "MAX_DERIV":DerivOption,
+                    "BASIS_SET":BasisOption
+                    }
+  },
   "VMFC" :
   {
     "type"        : "c_module",
@@ -101,8 +115,41 @@ minfo = {
                     "MAX_DERIV":DerivOption,
                     "BASIS_CARDINAL_NUMS":(OptionType.ListInt,None,True,None,
                     "The cardinal numbers of the two basis sets."),
-                    "MIM_KEY":(OptionType.String,"BP_MIM",False,None,
-                    "A way for changing which MIM module is called.")
+                    "MIM_KEY":MIMOption
+                    }
+  },
+  "FellerCBS" :
+    {
+    "type"        : "python_module",
+    "version"     : "0.1a",
+    "description" : "Performs a Complete Basis Set Extrapolation using the "\
+                    "three-point Feller formula",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                    "MAX_DERIV":(OptionType.Int,2,False,None,"The maximum "\
+                    "analytic derivative available.  At the moment this is 2"),
+                    "BASIS_CARDINAL_NUMS":(OptionType.ListInt,None,True,None,
+                    "The cardinal numbers of the two basis sets."),
+                    "MIM_KEY":MIMOption
+                    }
+  },
+  "FPA" :
+    {
+    "type"        : "python_module",
+    "version"     : "0.1a",
+    "description" : "Performs a Focal Point Analysis",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                    "MAX_DERIV":DerivOption,
+                    "LARGE_MP2_KEY":(OptionType.String,None,True,None,
+                       "The key for the large MP2 module"),
+                    "SMALL_MP2_KEY":(OptionType.String,"BP_MP2",False,None,
+                       "The key for the small MP2 module"),
+                    "CCSD(T)_KEY":(OptionType.String,"BP_CCSD(T)",False,None,
+                       "The key for the CCSD(T) module"),
+                    "MIM_KEY":MIMOption
                     }
   },
 }

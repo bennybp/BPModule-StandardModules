@@ -10,3 +10,4 @@ add_subdirectory(Methods)
 add_subdirectory(TestModules)
 
 install(FILES "StandardModules.py" DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES "CallPsi4.py" DESTINATION ${CMAKE_INSTALL_PREFIX})
