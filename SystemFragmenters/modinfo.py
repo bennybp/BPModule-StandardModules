@@ -17,6 +17,7 @@ minfo = {
   "Atomizer" :
   {
     "type"        : "c_module",
+    "base"        : "SystemFragmenter",
     "modpath"     : "SystemFragmenters.so",
     "version"     : "0.1a",
     "description" : "Atomizes a System",
@@ -29,6 +30,7 @@ minfo = {
   "Bondizer" :
   {
     "type"        : "c_module",
+    "base"        : "SystemFragmenter",
     "modpath"     : "SystemFragmenters.so",
     "version"     : "0.1a",
     "description" : "Makes all atoms within N bonds a fragment",
@@ -48,6 +50,7 @@ minfo = {
   "UserDefined" :
   {
     "type"        : "c_module",
+    "base"        : "SystemFragmenter",
     "modpath"     : "SystemFragmenters.so",
     "version"     : "0.1a",
     "description" : "Makes all atoms within N bonds a fragment",
@@ -67,6 +70,7 @@ minfo = {
   "NullFragmenter" :
   {
     "type"        : "c_module",
+    "base"        : "SystemFragmenter",
     "modpath"     : "SystemFragmenters.so",
     "version"     : "0.1a",
     "description" : "Returns the input as a single fragment.",

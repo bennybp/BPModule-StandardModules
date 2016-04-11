@@ -5,6 +5,7 @@ minfo = {
   "TestModule1" :
   {
     "type"        : "c_module",
+    "base"        : "Test_Base",
     "modpath"     : "TestModules.so",
     "version"     : "0.1a",
     "description" : "Some test module",
@@ -30,6 +31,7 @@ minfo = {
  "TestPyModule1" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Some test module",
     "authors"     : ["me", "myself", "I"],
@@ -57,6 +59,7 @@ minfo = {
   "TestExtLib" :
   {
     "type"        : "c_module",
+    "base"        : "Test_Base",
     "modpath"     : "TestModules.so",
     "version"     : "0.1a",
     "description" : "Some test module",
@@ -76,6 +79,7 @@ minfo = {
   "TestOptions_int" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of integers",
     "authors"     : [],
@@ -91,6 +95,7 @@ minfo = {
   "TestOptions_float" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of floats/doubles",
     "authors"     : [],
@@ -106,6 +111,7 @@ minfo = {
   "TestOptions_bool" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of bools",
     "authors"     : [],
@@ -121,6 +127,7 @@ minfo = {
   "TestOptions_str" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of strings",
     "authors"     : [],
@@ -136,6 +143,7 @@ minfo = {
   "TestOptions_listint" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of list of integers",
     "authors"     : [],
@@ -151,6 +159,7 @@ minfo = {
   "TestOptions_listfloat" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of list of floats/doubles",
     "authors"     : [],
@@ -166,6 +175,7 @@ minfo = {
   "TestOptions_listbool" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of list of bools",
     "authors"     : [],
@@ -181,6 +191,7 @@ minfo = {
   "TestOptions_liststr" :
   {
     "type"        : "python_module",
+    "base"        : "Test_Base",
     "version"     : "0.1a",
     "description" : "Tests option parsing of list of strings",
     "authors"     : [],
