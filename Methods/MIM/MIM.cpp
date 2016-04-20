@@ -40,7 +40,6 @@ class Task{
            size_t TaskNum=0):
          MM_(MM),Key_(Key),ID_(ID),Sys_(Sys),TaskNum_(TaskNum){}
       Return_t operator()(size_t Order)const{ 
-          std::cout<<Key_<<std::endl;
         EMethod_t DaMethod=MM_.GetModule<EnergyMethod>(Key_,ID_);
         DaMethod->InitialWfn().system=std::make_shared<System>(Sys_);
         return DaMethod->Deriv(Order);
@@ -126,8 +125,11 @@ Return_t MIM::DerivImpl(size_t Order)const{
    vector<string> RowTitles(NTasks);
    for(size_t TaskI=0;TaskI<NTasks;++TaskI){
       const System& SubSys=SysI->second;
-      Derivs[SysI->first]=Results[TaskI];
-      RowTitles[TaskI]=SysI->first;
+      std::stringstream ss;
+      ss<<SysI->first;
+      ss<<" ["<<MethodNames[SameMethod?0:TaskI]<<"]";
+      Derivs[ss.str()]=Results[TaskI];
+      RowTitles[TaskI]=ss.str();
       FillDeriv(TotalDeriv,Results[TaskI],Coeffs[TaskI],SubSys,
                 AtomMap,MapAtoms(SubSys),Order);
       if(!SameSystem)++SysI;
@@ -140,7 +142,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
 void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs){
    const size_t NCols=2,NRows=Rows.size()+1;
    bpmodule::output::Table ResultTable(NRows,NCols);
-   std::array<string,NCols> ColTitles={"System","Energy (a.u.)"};
+   std::array<string,NCols> ColTitles={"System [Method Key]","Energy (a.u.)"};
    ResultTable.SetHBorder(0,'*');
    ResultTable.SetHBorder(1,'-');
    ResultTable.SetHBorder(NRows,'*');
@@ -158,25 +160,23 @@ void PrintGradTable(const vector<string>& Rows,
     
    const size_t NCols=4;
    size_t NRows=1;
-   for(const SystemMap::value_type& Sys: Systems)NRows+=Sys.second.Size();
+   for(const auto& Di: Derivs)NRows+=(Di.second.size()/3);
    bpmodule::output::Table ResultTable(NRows,NCols);
    std::array<string,NCols> ColTitles=
-            {"System","x (a.u.)","y (a.u.)","z (a.u.)"};
+            {"System [Method Key]","dE/dx (a.u.)","dE/dy (a.u.)","dE/dz (a.u.)"};
    ResultTable.SetHBorder(0,'*');
    ResultTable.SetHBorder(NRows,'*');
    ResultTable.SetVBorder(1,'|');
    ResultTable.FillRow(ColTitles,0,0,NCols);
    size_t counter=0;
-   vector<string>::const_iterator RowI=Rows.begin();
-   for(const SystemMap::value_type& Sys: Systems){
+   for(const auto& RowI: Rows){
        ResultTable.SetHBorder(counter+1,'-');
-       size_t NAtoms=Sys.second.Size();
+       size_t NAtoms=Derivs.at(RowI).size()/3;
        for(size_t AtomI=0;AtomI<NAtoms;++AtomI){
            if(AtomI==(NAtoms-NAtoms%2)/2)
-               ResultTable.GetCell(counter+1,0).AddData(*RowI);
-           ResultTable.FillRow(&Derivs.at(*RowI)[AtomI*3],++counter,1,NCols);
+               ResultTable.GetCell(counter+1,0).AddData(RowI);
+           ResultTable.FillRow(&Derivs.at(RowI)[AtomI*3],++counter,1,NCols);
        }
-       ++RowI;
    }
    bpmodule::output::GetGlobalOut()<<ResultTable<<std::endl;
 }

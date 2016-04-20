@@ -29,8 +29,6 @@ class HelgakerCBS(bp.modulebase.EnergyMethod):
           sets.
 
       METHOD (str): The key for the electronic structure method to use.
-
-      REMOVE_HF (bool): True means only the correlation energy is extrapolated.
   """
 
   def __init__(self, myid):
@@ -58,3 +56,6 @@ class HelgakerCBS(bp.modulebase.EnergyMethod):
       MIM=self.CreateChildModule(self.Options().Get("MIM_KEY"))
       MIM.Options().Change("WEIGHTS",Cs)
       return MIM.Deriv(order)
+
+     
+         

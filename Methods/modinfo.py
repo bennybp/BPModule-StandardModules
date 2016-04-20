@@ -17,9 +17,10 @@ MIMOption=(OptionType.String,"BP_MIM",False,None,
 
 
 CommonBSSEOptions={
-                    "METHOD": MethodOption,
-                    "FRAGMENTIZER":FraggerOption,
-                    }
+                    "METHOD" : MethodOption,
+                    "FRAGMENTIZER" : FraggerOption,
+                    "MIM_KEY" : MIMOption
+                  }
 
 minfo = {
 
@@ -32,9 +33,7 @@ minfo = {
     "description" : "Performs a many-body expansion on a system",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
-    "options"     : {
-                    "METHOD": MethodOption,
-                    }
+    "options"     :CommonBSSEOptions                    
   },
   "MIM" :
   {
@@ -54,9 +53,6 @@ minfo = {
                     ' one key if it is the systems that are changing'),
                     "FRAGMENTIZER":(OptionType.String,"BP_NULL_FRAG",False,None,
                     'The key used to fragment the system'),
-                    "BASIS_SETS":(OptionType.ListString,["Primary"],False,None,
-                    'What basis set tags should be used.  If you only '\
-                    ' specify one, that basis will be used for all systems.')
                     }
   },
   "SCF" :
@@ -72,14 +68,24 @@ minfo = {
   },
   "MP2" :
   {
-    "type"         : "python_module",
+    "type"        : "python_module",
+    "base"        : "EnergyMethod",
     "version"     : "0.1a",
     "description" : "Calls Psi4 via a system call and then runs MP2",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""], 
     "options"     : {
-                    "MAX_DERIV":DerivOption,
-                    "BASIS_SET":BasisOption
+                    }
+  },
+  "CCSD(T)" :
+  {
+    "type"        : "python_module",
+    "base"        : "EnergyMethod",
+    "version"     : "0.1a",
+    "description" : "Calls Psi4 via a system call and then runs CCSD(T)",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""], 
+    "options"     : {
                     }
   },
   "VMFC" :

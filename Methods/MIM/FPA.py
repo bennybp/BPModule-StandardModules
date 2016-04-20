@@ -44,10 +44,12 @@ class FPA(bp.modulebase.EnergyMethod):
           Nothing
 
       """
-      MIM=self.MManager().GetChildModule(self.Options().Get("MIM_KEY"))
-      MIM.ChangeOption("METHODS",[self.Options().Get("LARGE_MP2_KEY"),
-                                  self.Options().Get("CCSD(T)_KEY"),
-                                  self.Options().Get("SMALL_MP2_KEY")
-      ])
-      MIM.ChangeOption("WEIGHTS",[1.0,-1.0,1.0])
+      MIM=self.CreateChildModule(self.Options().Get("MIM_KEY"))
+      MIM.ChangeOption("METHODS",
+            [self.Options().Get("LARGE_MP2_KEY"),
+             self.Options().Get("CCSD(T)_KEY"),
+             self.Options().Get("SMALL_MP2_KEY")
+            ]
+      )
+      MIM.ChangeOption("FPA_MIM","WEIGHTS",[1.0,-1.0,1.0])
       return MIM.Deriv(order)

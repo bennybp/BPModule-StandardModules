@@ -75,7 +75,8 @@ namespace bpmethods{
         }
 
         return RunCalcs(AllFrags,Coeffs,NewSys,Order,ID(),MManager(),
-                        Options().Get<string>("METHOD"));
+                        Options().Get<string>("METHOD"),
+                        Options().Get<string>("MIM_KEY"));
         
     }
     

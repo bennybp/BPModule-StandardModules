@@ -130,7 +130,8 @@ RealGhostData GhostTheSystem(const bpmodule::system::System& Sys){
                            size_t Order,
                            ID_t ID,
                            bpmodule::modulemanager::ModuleManager& MM,
-                           const string& MethodName){
+                           const string& MethodName,
+                           const string& MIMName){
         size_t NAtoms=Data.RealSystem->Size();
         size_t DoF=1;
         for(size_t i=0;i<Order;++i)DoF*=3*NAtoms;
@@ -149,18 +150,21 @@ RealGhostData GhostTheSystem(const bpmodule::system::System& Sys){
                 FragAtoms.push_back(Data.Atom2Idx.at(AtomI));
         }
         
-        if(!MM.HasKey("BSSE_FRAG"))MM.AddKey("BSSE_FRAG","UserDefined");
-        if(!MM.HasKey("BSSE_MIM"))MM.AddKey("BSSE_MIM","MIM");
-        
-        MM.ChangeOption("BSSE_FRAG","FRAGMENT_NAMES",Names);
-        MM.ChangeOption("BSSE_FRAG","ATOMS_PER_FRAG",Offsets);
-        MM.ChangeOption("BSSE_FRAG","FRAGMENTS",FragAtoms);
-        MM.ChangeOption("BSSE_MIM","FRAGMENTIZER","BSSE_FRAG");
-        MM.ChangeOption("BSSE_MIM","METHODS",vector<string>({MethodName}));
-        MM.ChangeOption("BSSE_MIM","WEIGHTS",Cs);
+        //MM.ReplaceKey("BSSE_FRAG","UserDefined");
+        string MIMKey=MM.GenerateUniqueKey();
+        string FragKey=MM.GenerateUniqueKey();
+        MM.DuplicateKey(MIMName,MIMKey);
+        MM.DuplicateKey("BP_UD_FRAG",FragKey);
+        //TODO: get rid of dependence on BP_UD_FRAG
+        MM.ChangeOption(FragKey,"FRAGMENT_NAMES",Names);
+        MM.ChangeOption(FragKey,"ATOMS_PER_FRAG",Offsets);
+        MM.ChangeOption(FragKey,"FRAGMENTS",FragAtoms);
+        MM.ChangeOption(MIMKey,"FRAGMENTIZER",FragKey);
+        MM.ChangeOption(MIMKey,"METHODS",vector<string>({MethodName}));
+        MM.ChangeOption(MIMKey,"WEIGHTS",Cs);
 
         
-        EMethod_t MIM=MM.GetModule<EnergyMethod>("BSSE_MIM",ID);
+        EMethod_t MIM=MM.GetModule<EnergyMethod>(MIMKey,ID);
         MIM->InitialWfn().system=std::make_shared<System>(Data.NewSystem,true);
         Return_t FullDeriv=MIM->Deriv(Order);
         Return_t FinalDeriv(DoF,0.0);

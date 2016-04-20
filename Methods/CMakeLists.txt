@@ -6,6 +6,7 @@ set(BPMETHODS_INC "")
 
 add_subdirectory(BSSE)
 add_subdirectory(CBS)
+add_subdirectory(CC)
 add_subdirectory(MBE)
 add_subdirectory(MIM)
 add_subdirectory(MP2)

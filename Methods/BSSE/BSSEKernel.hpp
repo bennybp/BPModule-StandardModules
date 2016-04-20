@@ -91,6 +91,7 @@ std::map<std::string,double> SSFCKernel(bpmodule::system::SystemMap& NMers,
  *  \param[in] ID The parent module's ID
  *  \param[in] MM The module manager of the parent
  *  \param[in] MethodName The key of the method we are going to call
+ *  \param[in] MIMName The key for MIM method you want us to call
  *  \return The derivative you were interested in
  */ 
 std::vector<double> RunCalcs(const bpmodule::system::SystemMap& AllFrags,
@@ -99,7 +100,8 @@ std::vector<double> RunCalcs(const bpmodule::system::SystemMap& AllFrags,
                         size_t Order,
                         ID_t ID,
                         bpmodule::modulemanager::ModuleManager& MM,
-                        const std::string& MethodName);
+                        const std::string& MethodName,
+                        const std::string& MIMName);
 
 }//End namespace
 

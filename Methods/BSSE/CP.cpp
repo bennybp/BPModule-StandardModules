@@ -36,7 +36,8 @@ vector<double> CP::Deriv_(size_t Order){
         Coeffs.emplace(ss.str(),1.0);
                 
         return RunCalcs(NMers,Coeffs,NewSys,Order,ID(),MManager(),
-                        Options().Get<string>("METHOD"));
+                        Options().Get<string>("METHOD"),
+                        Options().Get<string>("MIM_KEY"));
         
         
         

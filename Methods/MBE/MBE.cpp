@@ -64,10 +64,11 @@ namespace bpmethods{
             
         
         //Pass info to MIM
-        MManager().ChangeOption("MIM","METHODS",vector<string>({MethodName}));
-        MManager().ChangeOption("MIM","FRAGMENTIZER",Fragmentizer);
-        MManager().ChangeOption("MIM","WEIGHTS",SortedWeights);
-        EMethod_t MIM=CreateChildModule<EnergyMethod>("MIM");
+        const string MIMName=Options().Get<string>("MIM_KEY");
+        MManager().ChangeOption(MIMName,"METHODS",vector<string>({MethodName}));
+        MManager().ChangeOption(MIMName,"FRAGMENTIZER",Fragmentizer);
+        MManager().ChangeOption(MIMName,"WEIGHTS",SortedWeights);
+        EMethod_t MIM=CreateChildModule<EnergyMethod>(MIMName);
         return MIM->Deriv(Order);
     }
     
