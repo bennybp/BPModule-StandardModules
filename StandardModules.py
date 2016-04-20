@@ -1,9 +1,9 @@
 import sys
 import argparse
 import traceback
-import bpmodule as bp
+import pulsar as psr
 
-bp.Init(sys.argv, out = "stdout", color = True, debug = True)
+psr.Init(sys.argv, out = "stdout", color = True, debug = True)
 
 def LoadDefaultModules(mm):
    mm.LoadModule("Methods","CP","BP_CP")

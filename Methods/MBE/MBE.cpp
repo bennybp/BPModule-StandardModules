@@ -4,8 +4,8 @@
  * and open the template in the editor.
  */
 #include <string>
-#include <bpmodule/math/PowerSetItr.hpp>
-#include <bpmodule/math/Binomial.hpp>
+#include <pulsar/math/PowerSetItr.hpp>
+#include <pulsar/math/Binomial.hpp>
 #include "Methods/MBE/MBE.hpp"
 #include "Methods/MBE/MBECommon.hpp"
 #include "Methods/MBE/MBEUtils.hpp"
@@ -18,7 +18,7 @@ using std::map;
 using std::set;
 using std::stringstream;
 
-using bpmodule::modulemanager::ModuleManager;
+using pulsar::modulemanager::ModuleManager;
 
 typedef vector<double> Return_t;
 typedef map<string,Return_t> DerivMap;
@@ -28,7 +28,7 @@ typedef map<string,Return_t> DerivMap;
  *   "Re-running" the computations and then assembling derivatives
  */
 
-namespace bpmethods{
+namespace pulsarmethods{
     
     Return_t MBE::Deriv_(size_t Order){
         //Load options

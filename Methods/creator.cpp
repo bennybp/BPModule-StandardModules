@@ -4,16 +4,16 @@
 #include "Methods/MIM/MIM.hpp"
 
 
-using bpmodule::modulemanager::ModuleCreationFuncs;
+using pulsar::modulemanager::ModuleCreationFuncs;
 
 extern "C" {
 
 ModuleCreationFuncs InsertSupermodule(void){
     ModuleCreationFuncs cf;
-    cf.AddCppCreator<bpmethods::CP>("CP");
-    cf.AddCppCreator<bpmethods::MBE>("MBE");
-    cf.AddCppCreator<bpmethods::MIM>("MIM");
-    cf.AddCppCreator<bpmethods::VMFC>("VMFC");
+    cf.AddCppCreator<pulsarmethods::CP>("CP");
+    cf.AddCppCreator<pulsarmethods::MBE>("MBE");
+    cf.AddCppCreator<pulsarmethods::MIM>("MIM");
+    cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
     return cf;
 }
 

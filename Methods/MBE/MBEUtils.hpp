@@ -22,14 +22,14 @@
 #include<unordered_map>
 
 
-namespace bpmodule{namespace system{
+namespace pulsar{namespace system{
 class System;
 class Atom;
 typedef std::map<std::string,System> SystemMap;
 }}
 
 
-namespace bpmethods{
+namespace pulsarmethods{
 
 ///NMer's serial number (the indices of the fragments that make up the n-mer)
 typedef std::set<size_t> SN_t;
@@ -49,7 +49,7 @@ typedef std::vector<std::map<SN_t,std::string>> SNList_t;
  *   key in the input map.  It assumes that keys are of the form: "1_2_3"
  *   for the trimer made by the union of the systems with keys "1", "2", and "3"
  */ 
-SNList_t BinNMers(const bpmodule::system::SystemMap& Frags);
+SNList_t BinNMers(const pulsar::system::SystemMap& Frags);
 
 /*   \brief Function for projecting arbitrary order derivatives
  * 
@@ -102,12 +102,12 @@ SNList_t BinNMers(const bpmodule::system::SystemMap& Frags);
 void FillDeriv(std::vector<double>& Result, 
                const std::vector<double>& SubResult,
                double Coeff,
-               const bpmodule::system::System& Sys, 
-               const std::unordered_map<bpmodule::system::Atom,size_t>& SuperAtomMap,
-               const std::unordered_map<bpmodule::system::Atom,size_t>& SubAtomMap,
+               const pulsar::system::System& Sys, 
+               const std::unordered_map<pulsar::system::Atom,size_t>& SuperAtomMap,
+               const std::unordered_map<pulsar::system::Atom,size_t>& SubAtomMap,
                size_t Order,
-               std::vector<bpmodule::system::Atom> Idx=
-                  std::vector<bpmodule::system::Atom>(),
+               std::vector<pulsar::system::Atom> Idx=
+                  std::vector<pulsar::system::Atom>(),
                std::vector<size_t> Comp=std::vector<size_t>());
 
 //Computes the MBE coefficients by recursion

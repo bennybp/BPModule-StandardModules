@@ -6,5 +6,5 @@
 
 #include "SystemFragmenters/Null.hpp"
 
-bpmodule::system::SystemMap NullFragmenter::Fragmentize_(
-    const bpmodule::system::System & mol){return {{"SYSTEM",mol}};}
+pulsar::system::SystemMap NullFragmenter::Fragmentize_(
+    const pulsar::system::System & mol){return {{"SYSTEM",mol}};}

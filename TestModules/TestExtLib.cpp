@@ -1,5 +1,5 @@
-#include <bpmodule/output/Output.hpp>
-#include <bpmodule/modulemanager/ModuleManager.hpp>
+#include <pulsar/output/Output.hpp>
+#include <pulsar/modulemanager/ModuleManager.hpp>
 
 #include "TestExtLib.hpp"
 
@@ -7,9 +7,9 @@
 #include "staticlib.hpp"
 #include "dynlib.hpp"
 
-using namespace bpmodule::output;
-using namespace bpmodule::modulemanager;
-using namespace bpmodule::exception;
+using namespace pulsar::output;
+using namespace pulsar::modulemanager;
+using namespace pulsar::exception;
 
 
 

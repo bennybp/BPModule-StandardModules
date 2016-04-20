@@ -1,6 +1,6 @@
-import bpmodule as bp
+import pulsar as psr
 
-class FPA(bp.modulebase.EnergyMethod):
+class FPA(psr.modulebase.EnergyMethod):
    """This module performs a focal point analysis (FPA)
    
       For the purposes of this module an FPA is defined as:

@@ -7,7 +7,7 @@ set(SYSTEMFRAG_FILES creator.cpp
 
 add_library(SystemFragmenters MODULE ${SYSTEMFRAG_FILES})
 
-target_link_libraries(SystemFragmenters bpmodule)
+target_link_libraries(SystemFragmenters pulsar)
 
 
 install(TARGETS SystemFragmenters

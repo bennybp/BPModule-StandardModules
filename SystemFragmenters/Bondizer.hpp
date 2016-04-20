@@ -14,13 +14,13 @@
 #ifndef BONDIZER_HPP
 #define BONDIZER_HPP
 
-#include <bpmodule/modulebase/SystemFragmenter.hpp>
+#include <pulsar/modulebase/SystemFragmenter.hpp>
 
 
 /** \brief Breaks a system apart into groups of atoms that are seperated by at
  *         most a pre-defined number of bonds
  * 
- *   This fragmenter first calls bpmodule::system::GetConns() so I suggest 
+ *   This fragmenter first calls pulsar::system::GetConns() so I suggest 
  *   modifying the covalent radii of the atoms you want to be bonded/not bonded
  *   to accomplish this. For example, say the user wants two atoms to be bonded.
  *   If you compute
@@ -32,12 +32,12 @@
  *   This class recognizes the following options:
  *     - NBONDS The maximum number of bonds that may exist between two atoms
  */ 
-class Bondizer : public bpmodule::modulebase::SystemFragmenter
+class Bondizer : public pulsar::modulebase::SystemFragmenter
 {
 public:
-    using bpmodule::modulebase::SystemFragmenter::SystemFragmenter;
+    using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
 
-    virtual bpmodule::system::SystemMap Fragmentize_(const bpmodule::system::System & mol);
+    virtual pulsar::system::SystemMap Fragmentize_(const pulsar::system::System & mol);
 
 };
 

@@ -8,7 +8,7 @@
 #include "Methods/BSSE/BSSEKernel.hpp"
 #include "Methods/MBE/MBECommon.hpp"
 
-namespace bpmethods{
+namespace pulsarmethods{
     
 using std::vector;    
 using std::string;    

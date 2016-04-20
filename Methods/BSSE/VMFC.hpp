@@ -2,9 +2,9 @@
 #define VMFC_HPP_
 
 #include<vector>
-#include<bpmodule/modulebase/EnergyMethod.hpp>
+#include<pulsar/modulebase/EnergyMethod.hpp>
 
-namespace bpmethods{
+namespace pulsarmethods{
 /** \brief This class computes the derivatives of the Valiron-Mayer functional counterpoise procedure
  *
  *  VMFC is arguably the correct way to counterpoise correct a system; however, 
@@ -46,9 +46,9 @@ namespace bpmethods{
  *   all sub-interactions within the n-mer.
  * 
  */
-class VMFC : public bpmodule::modulebase::EnergyMethod {
+class VMFC : public pulsar::modulebase::EnergyMethod {
    private:
-      typedef bpmodule::modulebase::EnergyMethod Base_t;
+      typedef pulsar::modulebase::EnergyMethod Base_t;
    public:
       using Base_t::EnergyMethod;
       virtual std::vector<double> Deriv_(size_t Order);

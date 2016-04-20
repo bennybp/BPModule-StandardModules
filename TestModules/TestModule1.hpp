@@ -1,9 +1,9 @@
 #ifndef _GUARD_TESTMODULE1_HPP_
 #define _GUARD_TESTMODULE1_HPP_
 
-#include <bpmodule/modulebase/Test_Base.hpp>
+#include <pulsar/modulebase/Test_Base.hpp>
 
-class TestModule1 : public bpmodule::modulebase::Test_Base
+class TestModule1 : public pulsar::modulebase::Test_Base
 {
 public:
     TestModule1(ID_t id);

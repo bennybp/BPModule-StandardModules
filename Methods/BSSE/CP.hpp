@@ -15,9 +15,9 @@
 #define CP_HPP
 
 #include <vector>
-#include <bpmodule/modulebase/EnergyMethod.hpp>
+#include <pulsar/modulebase/EnergyMethod.hpp>
 
-namespace bpmethods{
+namespace pulsarmethods{
 
 /** \brief The Boys and Bernardi CP correction
  *
@@ -37,9 +37,9 @@ namespace bpmethods{
  * 
  *  \todo Make a module for a MBE in the full supersystem's basis set
  */
-class CP: public bpmodule::modulebase::EnergyMethod{
+class CP: public pulsar::modulebase::EnergyMethod{
 private:
-    typedef bpmodule::modulebase::EnergyMethod Base_t;
+    typedef pulsar::modulebase::EnergyMethod Base_t;
 public:
     using Base_t::EnergyMethod;
     virtual std::vector<double> Deriv_(size_t Order);

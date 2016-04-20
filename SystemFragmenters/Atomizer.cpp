@@ -1,6 +1,6 @@
 #include "Atomizer.hpp"
 
-using namespace bpmodule::system;
+using namespace pulsar::system;
 
 SystemMap Atomizer::Fragmentize_(const System & mol)
 {

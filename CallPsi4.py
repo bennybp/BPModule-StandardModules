@@ -1,4 +1,4 @@
-import bpmodule as bp
+import pulsar as psr
 from subprocess import call
 
 def CallPsi4(EMethod,MethodName,order):

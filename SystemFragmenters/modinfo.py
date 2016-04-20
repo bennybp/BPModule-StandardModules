@@ -1,4 +1,4 @@
-from bpmodule.datastore import OptionType
+from pulsar.datastore import OptionType
 
 DistThreshOption=(OptionType.DictIntFloat,{},False,
                     None,'A int->float dictionary where the int, call it n, is'\

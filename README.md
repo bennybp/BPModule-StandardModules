@@ -1,11 +1,11 @@
-# BPModule-StandardModules
+# Pulsar-StandardModules
 
 Quick and dirty build:
 
     mkdir build
     cd build
     CC=compiler CXX=compiler cmake ../ \
-                -DCMAKE_INSTALL_PREFIX=/bpmodule/install/path/modules/ \
-                -DBPMODULE_PATH=/bpmodule/install/path/
+                -DCMAKE_INSTALL_PREFIX=/pulsar/install/path/modules/ \
+                -DPULSAR_PATH=/pulsar/install/path/
 
     make install

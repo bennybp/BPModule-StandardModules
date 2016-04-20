@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
-list(APPEND CMAKE_PREFIX_PATH "${BPMODULE_PATH}")
-find_package(bpmodule REQUIRED)
+list(APPEND CMAKE_PREFIX_PATH "${PULSAR_PATH}")
+find_package(pulsar REQUIRED)
 
-include_directories(${BPMODULE_CXX_INCLUDES})
+include_directories(${PULSAR_CXX_INCLUDES})
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(SystemFragmenters)
 add_subdirectory(Methods)

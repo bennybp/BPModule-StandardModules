@@ -4,9 +4,9 @@
 /* Disclaimer:  Ryan wrote this on GitHub, while trying to kill time.  It likely does not compile*/
 
 #include <vector>
-#include <bpmodule/modulebase/EnergyMethod.hpp>
+#include <pulsar/modulebase/EnergyMethod.hpp>
 
-namespace bpmethods{
+namespace pulsarmethods{
 
 /** \brief This is a class that implements the Molecules in Molecules (MIM) method of Mayhall and Rahavachari (sp)
  *
@@ -34,10 +34,10 @@ namespace bpmethods{
  *  not set, it will be assumed that "PRIMARY" is to be used.  The keyword
  *  for this is BASIS_SETS.
  */
-class MIM : public bpmodule::modulebase::EnergyMethod {
+class MIM : public pulsar::modulebase::EnergyMethod {
    private:
       ///The type of the base class
-      typedef bpmodule::modulebase::EnergyMethod Base_t;
+      typedef pulsar::modulebase::EnergyMethod Base_t;
       ///The function that actually implements the derivative computation
       std::vector<double> DerivImpl(size_t Order)const;
    public:

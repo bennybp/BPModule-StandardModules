@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 #include <unordered_map>
-#include <bpmodule/math/PowerSetItr.hpp>
+#include <pulsar/math/PowerSetItr.hpp>
 #include "Methods/MBE/MBEUtils.hpp"
 #include "Methods/BSSE/VMFC.hpp"
 #include "Methods/BSSE/BSSEKernel.hpp"
@@ -14,15 +14,15 @@ using std::vector;
 using std::string;
 using std::unordered_map;
 
-using bpmodule::system::AtomSetUniverse;
-using bpmodule::system::MakeGhost;
-using bpmodule::system::IsGhost;
-using bpmodule::math::PowerSetItr;
+using pulsar::system::AtomSetUniverse;
+using pulsar::system::MakeGhost;
+using pulsar::system::IsGhost;
+using pulsar::math::PowerSetItr;
 
 typedef std::shared_ptr<const AtomSetUniverse> SharedUniverse;
 typedef vector<double> Return_t;
 
-namespace bpmethods{  
+namespace pulsarmethods{  
     
 
     

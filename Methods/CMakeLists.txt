@@ -15,7 +15,7 @@ add_subdirectory(SCF)
 
 add_library(Methods MODULE ${BPMETHODS_SRC})
 
-target_link_libraries(Methods bpmodule)
+target_link_libraries(Methods pulsar)
 
 
 install(TARGETS Methods

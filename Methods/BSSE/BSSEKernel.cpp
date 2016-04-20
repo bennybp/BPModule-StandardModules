@@ -4,11 +4,11 @@
  * and open the template in the editor.
  */
 #include <sstream>
-#include <bpmodule/math/PowerSetItr.hpp>
+#include <pulsar/math/PowerSetItr.hpp>
 #include "Methods/BSSE/BSSEKernel.hpp"
 #include "Methods/MBE/MBECommon.hpp"
 
-namespace bpmethods{
+namespace pulsarmethods{
     using std::string;
     using std::vector;
     using std::map;
@@ -20,7 +20,7 @@ namespace bpmethods{
                             return OldRealSys.Contains(AtomI);});
    }
     
-RealGhostData GhostTheSystem(const bpmodule::system::System& Sys){
+RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
     RealGhostData Data;
     
    //We use two loops so that the real atoms come first and then the ghosts
@@ -97,7 +97,7 @@ RealGhostData GhostTheSystem(const bpmodule::system::System& Sys){
                 System NewFrag=SwitchBasis(NMers.at(OldName),NewU);
                 //Get only frags that can be ghosts
                 SN_t EffectiveFullSN=SetDiff(FullSN,NMerI.first);
-                bpmodule::math::PowerSetItr<SN_t> 
+                pulsar::math::PowerSetItr<SN_t> 
                     Basis(EffectiveFullSN,MinGhostOrder,
                           std::min(MaxGhostOrder,EffectiveFullSN.size()));
                 
@@ -124,12 +124,12 @@ RealGhostData GhostTheSystem(const bpmodule::system::System& Sys){
    }
    
     
-   Return_t RunCalcs(const bpmodule::system::SystemMap& AllFrags,
+   Return_t RunCalcs(const pulsar::system::SystemMap& AllFrags,
                            const map<string,double>& Coeffs,
                            const RealGhostData& Data,
                            size_t Order,
                            ID_t ID,
-                           bpmodule::modulemanager::ModuleManager& MM,
+                           pulsar::modulemanager::ModuleManager& MM,
                            const string& MethodName,
                            const string& MIMName){
         size_t NAtoms=Data.RealSystem->Size();

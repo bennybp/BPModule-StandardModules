@@ -1,9 +1,9 @@
 #ifndef _GUARD_TESTEXTLIB_HPP_
 #define _GUARD_TESTEXTLIB_HPP_
 
-#include <bpmodule/modulebase/Test_Base.hpp>
+#include <pulsar/modulebase/Test_Base.hpp>
 
-class TestExtLib : public bpmodule::modulebase::Test_Base
+class TestExtLib : public pulsar::modulebase::Test_Base
 {
 public:
     TestExtLib(ID_t id);

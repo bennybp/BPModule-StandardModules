@@ -17,22 +17,22 @@
 #ifndef MBECOMMONHEADER_HPP
 #define MBECOMMONHEADER_HPP
 
-#include <bpmodule/system/System.hpp>
-#include <bpmodule/modulebase/ModuleBase.hpp>
-#include <bpmodule/modulebase/SystemFragmenter.hpp>
-#include <bpmodule/modulebase/EnergyMethod.hpp>
-#include <bpmodule/datastore/OptionMap.hpp>
+#include <pulsar/system/System.hpp>
+#include <pulsar/modulebase/ModuleBase.hpp>
+#include <pulsar/modulebase/SystemFragmenter.hpp>
+#include <pulsar/modulebase/EnergyMethod.hpp>
+#include <pulsar/datastore/OptionMap.hpp>
 
 
-using bpmodule::system::System;
-using bpmodule::system::Atom;
-using bpmodule::system::SystemMap;
-using bpmodule::modulebase::SystemFragmenter;
-using bpmodule::modulebase::EnergyMethod;
-using bpmodule::datastore::OptionMap;
+using pulsar::system::System;
+using pulsar::system::Atom;
+using pulsar::system::SystemMap;
+using pulsar::modulebase::SystemFragmenter;
+using pulsar::modulebase::EnergyMethod;
+using pulsar::datastore::OptionMap;
 
-typedef bpmodule::modulemanager::ModulePtr<SystemFragmenter> Fragmenter_t;
-typedef bpmodule::modulemanager::ModulePtr<EnergyMethod> EMethod_t;
+typedef pulsar::modulemanager::ModulePtr<SystemFragmenter> Fragmenter_t;
+typedef pulsar::modulemanager::ModulePtr<EnergyMethod> EMethod_t;
 
 
 #endif /* MBECOMMONHEADER_HPP */

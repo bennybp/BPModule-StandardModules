@@ -1,4 +1,4 @@
-from bpmodule.datastore import OptionType
+from pulsar.datastore import OptionType
 
 MethodOption=(OptionType.String,None,True,None,
                     'The key of the method that should be used to compute the '\

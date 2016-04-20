@@ -1,8 +1,8 @@
-import bpmodule as bp
+import pulsar as psr
 from subprocess import call
 from CallPsi4 import CallPsi4
 
-class CCSDT(bp.modulebase.EnergyMethod):
+class CCSDT(psr.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(CCSDT, self).__init__(myid)
 

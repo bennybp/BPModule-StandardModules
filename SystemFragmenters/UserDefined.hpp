@@ -14,7 +14,7 @@
 #ifndef USERDEFINED_HPP
 #define USERDEFINED_HPP
 
-#include <bpmodule/modulebase/SystemFragmenter.hpp>
+#include <pulsar/modulebase/SystemFragmenter.hpp>
 
 
 /** \brief A fragmenter that relies on the user to tell it what the fragments
@@ -33,13 +33,13 @@
  *  you have to be sure that this module gets the right system or else the
  *  fragmentation pattern is meaningless.
  */ 
-class UserDefined : public bpmodule::modulebase::SystemFragmenter
+class UserDefined : public pulsar::modulebase::SystemFragmenter
 {
 public:
 using SystemFragmenter::SystemFragmenter;
 
-virtual bpmodule::system::SystemMap 
-    Fragmentize_(const bpmodule::system::System & mol);
+virtual pulsar::system::SystemMap 
+    Fragmentize_(const pulsar::system::System & mol);
 
 };
 

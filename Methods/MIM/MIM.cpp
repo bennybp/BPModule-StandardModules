@@ -3,16 +3,16 @@
 #include <algorithm>
 #include <memory>
 
-#include <bpmodule/exception/Exceptions.hpp>
-#include <bpmodule/parallel/InitFinalize.hpp>
+#include <pulsar/exception/Exceptions.hpp>
+#include <pulsar/parallel/InitFinalize.hpp>
 #include <LibTaskForce.hpp>
-#include <bpmodule/output/Table.hpp>
-#include <bpmodule/output/GlobalOutput.hpp>
+#include <pulsar/output/Table.hpp>
+#include <pulsar/output/GlobalOutput.hpp>
 #include "Methods/MIM/MIM.hpp" 
 #include "Methods/MBE/MBECommon.hpp"
 #include "Methods/MBE/MBEUtils.hpp"
 
-using bpmodule::modulemanager::ModuleManager;
+using pulsar::modulemanager::ModuleManager;
 using LibTaskForce::Communicator;
 using LibTaskForce::TaskResults;
 using std::vector;
@@ -25,7 +25,7 @@ typedef map<string,Return_t> DerivMap;
 typedef unsigned long ULI;
 typedef unordered_map<Atom,size_t> AtomMap_t;
 
-namespace bpmethods{
+namespace pulsarmethods{
 
 class Task{
    private:
@@ -89,12 +89,12 @@ Return_t MIM::DerivImpl(size_t Order)const{
    
    //TODO: move check to options
    if(SameSystem && SameMethod && (NTasks>1))
-       throw bpmodule::exception::GeneralException(
+       throw pulsar::exception::GeneralException(
                "Minimally, either the number of systems "
                " or the number of methods must equal the number of coefficients");
    
    //Set-up parallel and our buffer
-   const Communicator& ParentComm=bpmodule::parallel::GetEnv().Comm();
+   const Communicator& ParentComm=pulsar::parallel::GetEnv().Comm();
    Communicator NewComm=ParentComm.Split(ParentComm.NThreads(),1,
                                          std::min(ParentComm.NProcs(),NTasks));
    TaskResults<Return_t> Results(NewComm);
@@ -141,7 +141,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
 
 void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs){
    const size_t NCols=2,NRows=Rows.size()+1;
-   bpmodule::output::Table ResultTable(NRows,NCols);
+   pulsar::output::Table ResultTable(NRows,NCols);
    std::array<string,NCols> ColTitles={"System [Method Key]","Energy (a.u.)"};
    ResultTable.SetHBorder(0,'*');
    ResultTable.SetHBorder(1,'-');
@@ -151,7 +151,7 @@ void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs){
    ResultTable.FillCol(Rows,0,1,NRows);
    for(size_t i=0;i<Rows.size();++i)
          ResultTable.FillRow(&Derivs.at(Rows[i])[0],i+1,1,NCols);
-   bpmodule::output::GetGlobalOut()<<ResultTable<<std::endl;
+   pulsar::output::GetGlobalOut()<<ResultTable<<std::endl;
 }
 
 void PrintGradTable(const vector<string>& Rows,
@@ -161,7 +161,7 @@ void PrintGradTable(const vector<string>& Rows,
    const size_t NCols=4;
    size_t NRows=1;
    for(const auto& Di: Derivs)NRows+=(Di.second.size()/3);
-   bpmodule::output::Table ResultTable(NRows,NCols);
+   pulsar::output::Table ResultTable(NRows,NCols);
    std::array<string,NCols> ColTitles=
             {"System [Method Key]","dE/dx (a.u.)","dE/dy (a.u.)","dE/dz (a.u.)"};
    ResultTable.SetHBorder(0,'*');
@@ -178,7 +178,7 @@ void PrintGradTable(const vector<string>& Rows,
            ResultTable.FillRow(&Derivs.at(RowI)[AtomI*3],++counter,1,NCols);
        }
    }
-   bpmodule::output::GetGlobalOut()<<ResultTable<<std::endl;
+   pulsar::output::GetGlobalOut()<<ResultTable<<std::endl;
 }
 
 

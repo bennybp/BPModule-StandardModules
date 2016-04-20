@@ -4,7 +4,7 @@
 #include "SystemFragmenters/UserDefined.hpp"
 
 
-using bpmodule::modulemanager::ModuleCreationFuncs;
+using pulsar::modulemanager::ModuleCreationFuncs;
 
 
 extern "C" {

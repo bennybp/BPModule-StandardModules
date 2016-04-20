@@ -1,6 +1,6 @@
 from . import TestPyModule1
 from . import TestOptions
-from bpmodule.modulemanager import ModuleCreationFuncs
+from pulsar.modulemanager import ModuleCreationFuncs
 
 
 def InsertSupermodule():

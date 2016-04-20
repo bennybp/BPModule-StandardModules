@@ -1,6 +1,6 @@
-import bpmodule as bp
+import pulsar as psr
 
-class HelgakerCBS(bp.modulebase.EnergyMethod):
+class HelgakerCBS(psr.modulebase.EnergyMethod):
   """This module implements the two-point Helgaker extrapolation.
 
   This module computes arbitrary order derivatives of an energy that has

@@ -4,7 +4,7 @@ from .CC import CCSDT
 from .CBS import Helgaker
 from .CBS import Feller
 from .MIM import FPA
-from bpmodule.modulemanager import ModuleCreationFuncs
+from pulsar.modulemanager import ModuleCreationFuncs
 
 
 def InsertSupermodule():

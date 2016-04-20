@@ -22,30 +22,30 @@
 #include <unordered_map>
 #include <map>
 #include <string>
-#include <bpmodule/system/System.hpp>
-#include <bpmodule/system/Atom.hpp>
-#include <bpmodule/modulemanager/ModuleManager.hpp>
+#include <pulsar/system/System.hpp>
+#include <pulsar/system/Atom.hpp>
+#include <pulsar/modulemanager/ModuleManager.hpp>
 #include "Methods/MBE/MBEUtils.hpp"
 
-namespace bpmethods{
+namespace pulsarmethods{
 
 
 ///A struct that contains all the relevant data after ghosting a system
 struct RealGhostData{
     ///Map of the Real atom to its corresponding ghost
-    std::unordered_map<bpmodule::system::Atom,bpmodule::system::Atom> Real2Ghost;
+    std::unordered_map<pulsar::system::Atom,pulsar::system::Atom> Real2Ghost;
     ///Map of any atom (real or ghost) to its index
-    std::unordered_map<bpmodule::system::Atom,size_t> Atom2Idx;
+    std::unordered_map<pulsar::system::Atom,size_t> Atom2Idx;
     ///Map of an atom (real or ghost) to its real index
-    std::unordered_map<bpmodule::system::Atom,size_t> Atom2RealIdx;
+    std::unordered_map<pulsar::system::Atom,size_t> Atom2RealIdx;
     ///A universe consisting of all the real and ghost atoms
-    bpmodule::system::AtomSetUniverse NewSystem;
+    pulsar::system::AtomSetUniverse NewSystem;
     ///A system comprised of only the real atoms
-    std::unique_ptr<bpmodule::system::System> RealSystem;
+    std::unique_ptr<pulsar::system::System> RealSystem;
 };
 
 ///Returns an appropriately structured RealGhostData struct for Mol
-RealGhostData GhostTheSystem(const bpmodule::system::System& Mol);
+RealGhostData GhostTheSystem(const pulsar::system::System& Mol);
 
 ///Returns a name consistent with our naming conventions
 std::string MakeName(const SN_t& FullSN,const SN_t& SN);
@@ -71,7 +71,7 @@ std::string MakeName(const SN_t& FullSN,const SN_t& SN);
  *                     (coefficients will also be added to return)
  *  \return The coefficients corresponding to each system
  */
-std::map<std::string,double> SSFCKernel(bpmodule::system::SystemMap& NMers,
+std::map<std::string,double> SSFCKernel(pulsar::system::SystemMap& NMers,
                                         const RealGhostData& Data, 
                                         size_t MaxRealOrder,size_t MinRealOrder,
                                       size_t MaxGhostOrder,size_t MinGhostOrder
@@ -94,12 +94,12 @@ std::map<std::string,double> SSFCKernel(bpmodule::system::SystemMap& NMers,
  *  \param[in] MIMName The key for MIM method you want us to call
  *  \return The derivative you were interested in
  */ 
-std::vector<double> RunCalcs(const bpmodule::system::SystemMap& AllFrags,
+std::vector<double> RunCalcs(const pulsar::system::SystemMap& AllFrags,
                         const std::map<std::string,double>& Coeffs,
                         const RealGhostData& Data,
                         size_t Order,
                         ID_t ID,
-                        bpmodule::modulemanager::ModuleManager& MM,
+                        pulsar::modulemanager::ModuleManager& MM,
                         const std::string& MethodName,
                         const std::string& MIMName);
 

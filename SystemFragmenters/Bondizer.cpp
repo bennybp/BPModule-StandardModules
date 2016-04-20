@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#include <bpmodule/system/System.hpp>
-#include <bpmodule/datastore/OptionMap.hpp>
+#include <pulsar/system/System.hpp>
+#include <pulsar/datastore/OptionMap.hpp>
 #include "SystemFragmenters/Bondizer.hpp"
 
-using bpmodule::datastore::OptionMap;
-using bpmodule::system::SystemMap;
-using bpmodule::system::System;
-using bpmodule::system::Atom;
+using pulsar::datastore::OptionMap;
+using pulsar::system::SystemMap;
+using pulsar::system::System;
+using pulsar::system::Atom;
 
 typedef std::unordered_map<Atom,std::unordered_set<Atom>> Conn_t;
 
@@ -29,7 +29,7 @@ void Recurse(size_t depth,
 }//End recurse
 
 SystemMap Bondizer::Fragmentize_(const System & mol){
-    Conn_t Conns=bpmodule::system::GetConns(mol);
+    Conn_t Conns=pulsar::system::GetConns(mol);
     const OptionMap& DaOptions=Options();
     size_t MaxBonds=DaOptions.Get<size_t>("NBONDS");
     SystemMap Frags;

@@ -3,17 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#include <bpmodule/exception/Exceptions.hpp>
+#include <pulsar/exception/Exceptions.hpp>
 #include "SystemFragmenters/UserDefined.hpp"
 
 using std::vector;
 using std::string;
 
-using bpmodule::system::System;
-using bpmodule::system::Atom;
-using bpmodule::system::SystemMap;
-using bpmodule::datastore::OptionMap;
-using bpmodule::exception::GeneralException;
+using pulsar::system::System;
+using pulsar::system::Atom;
+using pulsar::system::SystemMap;
+using pulsar::datastore::OptionMap;
+using pulsar::exception::GeneralException;
 
 SystemMap UserDefined::Fragmentize_(const System & mol){
     SystemMap NMers;

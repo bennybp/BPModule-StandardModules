@@ -1,10 +1,10 @@
-#include <bpmodule/output/Output.hpp>
-#include <bpmodule/modulemanager/ModuleManager.hpp>
+#include <pulsar/output/Output.hpp>
+#include <pulsar/modulemanager/ModuleManager.hpp>
 #include "TestModule1.hpp"
 
 
-using namespace bpmodule::modulemanager;
-using namespace bpmodule::exception;
+using namespace pulsar::modulemanager;
+using namespace pulsar::exception;
 
 
 

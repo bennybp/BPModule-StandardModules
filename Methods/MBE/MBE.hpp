@@ -15,12 +15,12 @@
 #define MBE_HPP
 
 #include <vector>
-#include <bpmodule/modulebase/EnergyMethod.hpp>
+#include <pulsar/modulebase/EnergyMethod.hpp>
 
-namespace bpmethods{
-class MBE : public bpmodule::modulebase::EnergyMethod{
+namespace pulsarmethods{
+class MBE : public pulsar::modulebase::EnergyMethod{
     private:
-        typedef bpmodule::modulebase::EnergyMethod Base_t;
+        typedef pulsar::modulebase::EnergyMethod Base_t;
     public:
         //Pull in energy method's constructors
         using Base_t::EnergyMethod;

@@ -1,4 +1,4 @@
-import bpmodule as bp
+import pulsar as psr
 
 def Grad(NDeriv,DDeriv,Egy):
    G=[]
@@ -19,7 +19,7 @@ def Hess(NDeriv,DDeriv,Egy,G):
 
 
 
-class FellerCBS(bp.modulebase.EnergyMethod):
+class FellerCBS(psr.modulebase.EnergyMethod):
   """This module implements the three-point Feller extrapolation
 
   In the Feller extrapolation scheme, the energy for a basis set of cardinal 

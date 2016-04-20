@@ -14,7 +14,7 @@
 #ifndef NULL_HPP
 #define NULL_HPP
 
-#include <bpmodule/modulebase/SystemFragmenter.hpp>
+#include <pulsar/modulebase/SystemFragmenter.hpp>
 
 /** \brief A class that generates a null fragmentation scheme
  *
@@ -24,14 +24,14 @@
  *  the input system.
  *  
  */
-class NullFragmenter: public bpmodule::modulebase::SystemFragmenter{
+class NullFragmenter: public pulsar::modulebase::SystemFragmenter{
     public:
     ///Import the constructor from the base class
-    using bpmodule::modulebase::SystemFragmenter::SystemFragmenter;
+    using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
 
     ///Returns a SystemMap with the input system
-    virtual bpmodule::system::SystemMap Fragmentize_
-           (const bpmodule::system::System & mol);
+    virtual pulsar::system::SystemMap Fragmentize_
+           (const pulsar::system::System & mol);
 };
 
 

@@ -4,9 +4,9 @@
  * and open the template in the editor.
  */
 #include <sstream>
-#include <bpmodule/system/System.hpp>
-#include <bpmodule/system/Atom.hpp>
-#include <bpmodule/math/PowerSetItr.hpp>
+#include <pulsar/system/System.hpp>
+#include <pulsar/system/Atom.hpp>
+#include <pulsar/math/PowerSetItr.hpp>
 #include "Methods/MBE/MBEUtils.hpp"
 
 using std::stringstream;
@@ -15,13 +15,13 @@ using std::vector;
 using std::map;
 using std::unordered_map;
 
-using bpmodule::system::System;
-using bpmodule::system::Atom;
-using bpmodule::system::SystemMap;
+using pulsar::system::System;
+using pulsar::system::Atom;
+using pulsar::system::SystemMap;
 
 typedef vector<double> Return_t;
 
-namespace bpmethods{
+namespace pulsarmethods{
 
 //Splits the nmer names up
 vector<string> split(const string &s){
@@ -100,7 +100,7 @@ void FillDeriv(Return_t& Result,
         size_t n=NMer.size()-1;
         if(SNs[n].count(NMer)==0)return;
         Coeffs[SNs[n].at(NMer)]+=(Even?1.0:-1.0);
-        bpmodule::math::PowerSetItr<SN_t> Frags(NMer,1,n);//no empty sets
+        pulsar::math::PowerSetItr<SN_t> Frags(NMer,1,n);//no empty sets
         while(!Frags.Done()){
             GetCoef(!Even,*Frags,SNs,Coeffs);
             ++Frags;

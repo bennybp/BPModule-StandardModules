@@ -1,8 +1,8 @@
-import bpmodule as bp
+import pulsar as psr
 from subprocess import call
 from CallPsi4 import CallPsi4
 
-class MP2(bp.modulebase.EnergyMethod):
+class MP2(psr.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(MP2, self).__init__(myid)
 

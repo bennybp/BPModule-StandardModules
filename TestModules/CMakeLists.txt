@@ -18,7 +18,7 @@ set (TESTMODULES_PYFILES creator.py
 
 add_library(TestModules MODULE ${TESTMODULES_FILES})
 
-target_link_libraries(TestModules dynlib staticlib bpmodule)
+target_link_libraries(TestModules dynlib staticlib pulsar)
 
 install(TARGETS TestModules LIBRARY DESTINATION TestModules
                             RUNTIME DESTINATION TestModules)
