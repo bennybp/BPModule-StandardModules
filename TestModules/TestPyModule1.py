@@ -8,7 +8,7 @@ class TestPyModule1(bp.modulebase.Test_Base):
   def RunTest_(self):
     bp.output.GlobalOutput("+++ In TestPyModule1: RunTest. Info: ({}) {} {} v{}\n".format(self.ID(), self.Key(), self.Name(), self.Version()))
 
-    bp.output.GlobalOutput("    Wavefunction: {}\n".format(self.InitialWfn().UniqueString()))
+    bp.output.GlobalOutput("    Wavefunction: {}\n".format(self.InitialWfn().MyHash().String()))
     bp.output.GlobalOutput("   Cache entries: {}\n".format(self.Cache().Size()))
 
     for it in self.Cache().GetKeys():
