@@ -18,13 +18,12 @@ class Overlap : public pulsar::modulebase::OneElectronIntegral
     private:
         //! \todo combine all these into a single memory allocation
         std::unique_ptr<double[]> work_;
-        std::unique_ptr<double[]> transformwork_;
-        std::unique_ptr<double[]> srcwork_;
-        double * work3_[3];
+
+        double * transformwork_;
+        double * sourcework_;
+        double * xyzwork_[3];
 
         std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_;
-
-        std::shared_ptr<pulsar::system::BasisSet> Normalize_(const pulsar::system::BasisSet & bs);
 };
 
 
