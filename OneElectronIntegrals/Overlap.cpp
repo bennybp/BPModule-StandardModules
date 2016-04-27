@@ -173,23 +173,22 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
     for(size_t i = 0; i < nprim1; i++)
     {
         const double a1 = sh1.Alpha(i);
-        const double a1x = a1*xyz1[0];
-        const double a1y = a1*xyz1[1];
-        const double a1z = a1*xyz1[2];
+        const double a1xyz[3] = { a1*xyz1[0], a1*xyz1[1], a1*xyz1[2] };
 
         for(size_t j = 0; j < nprim2; j++)
         {
             const double a2 = sh2.Alpha(j);
-            const double a2x = a2*xyz2[0];
-            const double a2y = a2*xyz2[1];
-            const double a2z = a2*xyz2[2];
+            const double a2xyz[3] = { a2*xyz2[0], a2*xyz2[1], a2*xyz2[2] };
 
             const double oop = 1.0/(a1 + a2); // = 1/p = 1/(a1 + a2)
             const double oo2p = 0.5*oop;
 
             const double mu = a1*a2*oop; // (a1+a2)/(a1*a2)
 
-            const double P[3] = { (a1x+a2x)*oop, (a1y+a2y)*oop, (a1z+a2z)*oop };
+            const double P[3] = { (a1xyz[0]+a2xyz[0])*oop,
+                                  (a1xyz[1]+a2xyz[1])*oop,
+                                  (a1xyz[2]+a2xyz[2])*oop };
+
             const double PA[3] = { P[0] - xyz1[0], P[1] - xyz1[1], P[2] - xyz1[2] };
             const double PB[3] = { P[0] - xyz2[0], P[1] - xyz2[1], P[2] - xyz2[2] };
 
@@ -202,36 +201,22 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
                 double * const RESTRICT ptr = work3_[d];
                 ptr[0] = S00;
 
-                // recurse all the way up the bra
-                // in this case, the third term is always zero
                 for(int b = 1; b < nam1; b++)
                 {
-                    const size_t dest = b*nam2;
+                    size_t dest = b*nam2;
 
+                    // form b0 via bra recurrence
                     ptr[dest] = PA[d]*ptr[(b-1)*nam2];
-
-                    if(b > 1)
+                    if(b > 2)
                         ptr[dest] += oo2p*(b-1)*ptr[(b-2)*nam2];
-                }
 
-                // now up the ket side
-                for(int b = 0; b < nam1; b++)
-                {
-                    // destination = b*nam2 + k 
-                    // starting with k = 1
-                    size_t dest = b*nam2 + 1;
-
-                    for(int k = 1; k < nam2; k++)
+                    for(int k = 1; k <= b; k++)
                     {
-                        ptr[dest] = PB[d]*ptr[b*nam2 + k - 1];
-
-                        if(b > 0)
-                            ptr[dest] += oo2p*b*ptr[(b-1)*nam2 + k - 1];
+                        ptr[dest+k] = PB[d]*ptr[dest + k - 1];
+                        ptr[dest+k] += oo2p*b*ptr[dest - nam2 + k - 1];  // (b-1)*nam2 + k - 1
 
                         if(k > 1)
-                            ptr[dest] += oo2p*(k-1)*ptr[b*nam2 + k - 2];
-
-                        dest++;
+                            ptr[dest+k] += oo2p*(k-1)*ptr[dest + k - 2];
                     }
                 }
             }
