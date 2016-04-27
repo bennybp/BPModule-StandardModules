@@ -8,6 +8,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(SystemFragmenters)
 add_subdirectory(Methods)
 add_subdirectory(SystemIntegrals)
+add_subdirectory(OneElectronIntegrals)
 add_subdirectory(TestModules)
 
 install(FILES "StandardModules.py" DESTINATION ${CMAKE_INSTALL_PREFIX})
