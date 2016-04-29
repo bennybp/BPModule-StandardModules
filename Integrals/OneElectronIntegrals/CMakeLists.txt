@@ -1,5 +1,6 @@
 set(ONEELECTRONINTEGRALS_FILES creator.cpp
                           Overlap.cpp
+                          KineticEnergy.cpp
    )
 
 set (ONEELECTRONINTEGRALS_PYFILES
@@ -11,7 +12,7 @@ add_library(OneElectronIntegrals MODULE ${ONEELECTRONINTEGRALS_FILES})
 target_link_libraries(OneElectronIntegrals pulsar Integral_Common)
 
 install(TARGETS OneElectronIntegrals LIBRARY DESTINATION OneElectronIntegrals
-                                RUNTIME DESTINATION OneElectronIntegrals)
+                                     RUNTIME DESTINATION OneElectronIntegrals)
 
 
 install(FILES "__init__.py" DESTINATION OneElectronIntegrals)
