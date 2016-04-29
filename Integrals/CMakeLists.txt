@@ -17,6 +17,7 @@ target_link_libraries(Integral_Common pulsar)
 
 
 add_subdirectory(OneElectronIntegrals)
+add_subdirectory(TwoElectronIntegrals)
 
 
 # Nothing from the common library should be installed

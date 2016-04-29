@@ -2,6 +2,7 @@
 #define _GUARD_KINETICENERGY_HPP_
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
+#include <pulsar/system/BasisSet.hpp>
 
 class KineticEnergy : public pulsar::modulebase::OneElectronIntegral
 {

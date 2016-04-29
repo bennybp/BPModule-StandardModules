@@ -1,6 +1,3 @@
-#include <pulsar/output/Output.hpp>
-#include <pulsar/modulemanager/ModuleManager.hpp>
-#include <pulsar/system/BasisSet.hpp>
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>

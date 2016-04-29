@@ -2,6 +2,7 @@
 #define _GUARD_OVERLAP_HPP_
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
+#include <pulsar/system/BasisSet.hpp>
 
 class Overlap : public pulsar::modulebase::OneElectronIntegral
 {
