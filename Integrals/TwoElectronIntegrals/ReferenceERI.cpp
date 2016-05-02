@@ -1,3 +1,4 @@
+#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 
@@ -51,39 +52,48 @@ uint64_t ReferenceERI::Calculate_(size_t deriv,
     size_t idx = 0;
 
     for(size_t ng1 = 0; ng1 < sh1.NGeneral(); ng1++)
-    for(size_t ng2 = 0; ng2 < sh2.NGeneral(); ng2++)
-    for(size_t ng3 = 0; ng3 < sh3.NGeneral(); ng3++)
-    for(size_t ng4 = 0; ng4 < sh4.NGeneral(); ng4++)
     {
-        // now loop over all cartesian components
         const auto & cartorder1 = CartesianOrdering(sh1.GeneralAM(ng1));
-        const auto & cartorder2 = CartesianOrdering(sh2.GeneralAM(ng2));
-        const auto & cartorder3 = CartesianOrdering(sh3.GeneralAM(ng3));
-        const auto & cartorder4 = CartesianOrdering(sh4.GeneralAM(ng4));
 
-        for(const auto & c1 : cartorder1)
-        for(const auto & c2 : cartorder2)
-        for(const auto & c3 : cartorder3)
-        for(const auto & c4 : cartorder4)
+        for(size_t ng2 = 0; ng2 < sh2.NGeneral(); ng2++)
         {
-            double myint = 0.0;
+            const auto & cartorder2 = CartesianOrdering(sh2.GeneralAM(ng2));
 
-            // now the primitives
-            for(size_t i = 0; i < sh1.NPrim(); i++)
-            for(size_t j = 0; j < sh2.NPrim(); j++)
-            for(size_t k = 0; k < sh3.NPrim(); k++)
-            for(size_t l = 0; l < sh4.NPrim(); l++)
+            for(size_t ng3 = 0; ng3 < sh3.NGeneral(); ng3++)
             {
-                // now we can calculate the beast
-                double val = ValeevRef_eri(c1[0], c1[1], c1[2], sh1.GetAlpha(i), sh1.CoordsPtr(),
-                                           c2[0], c2[1], c2[2], sh2.GetAlpha(j), sh2.CoordsPtr(),  
-                                           c3[0], c3[1], c3[2], sh3.GetAlpha(k), sh3.CoordsPtr(),  
-                                           c4[0], c4[1], c4[2], sh4.GetAlpha(l), sh4.CoordsPtr()); 
+                const auto & cartorder3 = CartesianOrdering(sh3.GeneralAM(ng3));
 
-                myint += val * sh1.GetCoef(ng1, i) * sh2.GetCoef(ng2, j) * sh3.GetCoef(ng3, k) * sh4.GetCoef(ng4, l);
+                for(size_t ng4 = 0; ng4 < sh4.NGeneral(); ng4++)
+                {
+                    const auto & cartorder4 = CartesianOrdering(sh4.GeneralAM(ng4));
+
+                    // now loop over all cartesian components
+                    for(const auto & c1 : cartorder1)
+                    for(const auto & c2 : cartorder2)
+                    for(const auto & c3 : cartorder3)
+                    for(const auto & c4 : cartorder4)
+                    {
+                        double myint = 0.0;
+
+                        // now the primitives
+                        for(size_t i = 0; i < sh1.NPrim(); i++)
+                        for(size_t j = 0; j < sh2.NPrim(); j++)
+                        for(size_t k = 0; k < sh3.NPrim(); k++)
+                        for(size_t l = 0; l < sh4.NPrim(); l++)
+                        {
+                            // now we can calculate the beast
+                            double val = ValeevRef_eri(c1[0], c1[1], c1[2], sh1.GetAlpha(i), sh1.CoordsPtr(),
+                                                       c2[0], c2[1], c2[2], sh2.GetAlpha(j), sh2.CoordsPtr(),  
+                                                       c3[0], c3[1], c3[2], sh3.GetAlpha(k), sh3.CoordsPtr(),  
+                                                       c4[0], c4[1], c4[2], sh4.GetAlpha(l), sh4.CoordsPtr()); 
+
+                            myint += val * sh1.GetCoef(ng1, i) * sh2.GetCoef(ng2, j) * sh3.GetCoef(ng3, k) * sh4.GetCoef(ng4, l);
+                        }
+
+                        outbuffer[idx++] = myint;
+                    }
+                }
             }
-
-            outbuffer[idx++] = myint;
         }
     }
 

@@ -1,6 +1,8 @@
 set(ONEELECTRONINTEGRALS_FILES creator.cpp
                           Overlap.cpp
                           KineticEnergy.cpp
+                          OneElectronPotential.cpp
+                          OneElectronPotential_LUT.cpp
    )
 
 set (ONEELECTRONINTEGRALS_PYFILES
@@ -18,3 +20,5 @@ install(TARGETS OneElectronIntegrals LIBRARY DESTINATION OneElectronIntegrals
 install(FILES "__init__.py" DESTINATION OneElectronIntegrals)
 install(FILES "modinfo.py"  DESTINATION OneElectronIntegrals)
 install(FILES ${ONEELECTRONINTEGRALS_PYFILES} DESTINATION OneElectronIntegrals)
+
+set_target_properties(OneElectronIntegrals PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/StandardModules)

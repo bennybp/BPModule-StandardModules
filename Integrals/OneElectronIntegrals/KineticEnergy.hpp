@@ -17,7 +17,6 @@ class KineticEnergy : public pulsar::modulebase::OneElectronIntegral
         virtual ~KineticEnergy();
 
     private:
-        //! \todo combine all these into a single memory allocation
         std::vector<double> work_;
 
         double * transformwork_;

@@ -28,6 +28,19 @@ minfo = {
                     }
   },
 
+  "OneElectronPotential" :
+  {
+    "type"        : "c_module",
+    "base"        : "OneElectronIntegral",
+    "modpath"     : "OneElectronIntegrals.so",
+    "version"     : "0.1a",
+    "description" : "Calculation of AO nuclear repulsion integrals over gaussian basis functions",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [],
+    "options"     : {
+                    }
+  },
+
 }
 
 

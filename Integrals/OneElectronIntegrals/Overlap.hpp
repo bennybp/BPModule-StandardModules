@@ -17,7 +17,6 @@ class Overlap : public pulsar::modulebase::OneElectronIntegral
         virtual ~Overlap();
 
     private:
-        //! \todo combine all these into a single memory allocation
         std::vector<double> work_;
 
         double * transformwork_;

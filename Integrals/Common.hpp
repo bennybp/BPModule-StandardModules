@@ -1,7 +1,6 @@
 #ifndef _GUARD_INTEGRAL_COMMON_HPP_
 #define _GUARD_INTEGRAL_COMMON_HPP_
 
-#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/BasisSet.hpp>
 #include <pulsar/datastore/CacheData.hpp>
 

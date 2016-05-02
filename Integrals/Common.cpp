@@ -11,6 +11,8 @@ using namespace pulsar::output;
 // coordinates not used
 static BasisShellInfo NormalizeShell_(const BasisShellInfo & shell, const CoordType &)
 {
+    // a common factor found in normalization
+    // (I forgot exactly what it is... :( )
     static const double norm_fac[25] =
     {
     /* l =    0 */  5.56832799683170785             ,
@@ -105,5 +107,4 @@ std::shared_ptr<BasisSet> NormalizeBasis(CacheData & cache,
 
     return newbs;
 }
-
 

@@ -1,3 +1,4 @@
+#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
@@ -36,6 +37,13 @@ uint64_t KineticEnergy::Calculate_(uint64_t deriv,
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
     const BasisSetShell & sh2 = bs2_->Shell(shell2);
 
+    const size_t nfunc = sh1.NFunctions() * sh2.NFunctions();
+
+    if(bufsize < nfunc)
+        throw GeneralException("Buffer is too small", "size", bufsize, "required", nfunc);
+
+
+
     // degree of general contraction
     size_t ngen1 = sh1.NGeneral();
     size_t ngen2 = sh2.NGeneral();
@@ -55,20 +63,14 @@ uint64_t KineticEnergy::Calculate_(uint64_t deriv,
         sh2_ordering.push_back(&CartesianOrdering(sh2.GeneralAM(g2)));
 
 
-    const size_t nfunc = sh1.NFunctions() * sh2.NFunctions();
-
-    if(bufsize < nfunc)
-        throw GeneralException("Buffer is to small", "size", bufsize, "required", nfunc);
-
-
-    // THe total AM of the shell. May be negative
+    // The total AM of the shell. May be negative
     const int am1 = sh1.AM();
     const int am2 = sh2.AM();
 
 
     // coordinates from each shell
-    const double * xyz1 = sh1.CoordsPtr();
-    const double * xyz2 = sh2.CoordsPtr();
+    const CoordType xyz1 = sh1.GetCoords();
+    const CoordType xyz2 = sh2.GetCoords();
 
     const double AB[3] = { xyz1[0] - xyz2[0], xyz1[1] - xyz2[1], xyz1[2] - xyz2[2] };
     const double AB2[3] = { AB[0]*AB[0], AB[1]*AB[1], AB[2]*AB[2] };
@@ -227,7 +229,7 @@ void KineticEnergy::SetBases_(const std::string & bs1, const std::string & bs2)
     // storage size for each x,y,z component
     int max1 = bs1_->MaxAM();
     int max2 = bs2_->MaxAM();
-    size_t worksize = (max1+1)*(max2+1);  // for wach component, we store [0, am]
+    size_t worksize = (max1+1)*(max2+1);  // for each component, we store [0, am]
 
     // find the maximum number of cartesian functions, not including general contraction
     size_t maxsize1 = bs1_->MaxProperty(NCartesianGaussianForShellAM);

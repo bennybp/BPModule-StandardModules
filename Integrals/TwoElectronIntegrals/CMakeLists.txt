@@ -18,3 +18,5 @@ install(TARGETS TwoElectronIntegrals LIBRARY DESTINATION TwoElectronIntegrals
 install(FILES "__init__.py" DESTINATION TwoElectronIntegrals)
 install(FILES "modinfo.py"  DESTINATION TwoElectronIntegrals)
 install(FILES ${TWOELECTRONINTEGRALS_PYFILES} DESTINATION TwoElectronIntegrals)
+
+set_target_properties(TwoElectronIntegrals PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/StandardModules)
