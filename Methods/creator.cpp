@@ -2,6 +2,7 @@
 #include "Methods/BSSE/VMFC.hpp"
 #include "Methods/MBE/MBE.hpp"
 #include "Methods/MIM/MIM.hpp"
+#include "Methods/SCF/BPTest.hpp"
 
 
 using pulsar::modulemanager::ModuleCreationFuncs;
@@ -14,6 +15,7 @@ ModuleCreationFuncs InsertSupermodule(void){
     cf.AddCppCreator<pulsarmethods::MBE>("MBE");
     cf.AddCppCreator<pulsarmethods::MIM>("MIM");
     cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
+    cf.AddCppCreator<pulsarmethods::BPTest>("BPTest");
     return cf;
 }
 

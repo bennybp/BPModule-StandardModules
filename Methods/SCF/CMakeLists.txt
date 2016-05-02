@@ -1,1 +1,10 @@
-install(FILES "SCF.py"  DESTINATION Methods/SCF)
+set(BPTEST_FILES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/BPTest.cpp
+ )
+
+set(BPMETHODS_SRC
+       ${BPMETHODS_SRC}
+       ${BPTEST_FILES}
+    PARENT_SCOPE
+)
+

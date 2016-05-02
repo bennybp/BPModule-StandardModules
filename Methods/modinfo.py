@@ -159,6 +159,24 @@ minfo = {
                     "MIM_KEY":MIMOption
                     }
   },
+  "BPTest" :
+  {
+    "type"        : "c_module",
+    "base"        : "EnergyMethod",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Quick HF test calculation",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [""],
+    "options"     : {
+                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
+                            "Key of the nuclear repulsion module to use"),
+                        "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
+                            "Key of the ao overlap module to use"),
+                        "KEY_AO_NUCATT": (OptionType.String, None, True, None,
+                            "Key of the ao nuclear attraction module to use"),
+                    }
+  },
 }
 
 
