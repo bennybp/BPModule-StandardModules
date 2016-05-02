@@ -38,6 +38,7 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
+                        "grid":   ( OptionType.String,  None, True, None,  "Grid of point charges to calculate the potential with" )
                     }
   },
 

@@ -123,7 +123,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
                         // we need [0, absam12-i] inclusive
                         const int max_m = absam12 - i; 
                         size_t idx = 0;
-                        for(int m = 0; m < max_m; m++)
+                        for(int m = 0; m <= max_m; m++)
                         {
                             // commonly used in dimensioning
                             const size_t offset_1 = m*incart_1;
@@ -260,14 +260,25 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
                                           uint64_t shell1, uint64_t shell2,
                                           double * outbuffer, size_t bufsize)
 {
-    if(!(InitialWfn().system))
-        throw GeneralException("Error - not given a system in the initial wavefunction");
+    // what grid are we using?
+    std::string gridopt = Options().Get<std::string>("grid");
 
     std::vector<std::pair<CoordType, double>> grid;
-    for(const auto & atom : *(InitialWfn().system))
-        if(atom.GetZ() != 0.0)
-            grid.push_back({atom.GetCoords(), atom.GetZ()});
 
+
+    if(gridopt == "ATOMS")
+    {
+        // create the grid from the system
+        for(const auto & atom : *(InitialWfn().system))
+            if(atom.GetZ() != 0.0)
+                grid.push_back({atom.GetCoords(), atom.GetZ()});
+    }
+    else
+        throw GeneralException("Unknown grid", "gridopt", gridopt);
+
+    out.Debug("Calculating one-electron potential with grid %? (%? points)\n", gridopt, grid.size());
+
+    // will check sizes of buffer, etc
     return CalculateWithGrid_(deriv, shell1, shell2, grid, outbuffer, bufsize);
 }
 
@@ -296,7 +307,7 @@ void OneElectronPotential::SetBases_(const std::string & bs1, const std::string 
     int max2 = bs2_->MaxAM();
     size_t worksize = 0;
 
-    //! \todo overestimates
+    // This overestimates a bit
     for(int i = 0; i <= max1; i++)
     for(int j = 0; j <= max2; j++)
         worksize += NCartesianGaussian(i)*NCartesianGaussian(j);
