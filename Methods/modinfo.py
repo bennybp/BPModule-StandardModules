@@ -175,6 +175,10 @@ minfo = {
                             "Key of the ao overlap module to use"),
                         "KEY_AO_NUCATT": (OptionType.String, None, True, None,
                             "Key of the ao nuclear attraction module to use"),
+                        "KEY_AO_KINETIC": (OptionType.String, None, True, None,
+                            "Key of the ao kinetic energy module to use"),
+                        "KEY_AO_ERI": (OptionType.String, None, True, None,
+                            "Key of the ao electron repulsion integral module to use"),
                     }
   },
 }

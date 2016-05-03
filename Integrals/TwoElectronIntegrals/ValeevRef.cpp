@@ -96,7 +96,7 @@ static void Valeev_F(double *F, int n, double x)
         {
             i++;
             num = num * t2;
-            term1 = num / DoubleFactorial(m2 + 2 * i + 1);
+            term1 = num / DoubleFactorialD(m2 + 2 * i + 1);
             sum += term1;
         }
         while (fabsl(term1) > EPS && i < MAXFAC);

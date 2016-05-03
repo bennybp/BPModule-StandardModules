@@ -1,10 +1,13 @@
 #include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/BasisSet.hpp>
+#include <pulsar/math/Cast.hpp>
 #include <eigen3/Eigen/Dense>
 #include "Methods/SCF/BPTest.hpp"
 
 using Eigen::MatrixXd;
+using Eigen::VectorXd;
 using Eigen::Map;
+using Eigen::SelfAdjointEigenSolver;
 
 using namespace pulsar::modulemanager;
 using namespace pulsar::modulebase;
@@ -82,6 +85,7 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
     return mat;
 }
 
+
     
 std::vector<double> BPTest::Deriv_(size_t order)
 {
@@ -111,6 +115,12 @@ std::vector<double> BPTest::Deriv_(size_t order)
     out.Output("NAO: %? nshell: %?\n", nao, nshell);
     bs.Print(out);
     
+    double nelec_d = sys.GetNElectrons();
+    if(!IsInteger(nelec_d))
+        throw GeneralException("Can't handle non-integer occupations", "nelectrons", nelec_d);
+    size_t nelec = numeric_cast<size_t>(nelec_d);
+    out.Output("Number of electrons: %?\n", nelec);
+
 
 
     // Step 1: Nuclear repulsion
@@ -129,6 +139,29 @@ std::vector<double> BPTest::Deriv_(size_t order)
     out << overlap_mat << "\n";
 
 
+    // diagonalize the overlap
+    SelfAdjointEigenSolver<MatrixXd> esolve(overlap_mat);
+    MatrixXd s_evec = esolve.eigenvectors();
+    VectorXd s_eval = esolve.eigenvalues();
+
+
+    out << "\nEigenvectors of the overlap matrix\n";
+    out << s_evec << "\n";
+
+    out << "\nEigenvalues of the overlap matrix\n";
+    out << s_eval << "\n";
+
+    // not sure an easier way to do this
+    for(size_t i = 0; i < s_eval.size(); i++)
+        s_eval(i) = 1.0/sqrt(s_eval(i));
+
+    MatrixXd S12 = s_evec * s_eval.asDiagonal() * s_evec.transpose();
+
+    
+    out << "\nS^(1/2) Matrix\n";
+    out << S12 << "\n";
+
+
     // Step 3: Nuclear Attraction
     auto mod_ao_nucatt = CreateChildModuleFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
     mod_ao_nucatt->SetBases(bstag, bstag);
@@ -138,6 +171,195 @@ std::vector<double> BPTest::Deriv_(size_t order)
     out << nucatt_mat << "\n";
 
 
+    // Step 4: Kinetic Energy
+    auto mod_ao_kinetic = CreateChildModuleFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
+    mod_ao_kinetic->SetBases(bstag, bstag);
+    MatrixXd kinetic_mat = FillOneElectronMatrix(mod_ao_kinetic, bs);
+
+    out << "\nKinetic energy matrix\n";
+    out << kinetic_mat << "\n";
+
+
+    // Step 5: ERI
+    auto mod_ao_eri = CreateChildModuleFromOption<TwoElectronIntegral>("KEY_AO_ERI");
+    mod_ao_eri->SetBases(bstag, bstag, bstag, bstag);
+
+    std::vector<double> eri(nao*nao*nao*nao);
+
+
+    {
+        size_t bufsize = maxnfunc*maxnfunc*maxnfunc*maxnfunc;
+        std::vector<double> eribuf(bufsize);
+
+        size_t i_start = 0;
+        for(size_t i = 0; i < nshell; i++)
+        {
+            const auto & sh1 = bs.Shell(i);
+            const size_t ng1 = sh1.NGeneral();
+            size_t j_start = 0;
+
+            for(size_t j = 0; j < nshell; j++)
+            {
+                const auto & sh2 = bs.Shell(j);
+                const size_t ng2 = sh2.NGeneral();
+                size_t k_start = 0;
+
+                for(size_t k = 0; k < nshell; k++)
+                {
+                    const auto & sh3 = bs.Shell(k);
+                    const size_t ng3 = sh3.NGeneral();
+                    size_t l_start = 0;
+
+                    for(size_t l = 0; l < nshell; l++)
+                    {
+                        const auto & sh4 = bs.Shell(l);
+                        const size_t ng4 = sh4.NGeneral();
+
+                        uint64_t ncalc = mod_ao_eri->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
+
+                        size_t idx = 0;
+                        size_t m_start = 0;
+                        for(size_t m = 0; m < ng1; m++)
+                        {
+                            const size_t nfunc1 = sh1.GeneralNFunctions(m); 
+                            size_t n_start = 0;
+
+                            for(size_t n = 0; n < ng2; n++)
+                            {
+                                const size_t nfunc2 = sh2.GeneralNFunctions(n); 
+                                size_t o_start = 0;
+
+                                for(size_t o = 0; o < ng3; o++)
+                                {
+                                    const size_t nfunc3 = sh3.GeneralNFunctions(o); 
+                                    size_t p_start = 0;
+
+                                    for(size_t p = 0; p < ng4; p++)
+                                    {
+                                        const size_t nfunc4 = sh4.GeneralNFunctions(p); 
+
+                                        for(size_t f1 = 0; f1 < nfunc1; f1++)
+                                        for(size_t f2 = 0; f2 < nfunc2; f2++)
+                                        for(size_t f3 = 0; f3 < nfunc3; f3++)
+                                        for(size_t f4 = 0; f4 < nfunc4; f4++)
+                                            eri.at((i_start+m_start+f1)*nao*nao*nao + 
+                                                   (j_start+n_start+f2)*nao*nao +
+                                                   (k_start+o_start+f3)*nao +
+                                                   (l_start+p_start+f4) ) = eribuf.at(idx++);
+
+                                        p_start += nfunc4;
+                                    }
+                                    o_start += nfunc3;
+                                }
+                                n_start += nfunc2;
+                            }
+                            m_start += nfunc1;
+                        }
+                        l_start += sh4.NFunctions();   
+                    }
+                    k_start += sh3.NFunctions();
+                }
+                j_start += sh2.NFunctions();
+            }
+            i_start += sh1.NFunctions();
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////
+    // Procedure
+    //////////////////////////////////////////////////////////////////
+    // 1. Form the core
+    MatrixXd Hcore = nucatt_mat + kinetic_mat;  // H = T + V
+
+    out << "\nCore Hamiltonian\n";
+    out << Hcore << "\n";
+
+    // 2. Initial Guess density
+    MatrixXd F0 = S12.transpose() * Hcore * S12.transpose();
+
+    out << "\nTransformed Fock Matrix\n";
+    out << F0 << "\n";
+
+
+    SelfAdjointEigenSolver<MatrixXd> fsolve(F0);
+    MatrixXd C0 = fsolve.eigenvectors();
+    VectorXd e0 = fsolve.eigenvalues();
+
+    // Tranform C0
+    C0 = S12*C0;
+
+    out << "Initial C matrix\n";
+    out << C0 << "\n";
+
+    out << "Initial orbital energies matrix\n";
+    out << e0 << "\n";
+
+    MatrixXd occblock = C0.block(0, 0, nao, nelec/2);
+    MatrixXd D0 = occblock * occblock.transpose();
+
+    out << "Initial density matrix\n";
+    out << D0 << "\n";
+
+
+    // 3. Calculate the initial guess energy
+    double energy = 0;
+
+    for(size_t i = 0; i < nao; i++)
+    for(size_t j = 0; j < nao; j++)
+        energy += D0(i,j) * ( 2*Hcore(i,j) );
+
+    out.Output("Initial guess energy: %12.8e\n", energy);
+
+    double lastenergy = 0;
+
+    MatrixXd lastD = D0;
+
+    size_t iter = 0;
+    //while(fabs(energy-lastenergy) > 1e-6)
+    while(iter < 5)
+    {
+        iter++; 
+
+        // 4. New fock matrix
+        MatrixXd F = Hcore;
+
+        for(size_t mu = 0; mu < nao; mu++)
+        for(size_t nu = 0; nu < nao; nu++)
+        {
+            for(size_t lambda = 0; lambda < nao; lambda++)
+            for(size_t sigma = 0; sigma < nao; sigma++)
+            {
+                size_t mnls = mu*nao*nao*nao + nu*nao*nao + lambda*nao + sigma;
+                size_t mlns = mu*nao*nao*nao + lambda*nao*nao + nu*nao + sigma;
+                F(mu, nu) += lastD(lambda, sigma) * (2*eri.at(mnls)-eri.at(mlns));
+            }
+        }
+    
+        //out.Output("Iteration %? - New F:\n", iter);
+        //out << F << "\n";
+
+        // 5. New density
+        MatrixXd Fprime = S12.transpose() * F * S12;
+
+        SelfAdjointEigenSolver<MatrixXd> fsolve(Fprime);
+        MatrixXd C = fsolve.eigenvectors();
+        VectorXd e = fsolve.eigenvalues();
+
+        C = S12*C;
+
+        MatrixXd occblock = C.block(0, 0, nao, nelec/2);
+        MatrixXd D = occblock * occblock.transpose();
+
+        energy = 0;
+        for(size_t i = 0; i < nao; i++)
+        for(size_t j = 0; j < nao; j++)
+            energy += D(i,j) * ( Hcore(i,j) + F(i,j));
+
+
+        out.Output("Iteration %? - Energy = %12.8e\n", iter, energy + nucrep);
+        lastD = D;
+    }
 
 
 
