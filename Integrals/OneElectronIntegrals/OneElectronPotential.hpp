@@ -3,6 +3,7 @@
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
 #include <pulsar/system/BasisSet.hpp>
+#include <pulsar/math/Grid.hpp>
 
 
 
@@ -31,7 +32,7 @@ class OneElectronPotential : public pulsar::modulebase::OneElectronIntegral
 
         uint64_t CalculateWithGrid_(uint64_t deriv,
                                     uint64_t shell1, uint64_t shell2,
-                                    const std::vector<std::pair<pulsar::system::CoordType, double>> & grid,
+                                    const pulsar::math::Grid & grid,
                                     double * outbuffer, size_t bufsize);
 };
 

@@ -29,7 +29,7 @@ OneElectronPotential::~OneElectronPotential()
 
 uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
                                                   uint64_t shell1, uint64_t shell2,
-                                                  const std::vector<std::pair<CoordType, double>> & grid,
+                                                  const Grid & grid,
                                                   double * outbuffer, size_t bufsize)
 {
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
@@ -89,7 +89,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
 
                 const double PA[3] = { P[0] - xyz1[0], P[1] - xyz1[1], P[2] - xyz1[2] };
                 const double PB[3] = { P[0] - xyz2[0], P[1] - xyz2[1], P[2] - xyz2[2] };
-                const double PC[3] = { P[0] - gridpt.first[0], P[1] - gridpt.first[1], P[2] - gridpt.first[2] };
+                const double PC[3] = { P[0] - gridpt.coords[0], P[1] - gridpt.coords[1], P[2] - gridpt.coords[2] };
                 const double PC2 = PC[0]*PC[0] + PC[1]*PC[1] + PC[2]*PC[2];
 
                 // boys function
@@ -242,7 +242,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
 
                         // remember: a and b are indices of primitives
                         // Also, the subtraction takes care of the minus sign
-                        sourcework_[outidx++] -= val * sh1.Coef(g1, a) * sh2.Coef(g2, b) * gridpt.second;
+                        sourcework_[outidx++] -= val * sh1.Coef(g1, a) * sh2.Coef(g2, b) * gridpt.value;
                     }
                 }
             } // end loop over primitive a
@@ -263,20 +263,22 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
     // what grid are we using?
     std::string gridopt = Options().Get<std::string>("grid");
 
-    std::vector<std::pair<CoordType, double>> grid;
-
+    GridUniverse gu;
 
     if(gridopt == "ATOMS")
     {
         // create the grid from the system
         for(const auto & atom : *(InitialWfn().system))
             if(atom.GetZ() != 0.0)
-                grid.push_back({atom.GetCoords(), atom.GetZ()});
+                gu.Insert({atom.GetCoords(), atom.GetZ()});
+        
     }
     else
         throw GeneralException("Unknown grid", "gridopt", gridopt);
 
-    out.Debug("Calculating one-electron potential with grid %? (%? points)\n", gridopt, grid.size());
+    Grid grid(std::make_shared<GridUniverse>(std::move(gu)), true);
+
+    out.Debug("Calculating one-electron potential with grid %? (%? points)\n", gridopt, grid.Size());
 
     // will check sizes of buffer, etc
     return CalculateWithGrid_(deriv, shell1, shell2, grid, outbuffer, bufsize);
