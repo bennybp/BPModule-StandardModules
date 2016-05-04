@@ -111,7 +111,7 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
         {
             const double a2 = sh2.Alpha(b);
             const double oop = 1.0/(a1 + a2); // = 1/p = 1/(a1 + a2)
-            const double mu = a1*a2*oop; // (a1+a2)/(a1*a2)
+            const double mu = a1*a2*oop; // (a1*a2)/(a1+a2)
 
 
             const double oo2p = 0.5*oop;

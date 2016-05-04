@@ -1,5 +1,6 @@
 #include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/BasisSet.hpp>
+#include <pulsar/system/AOIterator.hpp>
 #include <pulsar/math/Cast.hpp>
 #include <eigen3/Eigen/Dense>
 #include "Methods/SCF/BPTest.hpp"
@@ -7,6 +8,10 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::Map;
+using Eigen::RowMajor;
+using Eigen::ColMajor;
+using Eigen::Dynamic;
+using Eigen::Matrix;
 using Eigen::SelfAdjointEigenSolver;
 
 using namespace pulsar::modulemanager;
@@ -16,6 +21,8 @@ using namespace pulsar::system;
 using namespace pulsar::math;
 using namespace pulsar::output;
 using namespace pulsar::datastore;
+
+template class pulsar::system::AOIterator<2>;
 
 namespace pulsarmethods{
 
@@ -47,7 +54,7 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
         const size_t nfunc1 = sh1.NFunctions();
         size_t colstart = 0;
 
-        for(size_t n2 = 0; n2 < nshell; n2++)
+        for(size_t n2 = 0; n2 <= n1; n2++)
         {
             const auto & sh2  = bs.Shell(n2);
             const size_t nfunc2 = sh2.NFunctions();
@@ -55,27 +62,16 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
             // calculate
             size_t ncalc = mod->Calculate(0, n1, n2, b.data(), maxnfunc2); 
 
-            // go over the general contractions
-            size_t growstart = rowstart;
-            size_t offset = 0;
-            for(size_t g1 = 0; g1 < bs.Shell(n1).NGeneral(); g1++)
-            {
-                const size_t gnfunc1 = sh1.GeneralNFunctions(g1);
-                size_t gcolstart = colstart;
-                for(size_t g2 = 0; g2 < sh2.NGeneral(); g2++)
-                {
-                    const size_t gnfunc2 = sh2.GeneralNFunctions(g2);
-                
-                    // copy by blocking the matrix and mapping the raw buffer to a matrix
-                    mat.block(growstart, gcolstart, gnfunc1, gnfunc2)
-                          = Map<MatrixXd>(b.data() + offset, gnfunc1, gnfunc2);
+            // iterate and fill in the matrix
+            AOIterator<2> aoit({sh1, sh2});
 
-                    offset += gnfunc1*gnfunc2;
-                    gcolstart += gnfunc2;
-                }
-                growstart += gnfunc1;
-            }
-                
+            do { 
+                const size_t i = rowstart+aoit.ShellFunctionIdx<0>();
+                const size_t j = colstart+aoit.ShellFunctionIdx<1>();
+
+                mat(i,j) = mat(j, i) = b[aoit.TotalIdx()];
+            } while(aoit.Next());
+
             colstart += nfunc2;
         }
 
@@ -83,6 +79,77 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
     }
 
     return mat;
+}
+
+
+#define INDEX2(i,j) (  (j > i) ? (j*(j+1))/2 + i : (i*(i+1))/2 + j )
+#define INDEX4(i,j,k,l)  ( INDEX2(k,l) > INDEX2(i,j) ?  (INDEX2(k,l)*(INDEX2(k,l)+1))/2 + INDEX2(i,j) : (INDEX2(i,j)*(INDEX2(i,j)+1))/2 + INDEX2(k,l) )
+
+static std::vector<double>
+FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
+                      const BasisSet & bs)
+{
+    const size_t nao = bs.NFunctions();
+    const size_t nshell = bs.NShell();
+    const size_t maxnfunc = bs.MaxNFunctions();
+
+    const size_t nao12 = (nao*(nao+1))/2;
+    const size_t nao1234 = (nao12*(nao12+1))/2;
+    const size_t bufsize = maxnfunc*maxnfunc*maxnfunc*maxnfunc;
+
+    std::vector<double> eri(nao1234);
+    std::vector<double> eribuf(bufsize);
+
+    size_t i_start = 0;
+    for(size_t i = 0; i < nshell; i++)
+    {
+        const auto & sh1 = bs.Shell(i);
+        const size_t ng1 = sh1.NGeneral();
+        size_t j_start = 0;
+
+        for(size_t j = 0; j <= i; j++)
+        {
+            const auto & sh2 = bs.Shell(j);
+            const size_t ng2 = sh2.NGeneral();
+            size_t k_start = 0;
+
+            for(size_t k = 0; k < nshell; k++)
+            {
+                const auto & sh3 = bs.Shell(k);
+                const size_t ng3 = sh3.NGeneral();
+                size_t l_start = 0;
+
+                for(size_t l = 0; l <= k; l++)
+                {
+                    if(INDEX2(k,l) > INDEX2(i,j))
+                        continue;
+
+                    const auto & sh4 = bs.Shell(l);
+                    const size_t ng4 = sh4.NGeneral();
+
+                    uint64_t ncalc = mod->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
+
+                    AOIterator<4> aoit({sh1, sh2, sh3, sh4});
+
+                    do { 
+                        const size_t full_i = i_start+aoit.ShellFunctionIdx<0>();
+                        const size_t full_j = j_start+aoit.ShellFunctionIdx<1>();
+                        const size_t full_k = k_start+aoit.ShellFunctionIdx<2>();
+                        const size_t full_l = l_start+aoit.ShellFunctionIdx<3>();
+
+                        eri.at(INDEX4(full_i, full_j, full_k, full_l)) = eribuf.at(aoit.TotalIdx());
+                    } while(aoit.Next());
+
+                    l_start += sh4.NFunctions();   
+                }
+                k_start += sh3.NFunctions();
+            }
+            j_start += sh2.NFunctions();
+        }
+        i_start += sh1.NFunctions();
+    }
+
+    return std::move(eri);
 }
 
 
@@ -155,6 +222,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
     for(size_t i = 0; i < s_eval.size(); i++)
         s_eval(i) = 1.0/sqrt(s_eval(i));
 
+
     MatrixXd S12 = s_evec * s_eval.asDiagonal() * s_evec.transpose();
 
     
@@ -183,87 +251,9 @@ std::vector<double> BPTest::Deriv_(size_t order)
     // Step 5: ERI
     auto mod_ao_eri = CreateChildModuleFromOption<TwoElectronIntegral>("KEY_AO_ERI");
     mod_ao_eri->SetBases(bstag, bstag, bstag, bstag);
+    std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
 
-    std::vector<double> eri(nao*nao*nao*nao);
 
-
-    {
-        size_t bufsize = maxnfunc*maxnfunc*maxnfunc*maxnfunc;
-        std::vector<double> eribuf(bufsize);
-
-        size_t i_start = 0;
-        for(size_t i = 0; i < nshell; i++)
-        {
-            const auto & sh1 = bs.Shell(i);
-            const size_t ng1 = sh1.NGeneral();
-            size_t j_start = 0;
-
-            for(size_t j = 0; j < nshell; j++)
-            {
-                const auto & sh2 = bs.Shell(j);
-                const size_t ng2 = sh2.NGeneral();
-                size_t k_start = 0;
-
-                for(size_t k = 0; k < nshell; k++)
-                {
-                    const auto & sh3 = bs.Shell(k);
-                    const size_t ng3 = sh3.NGeneral();
-                    size_t l_start = 0;
-
-                    for(size_t l = 0; l < nshell; l++)
-                    {
-                        const auto & sh4 = bs.Shell(l);
-                        const size_t ng4 = sh4.NGeneral();
-
-                        uint64_t ncalc = mod_ao_eri->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
-
-                        size_t idx = 0;
-                        size_t m_start = 0;
-                        for(size_t m = 0; m < ng1; m++)
-                        {
-                            const size_t nfunc1 = sh1.GeneralNFunctions(m); 
-                            size_t n_start = 0;
-
-                            for(size_t n = 0; n < ng2; n++)
-                            {
-                                const size_t nfunc2 = sh2.GeneralNFunctions(n); 
-                                size_t o_start = 0;
-
-                                for(size_t o = 0; o < ng3; o++)
-                                {
-                                    const size_t nfunc3 = sh3.GeneralNFunctions(o); 
-                                    size_t p_start = 0;
-
-                                    for(size_t p = 0; p < ng4; p++)
-                                    {
-                                        const size_t nfunc4 = sh4.GeneralNFunctions(p); 
-
-                                        for(size_t f1 = 0; f1 < nfunc1; f1++)
-                                        for(size_t f2 = 0; f2 < nfunc2; f2++)
-                                        for(size_t f3 = 0; f3 < nfunc3; f3++)
-                                        for(size_t f4 = 0; f4 < nfunc4; f4++)
-                                            eri.at((i_start+m_start+f1)*nao*nao*nao + 
-                                                   (j_start+n_start+f2)*nao*nao +
-                                                   (k_start+o_start+f3)*nao +
-                                                   (l_start+p_start+f4) ) = eribuf.at(idx++);
-
-                                        p_start += nfunc4;
-                                    }
-                                    o_start += nfunc3;
-                                }
-                                n_start += nfunc2;
-                            }
-                            m_start += nfunc1;
-                        }
-                        l_start += sh4.NFunctions();   
-                    }
-                    k_start += sh3.NFunctions();
-                }
-                j_start += sh2.NFunctions();
-            }
-            i_start += sh1.NFunctions();
-        }
-    }
 
 
     //////////////////////////////////////////////////////////////////
@@ -317,7 +307,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
 
     size_t iter = 0;
     //while(fabs(energy-lastenergy) > 1e-6)
-    while(iter < 5)
+    while(iter < 100)
     {
         iter++; 
 
@@ -330,8 +320,8 @@ std::vector<double> BPTest::Deriv_(size_t order)
             for(size_t lambda = 0; lambda < nao; lambda++)
             for(size_t sigma = 0; sigma < nao; sigma++)
             {
-                size_t mnls = mu*nao*nao*nao + nu*nao*nao + lambda*nao + sigma;
-                size_t mlns = mu*nao*nao*nao + lambda*nao*nao + nu*nao + sigma;
+                size_t mnls = INDEX4(mu, nu, lambda, sigma);
+                size_t mlns = INDEX4(mu, lambda, nu, sigma);
                 F(mu, nu) += lastD(lambda, sigma) * (2*eri.at(mnls)-eri.at(mlns));
             }
         }
