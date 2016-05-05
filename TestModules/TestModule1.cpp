@@ -60,7 +60,7 @@ void TestModule1::CallRunTest_(const std::string & other)
 {
     out.Output("+++ In TestModule1: CallRunTest with %?\n", other);
 
-    ModulePtr<Test_Base> tb2 = CreateChildModule<Test_Base>(other);
+    ModulePtr<Test_Base> tb2 = CreateChild<Test_Base>(other);
     out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
     tb2->RunTest();
     out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
@@ -73,7 +73,7 @@ void TestModule1::CallRunTest2_(const std::string & other1, const std::string & 
 {
     out.Output("+++ In TestModule1: CallRunTest with %? %?\n", other1, other2);
 
-    ModulePtr<Test_Base> tb2 = CreateChildModule<Test_Base>(other1);
+    ModulePtr<Test_Base> tb2 = CreateChild<Test_Base>(other1);
     out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
     tb2->CallRunTest(other2);
     out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
@@ -97,7 +97,7 @@ void TestModule1::CallThrow_(const std::string & other)
 {
     out.Output("+++ In TestModule1: CallThrowTest with %?\n", other);
 
-    ModulePtr<Test_Base> tb2 = CreateChildModule<Test_Base>(other);
+    ModulePtr<Test_Base> tb2 = CreateChild<Test_Base>(other);
     out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
     tb2->TestThrow();
 

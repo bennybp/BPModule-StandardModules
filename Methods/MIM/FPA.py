@@ -44,7 +44,7 @@ class FPA(psr.modulebase.EnergyMethod):
           Nothing
 
       """
-      MIM=self.CreateChildModule(self.Options().Get("MIM_KEY"))
+      MIM=self.CreateChild(self.Options().Get("MIM_KEY"))
       MIM.ChangeOption("METHODS",
             [self.Options().Get("LARGE_MP2_KEY"),
              self.Options().Get("CCSD(T)_KEY"),

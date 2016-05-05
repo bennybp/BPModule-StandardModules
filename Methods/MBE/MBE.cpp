@@ -38,7 +38,7 @@ namespace pulsarmethods{
 
         //Make N-Mers
         const System& Mol=*InitialWfn().system;
-        Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(Fragmentizer);
+        Fragmenter_t Fragger=CreateChild<SystemFragmenter>(Fragmentizer);
         SystemMap NMers=Fragger->Fragmentize(Mol);
         
         //Parse the names, bin n-mers by size, zero weights
@@ -68,7 +68,7 @@ namespace pulsarmethods{
         MManager().ChangeOption(MIMName,"METHODS",vector<string>({MethodName}));
         MManager().ChangeOption(MIMName,"FRAGMENTIZER",Fragmentizer);
         MManager().ChangeOption(MIMName,"WEIGHTS",SortedWeights);
-        EMethod_t MIM=CreateChildModule<EnergyMethod>(MIMName);
+        EMethod_t MIM=CreateChild<EnergyMethod>(MIMName);
         return MIM->Deriv(Order);
     }
     

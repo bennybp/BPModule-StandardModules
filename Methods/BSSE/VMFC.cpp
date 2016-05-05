@@ -41,7 +41,7 @@ namespace pulsarmethods{
         RealGhostData NewSys=GhostTheSystem(Mol);
         System NewU(NewSys.NewSystem,true);      
        
-        Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(
+        Fragmenter_t Fragger=CreateChild<SystemFragmenter>(
                                    Options().Get<string>("FRAGMENTIZER"));
         SystemMap NMers=Fragger->Fragmentize(Mol);
         

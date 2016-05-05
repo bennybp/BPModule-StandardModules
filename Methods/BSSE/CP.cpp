@@ -16,7 +16,7 @@ using std::string;
 vector<double> CP::Deriv_(size_t Order){
         const System& Mol=*InitialWfn().system;
         RealGhostData NewSys=GhostTheSystem(Mol);
-        Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(
+        Fragmenter_t Fragger=CreateChild<SystemFragmenter>(
                                    Options().Get<string>("FRAGMENTIZER"));
         SystemMap NMers=Fragger->Fragmentize(Mol);        
         SNList_t SNs=BinNMers(NMers);

@@ -191,14 +191,14 @@ std::vector<double> BPTest::Deriv_(size_t order)
 
 
     // Step 1: Nuclear repulsion
-    auto mod_nuc_rep = CreateChildModuleFromOption<SystemIntegral>("KEY_NUC_REPULSION");
+    auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
     double nucrep;
     size_t n = mod_nuc_rep->Calculate(0, &nucrep, 1);
     out.Output("Nuclear repulsion: %12.8e\n", nucrep);
 
 
     // Step 2: Overlap
-    auto mod_ao_overlap = CreateChildModuleFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
+    auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
     mod_ao_overlap->SetBases(bstag, bstag);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
@@ -231,7 +231,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
 
 
     // Step 3: Nuclear Attraction
-    auto mod_ao_nucatt = CreateChildModuleFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
+    auto mod_ao_nucatt = CreateChildFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
     mod_ao_nucatt->SetBases(bstag, bstag);
     MatrixXd nucatt_mat = FillOneElectronMatrix(mod_ao_nucatt, bs);
 
@@ -240,7 +240,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
 
 
     // Step 4: Kinetic Energy
-    auto mod_ao_kinetic = CreateChildModuleFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
+    auto mod_ao_kinetic = CreateChildFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
     mod_ao_kinetic->SetBases(bstag, bstag);
     MatrixXd kinetic_mat = FillOneElectronMatrix(mod_ao_kinetic, bs);
 
@@ -249,7 +249,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
 
 
     // Step 5: ERI
-    auto mod_ao_eri = CreateChildModuleFromOption<TwoElectronIntegral>("KEY_AO_ERI");
+    auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
     mod_ao_eri->SetBases(bstag, bstag, bstag, bstag);
     std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
 

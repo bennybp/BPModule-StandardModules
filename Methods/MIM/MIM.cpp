@@ -74,7 +74,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
    
 
    //Get the subsystems
-   Fragmenter_t Fragger=CreateChildModule<SystemFragmenter>(
+   Fragmenter_t Fragger=CreateChild<SystemFragmenter>(
            DaOptions.Get<string>("FRAGMENTIZER"));
    SystemMap Systems=Fragger->Fragmentize(Mol);
      

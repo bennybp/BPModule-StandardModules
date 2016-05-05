@@ -38,7 +38,7 @@ class TestPyModule1(psr.modulebase.Test_Base):
   def CallRunTest_(self, other):
     psr.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(other))
 
-    tb = self.CreateChildModule(other)
+    tb = self.CreateChild(other)
     psr.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
     tb.RunTest()
     psr.output.GlobalOutput("  + Finished with scoped module {}. Deleting automatically\n".format(tb.ID()))
@@ -49,7 +49,7 @@ class TestPyModule1(psr.modulebase.Test_Base):
   def CallRunTest2_(self, other1, other2):
     psr.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {} {}\n".format(other1, other2))
 
-    tb = self.CreateChildModule(other1)
+    tb = self.CreateChild(other1)
     psr.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
     tb.CallRunTest(other2)
     psr.output.GlobalOutput("  + Finished with scoped module {}. Deleting automatically\n".format(tb.ID()))
@@ -65,7 +65,7 @@ class TestPyModule1(psr.modulebase.Test_Base):
   def CallThrow_(self, other):
     psr.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(other))
 
-    tb = self.CreateChildModule(other)
+    tb = self.CreateChild(other)
     psr.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
     tb.TestThrow()
 

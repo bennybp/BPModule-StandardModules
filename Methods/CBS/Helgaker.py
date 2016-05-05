@@ -53,7 +53,7 @@ class HelgakerCBS(psr.modulebase.EnergyMethod):
       l23=BasisCards[1]**3
       denom=l23-l13
       Cs=[l23/denom,-l13/denom]
-      MIM=self.CreateChildModule(self.Options().Get("MIM_KEY"))
+      MIM=self.CreateChild(self.Options().Get("MIM_KEY"))
       MIM.Options().Change("WEIGHTS",Cs)
       return MIM.Deriv(order)
 
