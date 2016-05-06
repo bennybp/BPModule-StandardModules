@@ -45,6 +45,9 @@ uint64_t ReferenceERI::Calculate_(size_t deriv,
     const BasisSetShell & sh4 = bs4_->Shell(shell4);
 
     size_t nfunc = sh1.NFunctions() * sh2.NFunctions() * sh3.NFunctions() * sh4.NFunctions();
+    size_t ncart =   NCartesianGaussianInShell(sh1) * NCartesianGaussianInShell(sh2)
+                   * NCartesianGaussianInShell(sh2) * NCartesianGaussianInShell(sh4);
+
     if(bufsize < nfunc)
         throw GeneralException("Buffer to small for ERI", "bufsize", bufsize, "nfunc", nfunc);
 
@@ -90,12 +93,15 @@ uint64_t ReferenceERI::Calculate_(size_t deriv,
                             myint += val * sh1.GetCoef(ng1, i) * sh2.GetCoef(ng2, j) * sh3.GetCoef(ng3, k) * sh4.GetCoef(ng4, l);
                         }
 
-                        outbuffer[idx++] = myint;
+                        sourcework_[idx++] = myint;
                     }
                 }
             }
         }
     }
+
+
+    CartesianToSpherical_4Center(sh1, sh2, sh3, sh4, sourcework_, outbuffer, transformwork_);
 
     return nfunc;
 }
@@ -120,6 +126,22 @@ void ReferenceERI::SetBases_(const std::string & bs1, const std::string & bs2,
     bs2_ = NormalizeBasis(Cache(), out, basisset2);
     bs3_ = NormalizeBasis(Cache(), out, basisset3);
     bs4_ = NormalizeBasis(Cache(), out, basisset4);
-    bs1_->Print(out);
+
+
+    size_t maxsize1 = bs1_->MaxProperty(NCartesianGaussianForShellAM);
+    size_t maxsize2 = bs2_->MaxProperty(NCartesianGaussianForShellAM);
+    size_t maxsize3 = bs3_->MaxProperty(NCartesianGaussianForShellAM);
+    size_t maxsize4 = bs4_->MaxProperty(NCartesianGaussianForShellAM);
+    size_t transformwork_size = maxsize1*maxsize2*maxsize3*maxsize4;
+    
+    maxsize1 =  bs1_->MaxProperty(NCartesianGaussianInShell);
+    maxsize2 =  bs2_->MaxProperty(NCartesianGaussianInShell);
+    maxsize3 =  bs3_->MaxProperty(NCartesianGaussianInShell);
+    maxsize4 =  bs4_->MaxProperty(NCartesianGaussianInShell);
+    size_t sourcework_size = maxsize1*maxsize2*maxsize3*maxsize4;
+
+    work_.resize(sourcework_size+transformwork_size);
+    sourcework_ = work_.data();
+    transformwork_ = sourcework_ + sourcework_size;   
 }
 

@@ -22,7 +22,6 @@ using namespace pulsar::math;
 using namespace pulsar::output;
 using namespace pulsar::datastore;
 
-template class pulsar::system::AOIterator<2>;
 
 namespace pulsarmethods{
 
@@ -47,23 +46,23 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
     // buffer
     std::vector<double> b(maxnfunc2);
 
-    size_t rowstart = 0;
     for(size_t n1 = 0; n1 < nshell; n1++)
     {
         const auto & sh1 = bs.Shell(n1);
+        const size_t rowstart = bs.ShellStart(n1);
         const size_t nfunc1 = sh1.NFunctions();
-        size_t colstart = 0;
 
         for(size_t n2 = 0; n2 <= n1; n2++)
         {
             const auto & sh2  = bs.Shell(n2);
+            const size_t colstart = bs.ShellStart(n2);
             const size_t nfunc2 = sh2.NFunctions();
 
             // calculate
             size_t ncalc = mod->Calculate(0, n1, n2, b.data(), maxnfunc2); 
 
             // iterate and fill in the matrix
-            AOIterator<2> aoit({sh1, sh2});
+            AOIterator<2> aoit({sh1, sh2}, false);
 
             do { 
                 const size_t i = rowstart+aoit.ShellFunctionIdx<0>();
@@ -71,11 +70,7 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
 
                 mat(i,j) = mat(j, i) = b[aoit.TotalIdx()];
             } while(aoit.Next());
-
-            colstart += nfunc2;
         }
-
-        rowstart += nfunc1;
     }
 
     return mat;
@@ -129,7 +124,7 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 
                     uint64_t ncalc = mod->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
 
-                    AOIterator<4> aoit({sh1, sh2, sh3, sh4});
+                    AOIterator<4> aoit({sh1, sh2, sh3, sh4}, false);
 
                     do { 
                         const size_t full_i = i_start+aoit.ShellFunctionIdx<0>();
@@ -212,11 +207,10 @@ std::vector<double> BPTest::Deriv_(size_t order)
     VectorXd s_eval = esolve.eigenvalues();
 
 
-    out << "\nEigenvectors of the overlap matrix\n";
-    out << s_evec << "\n";
-
-    out << "\nEigenvalues of the overlap matrix\n";
-    out << s_eval << "\n";
+    //out << "\nEigenvectors of the overlap matrix\n";
+    //out << s_evec << "\n";
+    //out << "\nEigenvalues of the overlap matrix\n";
+    //out << s_eval << "\n";
 
     // not sure an easier way to do this
     for(size_t i = 0; i < s_eval.size(); i++)
@@ -226,8 +220,8 @@ std::vector<double> BPTest::Deriv_(size_t order)
     MatrixXd S12 = s_evec * s_eval.asDiagonal() * s_evec.transpose();
 
     
-    out << "\nS^(1/2) Matrix\n";
-    out << S12 << "\n";
+    //out << "\nS^(1/2) Matrix\n";
+    //out << S12 << "\n";
 
 
     // Step 3: Nuclear Attraction
@@ -244,8 +238,8 @@ std::vector<double> BPTest::Deriv_(size_t order)
     mod_ao_kinetic->SetBases(bstag, bstag);
     MatrixXd kinetic_mat = FillOneElectronMatrix(mod_ao_kinetic, bs);
 
-    out << "\nKinetic energy matrix\n";
-    out << kinetic_mat << "\n";
+    //out << "\nKinetic energy matrix\n";
+    //out << kinetic_mat << "\n";
 
 
     // Step 5: ERI
