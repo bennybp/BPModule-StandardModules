@@ -197,11 +197,11 @@ void Overlap::SetBases_(const std::string & bs1, const std::string & bs2)
 {
     out.Debug("Overlap: Initializing with bases %? %?\n", bs1, bs2);
 
-    if(!(InitialWfn().system))
+    if(!(InitialWfn().GetSystem()))
         throw GeneralException("Error - not given a system in the initial wavefunction");
 
-    const BasisSet basisset1 = InitialWfn().system->GetBasisSet(bs1);
-    const BasisSet basisset2 = InitialWfn().system->GetBasisSet(bs2);
+    const BasisSet basisset1 = InitialWfn().GetSystem()->GetBasisSet(bs1);
+    const BasisSet basisset2 = InitialWfn().GetSystem()->GetBasisSet(bs2);
 
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, basisset1);

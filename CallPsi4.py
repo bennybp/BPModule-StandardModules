@@ -2,7 +2,7 @@ import pulsar as psr
 from subprocess import call
 
 def CallPsi4(EMethod,MethodName,order):
-      Mol=EMethod.InitialWfn().system
+      Mol=EMethod.InitialWfn().GetSystem()
       f=open(MethodName+".in","w")
       f.write("molecule{\n")
       f.write("units=bohr\n")

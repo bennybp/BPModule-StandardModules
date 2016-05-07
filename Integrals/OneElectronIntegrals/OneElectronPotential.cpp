@@ -268,7 +268,7 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
     if(gridopt == "ATOMS")
     {
         // create the grid from the system
-        for(const auto & atom : *(InitialWfn().system))
+        for(const auto & atom : *(InitialWfn().GetSystem()))
             if(atom.GetZ() != 0.0)
                 gu.Insert({atom.GetCoords(), atom.GetZ()});
         
@@ -290,11 +290,11 @@ void OneElectronPotential::SetBases_(const std::string & bs1, const std::string 
 {
     out.Debug("OneElectronPotential: Initializing with bases %? %?\n", bs1, bs2);
 
-    if(!(InitialWfn().system))
+    if(!(InitialWfn().GetSystem()))
         throw GeneralException("Error - not given a system in the initial wavefunction");
 
-    const BasisSet basisset1 = InitialWfn().system->GetBasisSet(bs1);
-    const BasisSet basisset2 = InitialWfn().system->GetBasisSet(bs2);
+    const BasisSet basisset1 = InitialWfn().GetSystem()->GetBasisSet(bs1);
+    const BasisSet basisset2 = InitialWfn().GetSystem()->GetBasisSet(bs2);
 
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, basisset1);

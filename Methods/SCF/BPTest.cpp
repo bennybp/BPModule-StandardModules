@@ -157,14 +157,14 @@ std::vector<double> BPTest::Deriv_(size_t order)
     // make sure stuff is set in wavefunction
     const Wavefunction & iwfn = InitialWfn();
 
-    if(!iwfn.system)
+    if(!iwfn.GetSystem())
         throw GeneralException("System is not set!");
 
     //if(!iwfn.cmat)
     //    throw GeneralException("C matrix is not set!");
 
     // get the basis set
-    const System & sys = *(iwfn.system);
+    const System & sys = *(iwfn.GetSystem());
     std::string bstag = Options().Get<std::string>("BASIS_SET");
 
     out.Output("Obtaining basis set %? from system\n", bstag);

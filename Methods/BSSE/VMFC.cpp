@@ -32,7 +32,7 @@ namespace pulsarmethods{
    }
    
     vector<double> VMFC::Deriv_(size_t Order){
-        const System& Mol=*InitialWfn().system;
+        const System& Mol=*InitialWfn().GetSystem();
         
         size_t NAtoms=Mol.Size();
         size_t DoF=1;

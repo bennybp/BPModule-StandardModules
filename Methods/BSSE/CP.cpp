@@ -14,7 +14,7 @@ using std::vector;
 using std::string;    
 
 vector<double> CP::Deriv_(size_t Order){
-        const System& Mol=*InitialWfn().system;
+        const System& Mol=*InitialWfn().GetSystem();
         RealGhostData NewSys=GhostTheSystem(Mol);
         Fragmenter_t Fragger=CreateChild<SystemFragmenter>(
                                    Options().Get<string>("FRAGMENTIZER"));

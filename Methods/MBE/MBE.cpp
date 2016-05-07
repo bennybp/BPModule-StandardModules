@@ -37,7 +37,7 @@ namespace pulsarmethods{
         string Fragmentizer=DaOptions.Get<string>("FRAGMENTIZER");
 
         //Make N-Mers
-        const System& Mol=*InitialWfn().system;
+        const System& Mol=*InitialWfn().GetSystem();
         Fragmenter_t Fragger=CreateChild<SystemFragmenter>(Fragmentizer);
         SystemMap NMers=Fragger->Fragmentize(Mol);
         

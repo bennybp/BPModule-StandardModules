@@ -113,13 +113,13 @@ void ReferenceERI::SetBases_(const std::string & bs1, const std::string & bs2,
 {
     out.Debug("ReferenceERI: Initializing with bases %? %? %? %?\n", bs1, bs2, bs3, bs4);
 
-    if(!(InitialWfn().system))
+    if(!(InitialWfn().GetSystem()))
         throw GeneralException("Error - not given a system in the initial wavefunction");
 
-    const BasisSet basisset1 = InitialWfn().system->GetBasisSet(bs1);
-    const BasisSet basisset2 = InitialWfn().system->GetBasisSet(bs2);
-    const BasisSet basisset3 = InitialWfn().system->GetBasisSet(bs3);
-    const BasisSet basisset4 = InitialWfn().system->GetBasisSet(bs4);
+    const BasisSet basisset1 = InitialWfn().GetSystem()->GetBasisSet(bs1);
+    const BasisSet basisset2 = InitialWfn().GetSystem()->GetBasisSet(bs2);
+    const BasisSet basisset3 = InitialWfn().GetSystem()->GetBasisSet(bs3);
+    const BasisSet basisset4 = InitialWfn().GetSystem()->GetBasisSet(bs4);
 
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, basisset1);

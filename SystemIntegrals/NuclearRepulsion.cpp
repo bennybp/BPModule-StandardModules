@@ -26,7 +26,7 @@ uint64_t NuclearRepulsion::Calculate_(uint64_t deriv, double * outbuffer,
         throw GeneralException("Not enough space in output buffer");
 
 
-    const System & sys = *(InitialWfn().system);
+    const System & sys = *(InitialWfn().GetSystem());
 
 
     double enuc = 0.0;

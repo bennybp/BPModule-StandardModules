@@ -165,7 +165,7 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
 
         
         EMethod_t MIM=MM.GetModule<EnergyMethod>(MIMKey,ID);
-        MIM->InitialWfn().system=std::make_shared<System>(Data.NewSystem,true);
+        MIM->InitialWfn().GetSystem()=std::make_shared<System>(Data.NewSystem,true);
         Return_t FullDeriv=MIM->Deriv(Order);
         Return_t FinalDeriv(DoF,0.0);
         FillDeriv(FinalDeriv,FullDeriv,1.0,NewU,Data.Atom2RealIdx,
