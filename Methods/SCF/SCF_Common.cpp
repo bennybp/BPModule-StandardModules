@@ -3,10 +3,12 @@
 #include "Methods/SCF/SCF_Common.hpp"
 
 using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 using namespace pulsar::modulemanager;
 using namespace pulsar::modulebase;
 using namespace pulsar::system;
+using namespace pulsar::math;
 
 
 
@@ -41,12 +43,12 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
             const size_t nfunc2 = sh2.NFunctions();
 
             // calculate
-            size_t ncalc = mod->Calculate(0, n1, n2, b.data(), maxnfunc2); 
+            size_t ncalc = mod->Calculate(0, n1, n2, b.data(), maxnfunc2);
 
             // iterate and fill in the matrix
             AOIterator<2> aoit({sh1, sh2}, false);
 
-            do { 
+            do {
                 const size_t i = rowstart+aoit.ShellFunctionIdx<0>();
                 const size_t j = colstart+aoit.ShellFunctionIdx<1>();
 
@@ -56,6 +58,67 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
     }
 
     return mat;
+}
+
+BlockByIrrepSpin<Eigen::VectorXd> FindOccupations(size_t nelec)
+{
+    BlockByIrrepSpin<Eigen::VectorXd> occ;
+
+
+    if(nelec %2 == 0)
+    {
+        size_t ndocc = nelec/2;
+        VectorXd docc(ndocc);
+        for(size_t i = 0; i < ndocc; i++)
+            docc(i) = 2.0;
+        occ.Take(Irrep::A, 0, std::move(docc));
+    }
+    else
+    {
+        size_t nbetaocc = nelec/2; // integer division
+        size_t nalphaocc = nelec - nbetaocc;
+
+        VectorXd alphaocc(nalphaocc), betaocc(nbetaocc);
+        for(size_t i = 0; i < nalphaocc; i++) alphaocc(i) = 1.0;
+        for(size_t i = 0; i < nbetaocc; i++) betaocc(i) = 1.0;
+
+        occ.Take(Irrep::A,  1, std::move(alphaocc));
+        occ.Take(Irrep::A, -1, std::move(betaocc));
+    }
+
+    return occ;
+}
+
+
+
+SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m)
+{
+    // eigen stores in column major by default
+    return SimpleMatrixD(m.rows(), m.cols(), m.transpose().data());
+}
+
+SimpleVectorD EigenToSimpleVector(const Eigen::VectorXd & v)
+{
+    return SimpleVectorD(v.size(), v.data());
+}
+
+Eigen::MatrixXd SimpleMatrixToEigen(const pulsar::math::SimpleMatrixD & m)
+{
+    using Eigen::Dynamic;
+    using Eigen::RowMajor;
+
+    //! \todo can't use map because of const issues?
+    Eigen::Matrix<double, Dynamic, Dynamic, RowMajor> ret(m.NRows(), m.NCols());
+    std::copy(m.Data(), m.Data() + m.Size(), ret.data());
+    return ret; // will convert to column major
+}
+
+Eigen::VectorXd SimpleVectorToEigen(const pulsar::math::SimpleVectorD & v)
+{
+    //! \todo can't use map because of const issues?
+    Eigen::VectorXd ret(v.Size());
+    std::copy(v.Data(), v.Data() + v.Size(), ret.data());
+    return ret;
 }
 
 

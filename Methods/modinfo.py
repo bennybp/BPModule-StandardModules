@@ -169,6 +169,8 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [""],
     "options"     : {
+                        "KEY_INITIAL_GUESS": (OptionType.String, None, False, None,
+                            "Key for the initial guess module"),
                         "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
                             "Key of the nuclear repulsion module to use"),
                         "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
@@ -179,6 +181,26 @@ minfo = {
                             "Key of the ao kinetic energy module to use"),
                         "KEY_AO_ERI": (OptionType.String, None, True, None,
                             "Key of the ao electron repulsion integral module to use"),
+                    }
+  },
+  "CoreGuess" :
+  {
+    "type"        : "c_module",
+    "base"        : "EnergyMethod",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Initial guess for Hartree Fock via core guess",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [""],
+    "options"     : {
+                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
+                            "Key of the nuclear repulsion module to use"),
+                        "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
+                            "Key of the ao overlap module to use"),
+                        "KEY_AO_NUCATT": (OptionType.String, None, True, None,
+                            "Key of the ao nuclear attraction module to use"),
+                        "KEY_AO_KINETIC": (OptionType.String, None, True, None,
+                            "Key of the ao kinetic energy module to use"),
                     }
   },
 }

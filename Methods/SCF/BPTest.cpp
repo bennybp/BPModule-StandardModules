@@ -126,7 +126,48 @@ std::vector<double> BPTest::Deriv_(size_t order)
 
     out.Output("NAO: %? nshell: %?\n", nao, nshell);
     bs.Print(out);
-    
+  
+    //////////////////////////////////////////////////////
+    // Storage of eigen matrices, etc, by irrep and spin 
+    //////////////////////////////////////////////////////
+    BlockByIrrepSpin<MatrixXd> Cmat, Dmat, Fmat;
+    BlockByIrrepSpin<VectorXd> epsilon;
+    BlockByIrrepSpin<VectorXd> occ;
+    double energy = 0;
+ 
+    //////////////////////////
+    // Initial Guess
+    //////////////////////////
+    if(!InitialWfn().HasCMat()) // c-matrix hasn't been set
+    {
+        out.Debug("Don't have C-matrices set. Will call initial guess module\n");
+        if(!Options().Has("KEY_INITIAL_GUESS"))
+            throw GeneralException("Missing initial guess module when I don't have a C-matrix");
+        auto mod_iguess = CreateChildFromOption<EnergyMethod>("KEY_INITIAL_GUESS");
+        mod_iguess->Energy();
+
+        // load the cmatrix and occupations from there
+        const auto & guesswfn = mod_iguess->FinalWfn();
+
+        Cmat = guesswfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
+        occ = guesswfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+        epsilon = guesswfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+    }
+    else
+    {
+        out.Debug("Using initial wavefunction as a starting point");
+ 
+        // c-matrices have been set. Make sure we have occupations, etc, as well
+        if(!InitialWfn().HasOccupations())
+            throw GeneralException("Missing Occupations");
+        if(!InitialWfn().HasEpsilon())
+            throw GeneralException("Missing Epsilon");
+
+        const auto & iwfn = InitialWfn();
+        Cmat = iwfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
+        occ = iwfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+        epsilon = iwfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleMatrixToEigen);
+    }
 
 
     ///////////////////////////////////////////
@@ -175,48 +216,8 @@ std::vector<double> BPTest::Deriv_(size_t order)
     mod_ao_eri->SetBases(bstag, bstag, bstag, bstag);
     std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
 
+
     
-    //////////////////////////
-    // Occupations
-    //////////////////////////
-    double nelec_d = sys.GetNElectrons();
-    if(!IsInteger(nelec_d))
-        throw GeneralException("Can't handle non-integer occupations", "nelectrons", nelec_d);
-    size_t nelec = numeric_cast<size_t>(nelec_d);
-
-    out.Output("Number of electrons: %?\n", nelec);
-
-
-    // Block some eigen matrices, etc, by irrep and spin
-    BlockByIrrepSpin<MatrixXd> Cmat, Dmat, Fmat;
-    BlockByIrrepSpin<VectorXd> epsilon;
-    BlockByIrrepSpin<VectorXd> occ;
-
-    // Fill in the occupations
-    //if(nelec %2 == 0)
-    if(0)
-    {
-        size_t ndocc = nelec/2;
-        VectorXd docc(ndocc);
-        for(size_t i = 0; i < ndocc; i++)
-            docc(i) = 2.0;
-        occ.Take(Irrep::A, 0, std::move(docc));
-
-        out.Output("Assuming restricted occupation of %? orbitals\n", ndocc);
-    }
-    else
-    {
-        size_t nbetaocc = nelec/2; // integer division
-        size_t nalphaocc = nelec - nbetaocc;
-        out.Output("Assuming unrestricted occupations: %? %?\n", nalphaocc, nbetaocc);
-        
-        VectorXd alphaocc(nalphaocc), betaocc(nbetaocc);
-        for(size_t i = 0; i < nalphaocc; i++) alphaocc(i) = 1.0;
-        for(size_t i = 0; i < nbetaocc; i++) betaocc(i) = 1.0;
-
-        occ.Take(Irrep::A,  1, std::move(alphaocc));
-        occ.Take(Irrep::A, -1, std::move(betaocc));
-    }
 
 
 
@@ -263,7 +264,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
     }
 
     // initial energy
-    double energy = 0;
+    energy = 0;
     for(auto s : Dmat.GetSpins(Irrep::A))
     {
         const auto & d = Dmat.Get(Irrep::A, s);
@@ -328,8 +329,6 @@ std::vector<double> BPTest::Deriv_(size_t order)
                 for(size_t m = 0; m < o.size(); m++)
                     d(i,j) += o(m) * c(i,m) * c(j,m);
             }
-            out << " Occ " << s << "\n" << o << "\n";
-            out << "Dmat " << s << "\n" << d << "\n";
 
             Dmat.Take(Irrep::A, s, std::move(d));
             Cmat.Take(Irrep::A, s, std::move(c));
