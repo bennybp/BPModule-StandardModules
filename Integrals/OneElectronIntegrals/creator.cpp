@@ -1,5 +1,6 @@
 #include "Overlap.hpp"
 #include "KineticEnergy.hpp"
+#include "CoreBuild.hpp"
 #include "OneElectronPotential.hpp"
 
 using pulsar::modulemanager::ModuleCreationFuncs;
@@ -13,6 +14,7 @@ ModuleCreationFuncs InsertSupermodule(void)
     cf.AddCppCreator<Overlap>("Overlap");
     cf.AddCppCreator<KineticEnergy>("KineticEnergy");
     cf.AddCppCreator<OneElectronPotential>("OneElectronPotential");
+    cf.AddCppCreator<CoreBuild>("CoreBuild");
     return cf;
 }
 

@@ -3,6 +3,7 @@ set(ONEELECTRONINTEGRALS_FILES creator.cpp
                           KineticEnergy.cpp
                           OneElectronPotential.cpp
                           OneElectronPotential_LUT.cpp
+                          CoreBuild.cpp
    )
 
 set (ONEELECTRONINTEGRALS_PYFILES

@@ -175,11 +175,11 @@ minfo = {
                             "Key of the nuclear repulsion module to use"),
                         "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
                             "Key of the ao overlap module to use"),
-                        "KEY_AO_NUCATT": (OptionType.String, None, True, None,
-                            "Key of the ao nuclear attraction module to use"),
-                        "KEY_AO_KINETIC": (OptionType.String, None, True, None,
-                            "Key of the ao kinetic energy module to use"),
+                        "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
+                            "Key of the core builder module to use"),
                         "KEY_AO_ERI": (OptionType.String, None, True, None,
+                            "Key of the ao electron repulsion integral module to use"),
+                        "MAX_ITER": (OptionType.Float, 40, False, None,
                             "Key of the ao electron repulsion integral module to use"),
                     }
   },
@@ -197,10 +197,8 @@ minfo = {
                             "Key of the nuclear repulsion module to use"),
                         "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
                             "Key of the ao overlap module to use"),
-                        "KEY_AO_NUCATT": (OptionType.String, None, True, None,
-                            "Key of the ao nuclear attraction module to use"),
-                        "KEY_AO_KINETIC": (OptionType.String, None, True, None,
-                            "Key of the ao kinetic energy module to use"),
+                        "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
+                            "Key of the core builder module to use"),
                     }
   },
 }

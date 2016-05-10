@@ -60,6 +60,102 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
     return mat;
 }
 
+
+
+std::vector<double>
+FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
+                      const BasisSet & bs)
+{
+    const size_t nao = bs.NFunctions();
+    const size_t nshell = bs.NShell();
+    const size_t maxnfunc = bs.MaxNFunctions();
+
+    const size_t nao12 = (nao*(nao+1))/2;
+    const size_t nao1234 = (nao12*(nao12+1))/2;
+    const size_t bufsize = maxnfunc*maxnfunc*maxnfunc*maxnfunc;
+
+    std::vector<double> eri(nao1234);
+    std::vector<double> eribuf(bufsize);
+
+    size_t i_start = 0;
+    for(size_t i = 0; i < nshell; i++)
+    {
+        const auto & sh1 = bs.Shell(i);
+        const size_t ng1 = sh1.NGeneral();
+        size_t j_start = 0;
+
+        for(size_t j = 0; j <= i; j++)
+        {
+            const auto & sh2 = bs.Shell(j);
+            const size_t ng2 = sh2.NGeneral();
+            size_t k_start = 0;
+
+            for(size_t k = 0; k < nshell; k++)
+            {
+                const auto & sh3 = bs.Shell(k);
+                const size_t ng3 = sh3.NGeneral();
+                size_t l_start = 0;
+
+                for(size_t l = 0; l <= k; l++)
+                {
+                    if(INDEX2(k,l) > INDEX2(i,j))
+                        continue;
+
+                    const auto & sh4 = bs.Shell(l);
+                    const size_t ng4 = sh4.NGeneral();
+
+                    uint64_t ncalc = mod->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
+
+                    AOIterator<4> aoit({sh1, sh2, sh3, sh4}, false);
+
+                    do { 
+                        const size_t full_i = i_start+aoit.ShellFunctionIdx<0>();
+                        const size_t full_j = j_start+aoit.ShellFunctionIdx<1>();
+                        const size_t full_k = k_start+aoit.ShellFunctionIdx<2>();
+                        const size_t full_l = l_start+aoit.ShellFunctionIdx<3>();
+
+                        eri.at(INDEX4(full_i, full_j, full_k, full_l)) = eribuf.at(aoit.TotalIdx());
+                    } while(aoit.Next());
+
+                    l_start += sh4.NFunctions();   
+                }
+                k_start += sh3.NFunctions();
+            }
+            j_start += sh2.NFunctions();
+        }
+        i_start += sh1.NFunctions();
+    }
+
+    return std::move(eri);
+}
+
+
+BlockByIrrepSpin<MatrixXd> FormDensity(const BlockByIrrepSpin<MatrixXd> & Cmat,
+                                       const BlockByIrrepSpin<VectorXd> & occ)
+{
+    BlockByIrrepSpin<MatrixXd> Dmat;
+
+    for(auto s : Cmat.GetSpins(Irrep::A))
+    {
+        const MatrixXd & c = Cmat.Get(Irrep::A, s);
+        const VectorXd & o = occ.Get(Irrep::A, s);
+
+        MatrixXd d(c.rows(), c.cols());
+        for(size_t i = 0; i < c.rows(); i++)
+        for(size_t j = 0; j < c.cols(); j++)
+        {
+            d(i,j) = 0.0;
+            for(size_t m = 0; m < o.size(); m++)
+                d(i,j) += o(m) * c(i,m) * c(j,m);
+        }
+        Dmat.Take(Irrep::A, s, std::move(d));
+    }
+
+    return Dmat;
+}
+
+
+
 BlockByIrrepSpin<Eigen::VectorXd> FindOccupations(size_t nelec)
 {
     BlockByIrrepSpin<Eigen::VectorXd> occ;

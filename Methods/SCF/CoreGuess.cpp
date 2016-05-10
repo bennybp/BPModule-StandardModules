@@ -76,17 +76,12 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
     // the S^(-1/2) matrix
     MatrixXd S12 = s_evec * s_eval.asDiagonal() * s_evec.transpose();
 
-    /////////////////////// 
-    // Nuclear Attraction
-    auto mod_ao_nucatt = CreateChildFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
-    mod_ao_nucatt->SetBases(bstag, bstag);
-    MatrixXd nucatt_mat = FillOneElectronMatrix(mod_ao_nucatt, bs);
+    //////////////////////////// 
+    // One-electron hamiltonian
+    auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
+    mod_ao_core->SetBases(bstag, bstag);
+    MatrixXd Hcore = FillOneElectronMatrix(mod_ao_core, bs);
 
-    /////////////////////// 
-    // Kinetic Energy
-    auto mod_ao_kinetic = CreateChildFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
-    mod_ao_kinetic->SetBases(bstag, bstag);
-    MatrixXd kinetic_mat = FillOneElectronMatrix(mod_ao_kinetic, bs);
 
     //////////////////////////
     // Occupations
@@ -107,9 +102,6 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
     // Fill in the occupations
     occ = FindOccupations(nelec);
 
-
-    // Form the core hamiltonian
-    MatrixXd Hcore = nucatt_mat + kinetic_mat;  // H = T + V
 
     // 2. Initial fock matrix
     MatrixXd F0 = S12.transpose() * Hcore * S12.transpose();
