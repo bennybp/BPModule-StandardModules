@@ -98,6 +98,94 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 }
 
 
+BlockByIrrepSpin<MatrixXd> BuildFock(const BlockByIrrepSpin<MatrixXd> & Dmat,
+                                     const MatrixXd & Hcore,
+                                     const std::vector<double> & eri)
+{
+    BlockByIrrepSpin<MatrixXd> Fmat;
+
+    for(auto s : Dmat.GetSpins(Irrep::A))
+    {
+        MatrixXd F = Hcore;
+        auto D = Dmat.Get(Irrep::A, s);
+
+        size_t nao1 = Hcore.rows();
+        size_t nao2 = Hcore.cols();
+
+        for(size_t mu = 0; mu < nao1; mu++)
+        for(size_t nu = 0; nu < nao2; nu++)
+        {
+            for(size_t lambda = 0; lambda < nao1; lambda++)
+            for(size_t sigma = 0; sigma < nao2; sigma++)
+            {
+                size_t mnls = INDEX4(mu, nu, lambda, sigma);
+                size_t mlns = INDEX4(mu, lambda, nu, sigma);
+                F(mu, nu) += 0.5*D(lambda, sigma) * (2*eri.at(mnls)-eri.at(mlns));
+            }
+        }
+
+        Fmat.Take(Irrep::A, s, std::move(F));
+    }
+
+    return Fmat;
+}
+
+
+BlockByIrrepSpin<MatrixXd> FormDensity(const BlockByIrrepSpin<MatrixXd> & Cmat,
+                                       const BlockByIrrepSpin<VectorXd> & occ)
+{
+    BlockByIrrepSpin<MatrixXd> Dmat;
+
+    for(auto s : Cmat.GetSpins(Irrep::A))
+    {
+        const MatrixXd & c = Cmat.Get(Irrep::A, s);
+        const VectorXd & o = occ.Get(Irrep::A, s);
+
+        MatrixXd d(c.rows(), c.cols());
+        for(size_t i = 0; i < c.rows(); i++)
+        for(size_t j = 0; j < c.cols(); j++)
+        {
+            d(i,j) = 0.0;
+            for(size_t m = 0; m < o.size(); m++)
+                d(i,j) += o(m) * c(i,m) * c(j,m);
+        }
+        Dmat.Take(Irrep::A, s, std::move(d));
+    }
+
+    return Dmat;
+}
+
+double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
+                       const BlockByIrrepSpin<MatrixXd> & Fmat,
+                       const MatrixXd & Hcore,
+                       OutputStream & out)
+{
+    // calculate the energy 
+    double energy = 0.0;
+    double oneelectron = 0.0;
+    double twoelectron = 0.0;
+    for(auto s : Dmat.GetSpins(Irrep::A))
+    {
+        const auto & d = Dmat.Get(Irrep::A, s);
+        const auto & f = Fmat.Get(Irrep::A, s);
+        for(size_t i = 0; i < d.rows(); i++)
+        for(size_t j = 0; j < d.cols(); j++)
+        {
+            oneelectron += d(i,j) * Hcore(i,j);
+            twoelectron += 0.5 * d(i,j) * f(i,j);
+        }
+    }
+
+    twoelectron -= 0.5*oneelectron;
+    energy = oneelectron + twoelectron;
+
+    out.Output("        One electron: %12.8e\n", oneelectron);
+    out.Output("        Two electron: %12.8e\n", twoelectron);
+    out.Output("    Total Electronic: %12.8e\n", energy);
+
+    return energy;
+}
+
     
 std::vector<double> BPTest::Deriv_(size_t order)
 {
@@ -214,67 +302,30 @@ std::vector<double> BPTest::Deriv_(size_t order)
     /////////////////////////
     auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
     mod_ao_eri->SetBases(bstag, bstag, bstag, bstag);
-    std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
+    const std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
 
 
     
-
-
-
     //////////////////////////////////////////////////////////////////
     // Procedure
     //////////////////////////////////////////////////////////////////
-    // 1. Form the core
-    MatrixXd Hcore = nucatt_mat + kinetic_mat;  // H = T + V
-
-    // 2. Initial fock matrix
-    MatrixXd F0 = S12.transpose() * Hcore * S12.transpose();
-    SelfAdjointEigenSolver<MatrixXd> fsolve(F0);
-    MatrixXd C0 = fsolve.eigenvectors();
-    VectorXd e0 = fsolve.eigenvalues();
-
-    // Tranform C0
-    C0 = S12*C0;
-
-
-    // The initial C matrix is the same for all spins
-    // Use the irrep/spin from occupations
-    for(auto s : occ.GetSpins(Irrep::A))
-        Cmat.Set(Irrep::A, s, C0);
-
+    // Form the core
+    const MatrixXd Hcore = nucatt_mat + kinetic_mat;  // H = T + V
 
     // Calculate the initial Density
-    for(auto s : Cmat.GetSpins(Irrep::A))
-    {
-        const auto & c = Cmat.Get(Irrep::A, s);
-        const auto & o = occ.Get(Irrep::A, s);
+    Dmat = FormDensity(Cmat, occ);
 
-        MatrixXd d(c.rows(), c.cols());
-
-        for(size_t i = 0; i < c.rows(); i++)
-        for(size_t j = 0; j < c.cols(); j++)
-        {
-            d(i,j) = 0.0;
-            for(size_t m = 0; m < o.size(); m++)
-                d(i,j) += o(m) * c(i,m) * c(j,m);
-        }
-
-        out << "Initial Dmat:\n" << d << "\n";
-        Dmat.Take(Irrep::A, s, std::move(d));
-    }
+    // Initial fock matrix is just the core Hamiltonain
+    for(const int s : Dmat.GetSpins(Irrep::A))
+        Fmat.Set(Irrep::A, s, Hcore);
+    out << "Initial CMat\n" << Cmat.Get(Irrep::A, 0) << "\n";
 
     // initial energy
-    energy = 0;
-    for(auto s : Dmat.GetSpins(Irrep::A))
-    {
-        const auto & d = Dmat.Get(Irrep::A, s);
-        for(size_t i = 0; i < d.rows(); i++)
-        for(size_t j = 0; j < d.cols(); j++)
-            energy += d(i,j) * Hcore(i,j);
-    }
-
-
-    out.Output("Initial guess energy: %12.8e\n", energy);
+    out.Output("Initial guess\n");
+    double elec_energy = CalculateEnergy(Dmat, Fmat, Hcore, out);
+    energy = elec_energy + nucrep;
+    out.Output("   Nuclear Repulsion: %12.8e\n", nucrep);
+    out.Output("               Total: %12.8e\n", energy);
 
     double lastenergy = energy;
 
@@ -286,28 +337,8 @@ std::vector<double> BPTest::Deriv_(size_t order)
     {
         iter++; 
 
-        // New fock matrix
-        for(auto s : Dmat.GetSpins(Irrep::A))
-        {
-            MatrixXd F = Hcore;
-            auto lastD = lastDmat.Get(Irrep::A, s);
+        const BlockByIrrepSpin<MatrixXd> Fmat = BuildFock(lastDmat, Hcore, eri);
 
-            for(size_t mu = 0; mu < nao; mu++)
-            for(size_t nu = 0; nu < nao; nu++)
-            {
-                for(size_t lambda = 0; lambda < nao; lambda++)
-                for(size_t sigma = 0; sigma < nao; sigma++)
-                {
-                    size_t mnls = INDEX4(mu, nu, lambda, sigma);
-                    size_t mlns = INDEX4(mu, lambda, nu, sigma);
-                    F(mu, nu) += 0.5*lastD(lambda, sigma) * (2*eri.at(mnls)-eri.at(mlns));
-                }
-            }
-
-
-            // store this
-            Fmat.Take(Irrep::A, s, std::move(F));
-        }
     
         // New density
         for(auto s : Fmat.GetSpins(Irrep::A))
@@ -330,35 +361,19 @@ std::vector<double> BPTest::Deriv_(size_t order)
                     d(i,j) += o(m) * c(i,m) * c(j,m);
             }
 
-            Dmat.Take(Irrep::A, s, std::move(d));
             Cmat.Take(Irrep::A, s, std::move(c));
             epsilon.Take(Irrep::A, s, std::move(e));
         }
 
-        // calculate the energy 
-        double oneelectron = 0.0;
-        double twoelectron = 0.0;
-        for(auto s : Dmat.GetSpins(Irrep::A))
-        {
-            const auto & d = Dmat.Get(Irrep::A, s);
-            const auto & f = Fmat.Get(Irrep::A, s);
-            for(size_t i = 0; i < d.rows(); i++)
-            for(size_t j = 0; j < d.cols(); j++)
-            {
-                oneelectron += d(i,j) * Hcore(i,j);
-                twoelectron += 0.5 * d(i,j) * f(i,j);
-            }
+        Dmat = FormDensity(Cmat, occ);
 
-        }
+        out.Output("Iteration %?\n", iter);
 
-        twoelectron -= 0.5*oneelectron;
-        energy = oneelectron + twoelectron + nucrep;
+        elec_energy = CalculateEnergy(Dmat, Fmat, Hcore, out);
+        energy = elec_energy + nucrep;
 
-        out.Output("Iteration %? - Energy = %12.8e\n", iter, energy);
-        out.Output("        One electron: %12.8e\n", oneelectron);
-        out.Output("        Two electron: %12.8e\n", twoelectron);
         out.Output("   Nuclear Repulsion: %12.8e\n", nucrep);
-        out.Output("               Total: %12.8e\n", oneelectron + twoelectron + nucrep);
+        out.Output("               Total: %12.8e\n", energy);
 
         lastDmat = Dmat;
     }//while(fabs(energy-lastenergy) > 1e-6);

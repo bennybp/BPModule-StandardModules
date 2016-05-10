@@ -143,7 +143,6 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
                 d(i,j) += o(m) * c(i,m) * c(j,m);
         }
 
-        out << "Initial dmat:\n" << d << "\n";
         dmat.Take(Irrep::A, s, std::move(d));
     }
 

@@ -94,7 +94,11 @@ BlockByIrrepSpin<Eigen::VectorXd> FindOccupations(size_t nelec)
 SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m)
 {
     // eigen stores in column major by default
-    return SimpleMatrixD(m.rows(), m.cols(), m.transpose().data());
+    SimpleMatrixD s(m.rows(), m.cols());
+    for(size_t i = 0; i < m.rows(); i++)
+    for(size_t j = 0; j < m.cols(); j++)
+        s(i,j) = m(i,j);
+    return s;
 }
 
 SimpleVectorD EigenToSimpleVector(const Eigen::VectorXd & v)
@@ -108,9 +112,11 @@ Eigen::MatrixXd SimpleMatrixToEigen(const pulsar::math::SimpleMatrixD & m)
     using Eigen::RowMajor;
 
     //! \todo can't use map because of const issues?
-    Eigen::Matrix<double, Dynamic, Dynamic, RowMajor> ret(m.NRows(), m.NCols());
-    std::copy(m.Data(), m.Data() + m.Size(), ret.data());
-    return ret; // will convert to column major
+    MatrixXd em(m.NRows(), m.NCols());
+    for(size_t i = 0; i < m.NRows(); i++)
+    for(size_t j = 0; j < m.NCols(); j++)
+        em(i,j) = m(i,j);
+    return em;
 }
 
 Eigen::VectorXd SimpleVectorToEigen(const pulsar::math::SimpleVectorD & v)
