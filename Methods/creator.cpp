@@ -3,6 +3,7 @@
 #include "Methods/MBE/MBE.hpp"
 #include "Methods/MIM/MIM.hpp"
 #include "Methods/SCF/BPTest.hpp"
+#include "Methods/SCF/HFIterate.hpp"
 #include "Methods/SCF/CoreGuess.hpp"
 
 
@@ -17,6 +18,7 @@ ModuleCreationFuncs InsertSupermodule(void){
     cf.AddCppCreator<pulsarmethods::MIM>("MIM");
     cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
     cf.AddCppCreator<pulsarmethods::BPTest>("BPTest");
+    cf.AddCppCreator<pulsarmethods::HFIterate>("HFIterate");
     cf.AddCppCreator<pulsarmethods::CoreGuess>("CoreGuess");
     return cf;
 }

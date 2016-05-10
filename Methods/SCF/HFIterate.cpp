@@ -1,4 +1,4 @@
-#include "Methods/SCF/BPTest.hpp"
+#include "Methods/SCF/HFIterate.hpp"
 #include "Methods/SCF/SCF_Common.hpp"
 
 #include <pulsar/output/OutputStream.hpp>
@@ -22,11 +22,7 @@ namespace pulsarmethods{
 
 
 
-BPTest::BPTest(ID_t id)
-    : EnergyMethod(id) { }
-    
-
-
+static
 BlockByIrrepSpin<MatrixXd> BuildFock(const BlockByIrrepSpin<MatrixXd> & Dmat,
                                      const MatrixXd & Hcore,
                                      const std::vector<double> & eri)
@@ -60,7 +56,7 @@ BlockByIrrepSpin<MatrixXd> BuildFock(const BlockByIrrepSpin<MatrixXd> & Dmat,
 }
 
 
-
+static
 double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
                        const BlockByIrrepSpin<MatrixXd> & Fmat,
                        const MatrixXd & Hcore,
@@ -93,7 +89,7 @@ double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
 }
 
     
-std::vector<double> BPTest::Deriv_(size_t order)
+std::vector<double> HFIterate::Deriv_(size_t order)
 {
     if(order != 0)
         throw NotYetImplementedException("Test with deriv != 0");
@@ -124,44 +120,25 @@ std::vector<double> BPTest::Deriv_(size_t order)
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 
     //////////////////////////////////////////////////////
-    BlockByIrrepSpin<MatrixXd> Cmat, Dmat, Fmat;
+    BlockByIrrepSpin<MatrixXd> Cmat, Dmat;
     BlockByIrrepSpin<VectorXd> epsilon;
     BlockByIrrepSpin<VectorXd> occ;
-    double energy = 0;
  
     //////////////////////////
     // Initial Guess
     //////////////////////////
-    if(!InitialWfn().HasCMat()) // c-matrix hasn't been set
-    {
-        out.Debug("Don't have C-matrices set. Will call initial guess module\n");
-        if(!Options().Has("KEY_INITIAL_GUESS"))
-            throw GeneralException("Missing initial guess module when I don't have a C-matrix");
-        auto mod_iguess = CreateChildFromOption<EnergyMethod>("KEY_INITIAL_GUESS");
-        mod_iguess->Energy();
-
-        // load the cmatrix and occupations from there
-        const auto & guesswfn = mod_iguess->FinalWfn();
-
-        Cmat = guesswfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
-        occ = guesswfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-        epsilon = guesswfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-    }
-    else
-    {
-        out.Debug("Using initial wavefunction as a starting point");
  
-        // c-matrices have been set. Make sure we have occupations, etc, as well
-        if(!InitialWfn().HasOccupations())
-            throw GeneralException("Missing Occupations");
-        if(!InitialWfn().HasEpsilon())
-            throw GeneralException("Missing Epsilon");
+    // c-matrices have been set. Make sure we have occupations, etc, as well
+    if(!InitialWfn().HasCMat())
+        throw GeneralException("Missing C matrix");
+    if(!InitialWfn().HasOccupations())
+        throw GeneralException("Missing Occupations");
+    if(!InitialWfn().HasEpsilon())
+        throw GeneralException("Missing Epsilon");
 
-        const auto & iwfn = InitialWfn();
-        Cmat = iwfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
-        occ = iwfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-        epsilon = iwfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleMatrixToEigen);
-    }
+    Cmat = iwfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
+    occ = iwfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+    epsilon = iwfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
 
 
     ///////////////////////////////////////////
@@ -192,6 +169,14 @@ std::vector<double> BPTest::Deriv_(size_t order)
     MatrixXd S12 = s_evec * s_eval.asDiagonal() * s_evec.transpose();
 
 
+    /////////////////////////
+    // Load the ERI to core
+    /////////////////////////
+    auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
+    mod_ao_eri->SetBases(bstag, bstag, bstag, bstag);
+    const std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
+
+
     //////////////////////////// 
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
@@ -206,68 +191,41 @@ std::vector<double> BPTest::Deriv_(size_t order)
     // Calculate the initial Density
     Dmat = FormDensity(Cmat, occ);
 
-    // Initial fock matrix is just the core Hamiltonain
-    for(const int s : Dmat.GetSpins(Irrep::A))
-        Fmat.Set(Irrep::A, s, Hcore);
-    out << "Initial CMat\n" << Cmat.Get(Irrep::A, 0) << "\n";
+    // Build the fock matrix
+    const BlockByIrrepSpin<MatrixXd> Fmat = BuildFock(Dmat, Hcore, eri);
 
-    // initial energy
-    out.Output("Initial guess\n");
-    double elec_energy = CalculateEnergy(Dmat, Fmat, Hcore, out);
-    energy = elec_energy + nucrep;
-    out.Output("   Nuclear Repulsion: %12.8e\n", nucrep);
-    out.Output("               Total: %12.8e\n", energy);
+    // diagonalize, form density, etc
+    // and calculate the energy
+    double energy = nucrep;
 
-    double lastenergy = energy;
-
-    BlockByIrrepSpin<MatrixXd> lastDmat, lastCmat;
-    BlockByIrrepSpin<VectorXd> lastocc, lastepsilon;
-
-
-    // obtain the options
-    double etol = Options().Get<double>("E_TOLERANCE");
-    size_t maxniter = Options().Get<double>("MAX_ITER");
-
-    size_t iter = 0;
-    do
+    for(auto s : Fmat.GetSpins(Irrep::A))
     {
-        iter++; 
-        lastenergy = energy;
+        MatrixXd Fprime = S12.transpose() * Fmat.Get(Irrep::A, s) * S12;
 
-        auto mod_iter = CreateChildFromOption<EnergyMethod>("KEY_SCF_ITERATOR");
-        mod_iter->InitialWfn().SetCMat(Cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
-        mod_iter->InitialWfn().SetOccupations(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
-        mod_iter->InitialWfn().SetEpsilon(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
-        energy = mod_iter->Deriv(order)[0];
+        SelfAdjointEigenSolver<MatrixXd> fsolve(Fprime);
+        MatrixXd c = fsolve.eigenvectors();
+        VectorXd e = fsolve.eigenvalues();
+        c = S12*c;
 
-        lastDmat = std::move(Dmat);
-        lastCmat = std::move(Cmat);
-        lastocc = std::move(occ);
-        lastepsilon = std::move(epsilon);
+        const auto & o = occ.Get(Irrep::A, s);
 
-        // New density
-        Cmat = mod_iter->FinalWfn().GetCMat()->TransformType<MatrixXd>(SimpleMatrixToEigen);
-        occ = mod_iter->FinalWfn().GetOccupations()->TransformType<VectorXd>(SimpleVectorToEigen);
-        epsilon = mod_iter->FinalWfn().GetEpsilon()->TransformType<VectorXd>(SimpleVectorToEigen);
-        Dmat = FormDensity(Cmat, occ);
 
-        out.Output("Iteration %?\n", iter);
-        out.Output("       Total energy: %12.8e\n", energy);
+        Cmat.Take(Irrep::A, s, std::move(c));
+        epsilon.Take(Irrep::A, s, std::move(e));
 
-        out.Output(" Difference from last step: %12.8e\n", energy - lastenergy);
+    }
 
-    }while(fabs(energy-lastenergy) > etol && iter < maxniter);
+    // energy
+    Dmat = FormDensity(Cmat, occ);
+    energy += CalculateEnergy(Dmat, Fmat, Hcore, out);
 
-    // create the occupations and other data that will eventually
-    // be saved
-    //std::shared_ptr<IrrepSpinVectorD> occ(new IrrepSpinVectorD);
-    //std::shared_ptr<IrrepSpinVectorD> epsilon(new IrrepSpinVectorD);
-    //std::shared_ptr<IrrepSpinMatrixD> cmat(new IrrepSpinMatrixD);
+    // set the final wavefunction stuff
+    FinalWfn().SetCMat(Cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
+    FinalWfn().SetEpsilon(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
 
-    // store the final information
-    //FinalWfn().SetOccupations(irrepspinocc);
 
-    return {0.0};
+    out.Output("Iteration energy: %12.8e\n", energy);
+    return {energy};
 }
     
 

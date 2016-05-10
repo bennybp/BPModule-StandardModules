@@ -116,7 +116,10 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
     // The initial C matrix is the same for all spins
     // Use the irrep/spin from occupations
     for(auto s : occ.GetSpins(Irrep::A))
+    {
         cmat.Set(Irrep::A, s, C0);
+        epsilon.Set(Irrep::A, s, e0);
+    }
 
 
     // Calculate the initial Density

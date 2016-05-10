@@ -159,6 +159,26 @@ minfo = {
                     "MIM_KEY":MIMOption
                     }
   },
+  "HFIterate" :
+  {
+    "type"        : "c_module",
+    "base"        : "EnergyMethod",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Quick HF test calculation",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [""],
+    "options"     : {
+                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
+                            "Key of the nuclear repulsion module to use"),
+                        "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
+                            "Key of the ao overlap module to use"),
+                        "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
+                            "Key of the core builder module to use"),
+                        "KEY_AO_ERI": (OptionType.String, None, True, None,
+                            "Key of the ERI module to use"),
+                    }
+  },
   "BPTest" :
   {
     "type"        : "c_module",
@@ -177,8 +197,8 @@ minfo = {
                             "Key of the ao overlap module to use"),
                         "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
                             "Key of the core builder module to use"),
-                        "KEY_AO_ERI": (OptionType.String, None, True, None,
-                            "Key of the ao electron repulsion integral module to use"),
+                        "KEY_SCF_ITERATOR": (OptionType.String, None, True, None,
+                            "Key of the iterator module to use"),
                         "MAX_ITER": (OptionType.Float, 40, False, None,
                             "Key of the ao electron repulsion integral module to use"),
                     }
