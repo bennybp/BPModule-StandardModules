@@ -87,9 +87,8 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
 
 
     // Block some eigen matrices, etc, by irrep and spin
-    BlockedEigenMatrix cmat, dmat;
-    BlockedEigenVector epsilon;
-    BlockedEigenVector occ;
+    IrrepSpinMatrixD cmat, dmat;
+    IrrepSpinVectorD epsilon, occ;
 
     // Fill in the occupations
     occ = FindOccupations(nelec);
@@ -109,41 +108,55 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     // Use the irrep/spin from occupations
     for(auto s : occ.GetSpins(Irrep::A))
     {
-        cmat.Set(Irrep::A, s, C0);
-        epsilon.Set(Irrep::A, s, e0);
+        cmat.Set(Irrep::A, s, EigenToSimpleMatrix(C0));
+        epsilon.Set(Irrep::A, s, EigenToSimpleVector(e0));
     }
 
 
     // Calculate the initial Density
+    for(auto ir : cmat.GetIrreps())
     for(auto s : cmat.GetSpins(Irrep::A))
     {
-        const auto & c = cmat.Get(Irrep::A, s);
-        const auto & o = occ.Get(Irrep::A, s);
+        const auto & c = cmat.Get(ir, s);
+        const auto & o = occ.Get(ir, s);
 
-        MatrixXd d(c.rows(), c.cols());
+        SimpleMatrixD d(c.NRows(), c.NCols());
 
-        for(size_t i = 0; i < c.rows(); i++)
-        for(size_t j = 0; j < c.cols(); j++)
+        for(size_t i = 0; i < c.NRows(); i++)
+        for(size_t j = 0; j < c.NCols(); j++)
         {
             d(i,j) = 0.0;
-            for(size_t m = 0; m < o.size(); m++)
+            for(size_t m = 0; m < o.Size(); m++)
                 d(i,j) += o(m) * c(i,m) * c(j,m);
         }
 
-        dmat.Take(Irrep::A, s, std::move(d));
+        dmat.Take(ir, s, std::move(d));
     }
 
     // initial energy
-    double energy = nucrep;
-    for(auto s : dmat.GetSpins(Irrep::A))
+    double energy = 0.0;
+    for(auto ir : dmat.GetIrreps())
+    for(auto s : dmat.GetSpins(ir))
     {
-        const auto & d = dmat.Get(Irrep::A, s);
-        energy += (d + Hcore).sum();
+        const auto & d = dmat.Get(ir, s);
+        for(size_t i = 0; i < d.NRows(); i++)
+        for(size_t j = 0; j < d.NCols(); j++)
+            energy += d(i,j) * Hcore(i,j);
     }
 
 
-    out.Output("Formed initial guess. Total energy =  %16.8e\n", energy);
-    Wavefunction newwfn = EigenToWavefunction(wfn.system, cmat, epsilon, occ);
+    out.Output("Formed initial guess.\n");
+    out.Output("    Electronic energy:  %16.8e\n", energy);
+    out.Output("    Nuclear repulsion:  %16.8e\n", nucrep);
+
+    energy += nucrep;
+    out.Output("         Total energy:  %16.8e\n", energy);
+
+    Wavefunction newwfn;
+    newwfn.system = wfn.system;
+    newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(std::move(cmat));
+    newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(std::move(occ));
+    newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(std::move(epsilon));
 
     return {std::move(newwfn), {energy}};
 }

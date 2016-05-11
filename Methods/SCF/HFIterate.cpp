@@ -1,38 +1,34 @@
 #include "Methods/SCF/HFIterate.hpp"
-#include "Methods/SCF/SCF_Common.hpp"
-
-#include <pulsar/output/OutputStream.hpp>
-#include <pulsar/system/AOIterator.hpp>
-#include <pulsar/math/Cast.hpp>
+#include "pulsar/modulebase/All.hpp"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::SelfAdjointEigenSolver;
 
-using namespace pulsar::modulemanager;
-using namespace pulsar::modulebase;
-using namespace pulsar::exception;
+using namespace pulsar::datastore;
 using namespace pulsar::system;
 using namespace pulsar::math;
+using namespace pulsar::exception;
 using namespace pulsar::output;
-using namespace pulsar::datastore;
+using namespace pulsar::modulebase;
 
 
-namespace pulsarmethods{
-
+namespace pulsarmethods {
 
 
 static
-BlockByIrrepSpin<MatrixXd> BuildFock(const BlockByIrrepSpin<MatrixXd> & Dmat,
-                                     const MatrixXd & Hcore,
-                                     const std::vector<double> & eri)
+BlockedEigenMatrix BuildFock(const IrrepSpinMatrixD & Dmat,
+                             const MatrixXd & Hcore,
+                             const std::vector<double> & eri)
 {
-    BlockByIrrepSpin<MatrixXd> Fmat;
+    BlockedEigenMatrix Fmat;
 
-    for(auto s : Dmat.GetSpins(Irrep::A))
+    for(auto ir : Dmat.GetIrreps())
+    for(auto s : Dmat.GetSpins(ir))
     {
+        MappedConstMatrix D = MapConstSimpleMatrix(Dmat.Get(ir,s));
+
         MatrixXd F = Hcore;
-        auto D = Dmat.Get(Irrep::A, s);
 
         size_t nao1 = Hcore.rows();
         size_t nao2 = Hcore.cols();
@@ -49,31 +45,30 @@ BlockByIrrepSpin<MatrixXd> BuildFock(const BlockByIrrepSpin<MatrixXd> & Dmat,
             }
         }
 
-        Fmat.Take(Irrep::A, s, std::move(F));
+        Fmat.Take(ir, s, std::move(F));
     }
 
     return Fmat;
 }
 
 
-static
-double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
-                       const BlockByIrrepSpin<MatrixXd> & Fmat,
-                       const MatrixXd & Hcore,
-                       OutputStream & out)
+double HFIterate::CalculateEnergy(const IrrepSpinMatrixD & Dmat,
+                                  const BlockedEigenMatrix & Fmat)
 {
-    // calculate the energy 
+    // calculate the energy
     double energy = 0.0;
     double oneelectron = 0.0;
     double twoelectron = 0.0;
-    for(auto s : Dmat.GetSpins(Irrep::A))
+
+    for(auto ir : Dmat.GetIrreps())
+    for(auto s : Dmat.GetSpins(ir))
     {
-        const auto & d = Dmat.Get(Irrep::A, s);
-        const auto & f = Fmat.Get(Irrep::A, s);
+        MappedConstMatrix d = MapConstSimpleMatrix(Dmat.Get(ir, s));
+        const auto & f = Fmat.Get(ir, s);
         for(size_t i = 0; i < d.rows(); i++)
         for(size_t j = 0; j < d.cols(); j++)
         {
-            oneelectron += d(i,j) * Hcore(i,j);
+            oneelectron += d(i,j) * Hcore_(i,j);
             twoelectron += 0.5 * d(i,j) * f(i,j);
         }
     }
@@ -81,55 +76,29 @@ double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
     twoelectron -= 0.5*oneelectron;
     energy = oneelectron + twoelectron;
 
-    out.Output("        One electron: %16.8e\n", oneelectron);
-    out.Output("        Two electron: %16.8e\n", twoelectron);
-    out.Output("    Total Electronic: %16.8e\n", energy);
+    out.Output("            One electron: %16.8e\n", oneelectron);
+    out.Output("            Two electron: %16.8e\n", twoelectron);
+    out.Output("        Total Electronic: %16.8e\n", energy);
+    out.Output("       Nuclear Repulsion: %16.8e\n", nucrep_);
+
+    energy += nucrep_;
+    out.Output("            Total energy: %16.8e\n", energy);
 
     return energy;
 }
 
-    
-HFIterate::DerivReturnType HFIterate::Deriv_(size_t order, const Wavefunction & wfn)
+
+void HFIterate::Initialize_(const System & sys, const std::string & bstag)
 {
-    if(order != 0)
-        throw NotYetImplementedException("Test with deriv != 0");
-
-
-    if(!wfn.system)
-        throw GeneralException("System is not set!");
-
-    // get the basis set
-    const System & sys = *(wfn.system);
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
-
     out.Output("Obtaining basis set %? from system\n", bstag);
     const BasisSet bs = sys.GetBasisSet(bstag);
-    size_t nao = bs.NFunctions();
-    size_t nshell = bs.NShell();
-    size_t maxnfunc = bs.MaxNFunctions();
-    size_t maxnfunc2 = maxnfunc * maxnfunc;
 
-    out.Output("NAO: %? nshell: %?\n", nao, nshell);
-    bs.Print(out);
-  
-    //////////////////////////////////////////////////////
-    // Storage of eigen matrices, etc, by irrep and spin 
-    //////////////////////////////////////////////////////
-    BlockByIrrepSpin<MatrixXd> Cmat, Dmat;
-    BlockByIrrepSpin<VectorXd> epsilon;
-    BlockByIrrepSpin<VectorXd> occ;
- 
-    // c-matrices have been set. Make sure we have occupations, etc, as well
-    if(!wfn.cmat)
-        throw GeneralException("Missing C matrix");
-    if(!wfn.occupations)
-        throw GeneralException("Missing Occupations");
-    if(!wfn.epsilon)
-        throw GeneralException("Missing Epsilon");
-
-    Cmat = wfn.cmat->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
-    occ = wfn.occupations->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-    epsilon = wfn.epsilon->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+    /////////////////////////
+    // Load the ERI to core
+    /////////////////////////
+    auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
+    mod_ao_eri->SetBases(sys, bstag, bstag, bstag, bstag);
+    eri_ = FillTwoElectronVector(mod_ao_eri, bs);
 
 
     ///////////////////////////////////////////
@@ -138,13 +107,13 @@ HFIterate::DerivReturnType HFIterate::Deriv_(size_t order, const Wavefunction & 
     ///////////////////////////////////////////
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
-    double nucrep;
-    size_t n = mod_nuc_rep->Calculate(0, *wfn.system, &nucrep, 1);
+    size_t n = mod_nuc_rep->Calculate(0, sys, &nucrep_, 1);
 
-    /////////////////////// 
+    ///////////////////////
     // Overlap
+    ///////////////////////
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(*wfn.system, bstag, bstag);
+    mod_ao_overlap->SetBases(sys, bstag, bstag);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap
@@ -157,68 +126,86 @@ HFIterate::DerivReturnType HFIterate::Deriv_(size_t order, const Wavefunction & 
         s_eval(i) = 1.0/sqrt(s_eval(i));
 
     // the S^(-1/2) matrix
-    MatrixXd S12 = s_evec * s_eval.asDiagonal() * s_evec.transpose();
+    S12_ = s_evec * s_eval.asDiagonal() * s_evec.transpose();
 
 
-    /////////////////////////
-    // Load the ERI to core
-    /////////////////////////
-    auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
-    mod_ao_eri->SetBases(*wfn.system, bstag, bstag, bstag, bstag);
-    const std::vector<double> eri = FillTwoElectronVector(mod_ao_eri, bs);
-
-
-    //////////////////////////// 
+    ////////////////////////////
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(*wfn.system, bstag, bstag);
-    MatrixXd Hcore = FillOneElectronMatrix(mod_ao_core, bs);
+    mod_ao_core->SetBases(sys, bstag, bstag);
+    Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
 
 
-    
+    initialized_ = true;
+}
+
+
+HFIterate::DerivReturnType HFIterate::Deriv_(size_t order, const Wavefunction & wfn)
+{
+    if(order != 0)
+        throw NotYetImplementedException("Test with deriv != 0");
+
+    if(!wfn.system)
+        throw GeneralException("System is not set!");
+
+    // get the basis set
+    const System & sys = *(wfn.system);
+    std::string bstag = Options().Get<std::string>("BASIS_SET");
+
+
+    if(!initialized_)
+        Initialize_(*wfn.system, bstag);
+
+    // c-matrices have been set. Make sure we have occupations, etc, as well
+    if(!wfn.cmat)
+        throw GeneralException("Missing C matrix");
+    if(!wfn.occupations)
+        throw GeneralException("Missing Occupations");
+    if(!wfn.epsilon)
+        throw GeneralException("Missing Epsilon");
+
+
     //////////////////////////////////////////////////////////////////
     // Procedure
     //////////////////////////////////////////////////////////////////
     // Calculate the initial Density
-    Dmat = FormDensity(Cmat, occ);
+    IrrepSpinMatrixD Dmat = FormDensity(*wfn.cmat, *wfn.occupations);
+
+    IrrepSpinMatrixD Cmat;
+    IrrepSpinVectorD epsilon;
 
     // Build the fock matrix
-    const BlockByIrrepSpin<MatrixXd> Fmat = BuildFock(Dmat, Hcore, eri);
+    const BlockedEigenMatrix Fmat = BuildFock(Dmat, Hcore_, eri_);
 
-    // diagonalize, form density, etc
-    // and calculate the energy
-    double energy = nucrep;
-
-    for(auto s : Fmat.GetSpins(Irrep::A))
+    // Diagonalize, etc
+    for(auto ir : Fmat.GetIrreps())
+    for(auto s : Fmat.GetSpins(ir))
     {
-        MatrixXd Fprime = S12.transpose() * Fmat.Get(Irrep::A, s) * S12;
+        MatrixXd Fprime = S12_.transpose() * Fmat.Get(ir, s) * S12_;
 
         SelfAdjointEigenSolver<MatrixXd> fsolve(Fprime);
         MatrixXd c = fsolve.eigenvectors();
         VectorXd e = fsolve.eigenvalues();
-        c = S12*c;
+        c = S12_*c;
 
-        const auto & o = occ.Get(Irrep::A, s);
-
-
-        Cmat.Take(Irrep::A, s, std::move(c));
-        epsilon.Take(Irrep::A, s, std::move(e));
+        // convert back to simple matrices
+        Cmat.Take(ir, s, EigenToSimpleMatrix(c)); 
+        epsilon.Take(ir, s, EigenToSimpleVector(e));
     }
 
     // energy
-    Dmat = FormDensity(Cmat, occ);
-    energy += CalculateEnergy(Dmat, Fmat, Hcore, out);
+    Dmat = FormDensity(Cmat, *wfn.occupations);
+    double energy = CalculateEnergy(Dmat, Fmat);
 
     // set the final wavefunction stuff
     Wavefunction newwfn;
     newwfn.system = wfn.system;
-    newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(Cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
-    newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
-    newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
+    newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(std::move(Cmat));
+    newwfn.occupations = wfn.occupations; // didn't change
+    newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(std::move(epsilon));
 
-    out.Output("Iteration energy: %16.8e\n", energy);
     return {std::move(newwfn), {energy}};
 }
-    
 
-}//End namespace
+
+} // close namespace pulsarmethods

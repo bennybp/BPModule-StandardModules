@@ -130,10 +130,10 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 }
 
 
-BlockByIrrepSpin<MatrixXd> FormDensity(const BlockByIrrepSpin<MatrixXd> & Cmat,
-                                       const BlockByIrrepSpin<VectorXd> & occ)
+BlockedEigenMatrix FormDensity(const BlockedEigenMatrix & Cmat,
+                               const BlockedEigenVector & occ)
 {
-    BlockByIrrepSpin<MatrixXd> Dmat;
+    BlockedEigenMatrix Dmat;
 
     for(auto s : Cmat.GetSpins(Irrep::A))
     {
@@ -181,15 +181,14 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
 
 
 
-BlockedEigenVector FindOccupations(size_t nelec)
+IrrepSpinVectorD FindOccupations(size_t nelec)
 {
-    BlockedEigenVector occ;
-
+    IrrepSpinVectorD occ;
 
     if(nelec %2 == 0)
     {
         size_t ndocc = nelec/2;
-        VectorXd docc(ndocc);
+        SimpleVectorD docc(ndocc);
         for(size_t i = 0; i < ndocc; i++)
             docc(i) = 2.0;
         occ.Take(Irrep::A, 0, std::move(docc));
@@ -199,7 +198,7 @@ BlockedEigenVector FindOccupations(size_t nelec)
         size_t nbetaocc = nelec/2; // integer division
         size_t nalphaocc = nelec - nbetaocc;
 
-        VectorXd alphaocc(nalphaocc), betaocc(nbetaocc);
+        SimpleVectorD alphaocc(nalphaocc), betaocc(nbetaocc);
         for(size_t i = 0; i < nalphaocc; i++) alphaocc(i) = 1.0;
         for(size_t i = 0; i < nbetaocc; i++) betaocc(i) = 1.0;
 
@@ -220,16 +219,6 @@ SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m)
     for(size_t j = 0; j < m.cols(); j++)
         s(i,j) = m(i,j);
     return s;
-}
-
-IrrepSpinMatrixD EigenToIrrepSpinMatrix(const BlockedEigenMatrix & m)
-{
-    return m.TransformType<SimpleMatrixD>(EigenToSimpleMatrix);
-}
-
-IrrepSpinVectorD EigenToIrrepSpinVector(const BlockedEigenVector & v)
-{
-    return v.TransformType<SimpleVectorD>(EigenToSimpleVector);
 }
 
 
@@ -259,16 +248,6 @@ Eigen::VectorXd SimpleVectorToEigen(const SimpleVectorD & v)
     return ret;
 }
 
-BlockedEigenMatrix IrrepSpinMatrixToEigen(const IrrepSpinMatrixD & m)
-{
-    return m.TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
-}
-
-BlockedEigenVector IrrepSpinVectorToEigen(const IrrepSpinVectorD & v)
-{
-    return v.TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-}
-
 MappedMatrix MapSimpleMatrix(SimpleMatrixD & m)
 {
     return MappedMatrix(m.Data(), m.NRows(), m.NCols());
@@ -289,29 +268,5 @@ MappedConstVector MapConstSimpleVector(const SimpleVectorD & v)
     return MappedConstVector(v.Data(), v.Size());
 }
 
-
-BlockByIrrepSpin<MappedConstMatrix> MapIrrepSpinMatrix(const IrrepSpinMatrixD & m)
-{
-    return m.TransformType<MappedConstMatrix>(MapConstSimpleMatrix);
-}
-
-BlockByIrrepSpin<MappedConstVector> MapIrrepSpinVector(const IrrepSpinVectorD & v)
-{
-    return v.TransformType<MappedConstVector>(MapConstSimpleVector);
-}
-
-Wavefunction EigenToWavefunction(std::shared_ptr<const System> sys,
-                                 const BlockedEigenMatrix & cmat,
-                                 const BlockedEigenVector & epsilon,
-                                 const BlockedEigenVector & occ)
-{
-    Wavefunction newwfn;
-    newwfn.system = sys;
-    newwfn.cmat = std::make_shared<IrrepSpinMatrixD>(EigenToIrrepSpinMatrix(cmat));
-    newwfn.occupations = std::make_shared<IrrepSpinVectorD>(EigenToIrrepSpinVector(occ));
-    newwfn.epsilon = std::make_shared<IrrepSpinVectorD>(EigenToIrrepSpinVector(epsilon));
-    return newwfn;
-}
-                                 
 
 }//End namespace

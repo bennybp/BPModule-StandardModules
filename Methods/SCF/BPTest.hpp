@@ -1,9 +1,7 @@
 #ifndef BPTEST_HPP
 #define BPTEST_HPP
 
-#include <vector>
 #include <pulsar/modulebase/EnergyMethod.hpp>
-#include <pulsar/modulebase/All.hpp>
 
 namespace pulsarmethods {
 

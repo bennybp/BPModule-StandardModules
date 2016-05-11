@@ -193,8 +193,10 @@ minfo = {
                             "Key for the initial guess module"),
                         "KEY_SCF_ITERATOR": (OptionType.String, None, True, None,
                             "Key of the iterator module to use"),
-                        "MAX_ITER": (OptionType.Float, 40, False, None,
+                        "MAX_ITER": (OptionType.Int, 40, False, None,
                             "Key of the ao electron repulsion integral module to use"),
+                        "DENS_TOLERANCE": (OptionType.Float, 1e-8, False, None,
+                            "Maximum value for the change in density"),
                     }
   },
   "CoreGuess" :

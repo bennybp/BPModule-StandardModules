@@ -41,7 +41,7 @@ pulsar::math::IrrepSpinMatrixD
 FormDensity(const pulsar::math::IrrepSpinMatrixD & Cmat, const pulsar::math::IrrepSpinVectorD & occ);
 
 
-BlockedEigenVector FindOccupations(size_t nelec);
+pulsar::math::IrrepSpinVectorD FindOccupations(size_t nelec);
 
 pulsar::math::SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m);
 
@@ -51,14 +51,6 @@ Eigen::MatrixXd SimpleMatrixToEigen(const pulsar::math::SimpleMatrixD & m);
 
 Eigen::VectorXd SimpleVectorToEigen(const pulsar::math::SimpleVectorD & v); 
 
-pulsar::math::IrrepSpinMatrixD EigenToIrrepSpinMatrix(const BlockedEigenMatrix & m);
-
-pulsar::math::IrrepSpinVectorD EigenToIrrepSpinVector(const BlockedEigenVector & v);
-
-BlockedEigenMatrix IrrepSpinMatrixToEigen(const pulsar::math::IrrepSpinMatrixD & m);
-
-BlockedEigenVector IrrepSpinVectorToEigen(const pulsar::math::IrrepSpinVectorD & v);
-
 MappedMatrix MapSimpleMatrix(pulsar::math::SimpleMatrixD & m);
 
 MappedConstMatrix MapConstSimpleMatrix(const pulsar::math::SimpleMatrixD & m);
@@ -66,16 +58,6 @@ MappedConstMatrix MapConstSimpleMatrix(const pulsar::math::SimpleMatrixD & m);
 MappedVector MapSimpleVector(pulsar::math::SimpleVectorD & v);
 
 MappedConstVector MapConstSimpleVector(const pulsar::math::SimpleVectorD & v);
-
-pulsar::math::BlockByIrrepSpin<MappedConstMatrix> MapIrrepSpinMatrix(const pulsar::math::IrrepSpinMatrixD & m);
-
-pulsar::math::BlockByIrrepSpin<MappedConstVector> MapIrrepSpinVector(const pulsar::math::IrrepSpinVectorD & v);
-
-pulsar::datastore::Wavefunction
-EigenToWavefunction(std::shared_ptr<const pulsar::system::System> sys,
-                    const BlockedEigenMatrix & cmat,
-                    const BlockedEigenVector & epsilon,
-                    const BlockedEigenVector & occ);
 
 
 } // close namespace pulsarmethods

@@ -1,19 +1,37 @@
 #include "Methods/SCF/BPTest.hpp"
 #include "Methods/SCF/SCF_Common.hpp"
 
-#include <pulsar/output/OutputStream.hpp>
-#include <pulsar/system/AOIterator.hpp>
-#include <pulsar/math/Cast.hpp>
-
-using namespace pulsar::modulemanager;
-using namespace pulsar::modulebase;
-using namespace pulsar::exception;
+using namespace pulsar::datastore;
 using namespace pulsar::system;
 using namespace pulsar::math;
-using namespace pulsar::datastore;
+using namespace pulsar::exception;
 
 
-namespace pulsarmethods{
+namespace pulsarmethods {
+
+static double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2)
+{
+    if(!m1.SameStructure(m2))
+        throw GeneralException("Density matrices have different structure");
+
+    double rms = 0.0;
+
+    for(Irrep ir : m1.GetIrreps())
+    for(int spin : m1.GetSpins(ir))
+    {
+        const auto & mat1 = m1.Get(ir, spin);
+        const auto & mat2 = m2.Get(ir, spin);
+
+        for(size_t i = 0; i < mat1.NRows(); i++)
+        for(size_t j = 0; j < mat1.NCols(); j++)
+        {
+            const double diff = mat1(i,j) - mat2(i,j);
+            rms += diff*diff;
+        }
+    }
+
+    return sqrt(rms);
+}
 
 
 
@@ -63,13 +81,13 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     }
     else
     {
-        out.Debug("Using initial wavefunction as a starting point");
+        out.Debug("Using given wavefunction as a starting point");
  
         // c-matrices have been set. Make sure we have occupations, etc, as well
         if(!wfn.occupations)
-            throw GeneralException("Missing Occupations");
+            throw GeneralException("Missing Occupations in given wavefunction");
         if(!wfn.epsilon)
-            throw GeneralException("Missing Epsilon");
+            throw GeneralException("Missing Epsilon in given wavefunction");
 
         initial_wfn = wfn;
     }
@@ -79,7 +97,8 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     // Obtain the options for SCF
     ///////////////////////////////
     double etol = Options().Get<double>("E_TOLERANCE");
-    size_t maxniter = Options().Get<double>("MAX_ITER");
+    size_t maxniter = Options().Get<size_t>("MAX_ITER");
+    double dtol = Options().Get<double>("DENS_TOLERANCE");
 
 
     //////////////////////////////////////////////////////////////////
@@ -91,14 +110,19 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     double last_energy = initial_energy;  // right now, energy = initial guess energy
     double current_energy = last_energy;
     double energy_diff = 0.0;
+    double dens_diff = 0.0;
+
+    // The last density
+    IrrepSpinMatrixD lastdens = FormDensity(*lastwfn.cmat, *lastwfn.occupations);
+
+    // Load and set up the iterator module
+    auto mod_iter = CreateChildFromOption<EnergyMethod>("KEY_SCF_ITERATOR");
 
     // Start the SCF procedure
     size_t iter = 0;
     do
     {
         iter++; 
-
-        auto mod_iter = CreateChildFromOption<EnergyMethod>("KEY_SCF_ITERATOR");
 
         // Iterate, making a new wavefunction
         auto iterate_ret = mod_iter->Energy(lastwfn);
@@ -108,18 +132,26 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
         current_energy = iterate_ret.second;
         lastwfn = iterate_ret.first;
 
-        out.Output("Iteration %?\n", iter);
-        out.Output("       Total energy: %16.8e\n", current_energy);
-
         energy_diff = current_energy - last_energy;
 
-        out.Output(" Difference from last step: %16.8e\n", energy_diff);
+        // Form the density and calculate the RMS difference
+        // Note - we've already set lastwfn equal to the new iteration
+        IrrepSpinMatrixD dens = FormDensity(*lastwfn.cmat, *lastwfn.occupations);
+        dens_diff = CalculateRMSDens(dens, lastdens);
 
-    } while(fabs(energy_diff) > etol && iter < maxniter);
+        // store the new density
+        lastdens = std::move(dens); 
+
+        out.Output("%5?  %16.8e  %16.8e  %16.8e\n",
+                    iter, current_energy, energy_diff, dens_diff);
+
+    } while(fabs(energy_diff) > etol &&
+            dens_diff > dtol &&
+            iter < maxniter);
 
     // What are we returning 
     return {std::move(lastwfn), {current_energy}};
 }
     
 
-}//End namespace
+} // close namespace pulsarmethods
