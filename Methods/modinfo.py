@@ -191,12 +191,6 @@ minfo = {
     "options"     : {
                         "KEY_INITIAL_GUESS": (OptionType.String, None, False, None,
                             "Key for the initial guess module"),
-                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
-                            "Key of the nuclear repulsion module to use"),
-                        "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
-                            "Key of the ao overlap module to use"),
-                        "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
-                            "Key of the core builder module to use"),
                         "KEY_SCF_ITERATOR": (OptionType.String, None, True, None,
                             "Key of the iterator module to use"),
                         "MAX_ITER": (OptionType.Float, 40, False, None,

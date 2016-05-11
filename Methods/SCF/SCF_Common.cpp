@@ -8,8 +8,8 @@ using Eigen::VectorXd;
 using namespace pulsar::modulemanager;
 using namespace pulsar::modulebase;
 using namespace pulsar::system;
+using namespace pulsar::datastore;
 using namespace pulsar::math;
-
 
 
 namespace pulsarmethods{
@@ -155,10 +155,35 @@ BlockByIrrepSpin<MatrixXd> FormDensity(const BlockByIrrepSpin<MatrixXd> & Cmat,
 }
 
 
-
-BlockByIrrepSpin<Eigen::VectorXd> FindOccupations(size_t nelec)
+IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
+                             const IrrepSpinVectorD & occ)
 {
-    BlockByIrrepSpin<Eigen::VectorXd> occ;
+    IrrepSpinMatrixD Dmat;
+
+    for(auto s : Cmat.GetSpins(Irrep::A))
+    {
+        const SimpleMatrixD & c = Cmat.Get(Irrep::A, s);
+        const SimpleVectorD & o = occ.Get(Irrep::A, s);
+
+        SimpleMatrixD d(c.NRows(), c.NCols());
+        for(size_t i = 0; i < c.NRows(); i++)
+        for(size_t j = 0; j < c.NCols(); j++)
+        {
+            d(i,j) = 0.0;
+            for(size_t m = 0; m < o.Size(); m++)
+                d(i,j) += o(m) * c(i,m) * c(j,m);
+        }
+        Dmat.Take(Irrep::A, s, std::move(d));
+    }
+
+    return Dmat;
+}
+
+
+
+BlockedEigenVector FindOccupations(size_t nelec)
+{
+    BlockedEigenVector occ;
 
 
     if(nelec %2 == 0)
@@ -197,12 +222,23 @@ SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m)
     return s;
 }
 
+IrrepSpinMatrixD EigenToIrrepSpinMatrix(const BlockedEigenMatrix & m)
+{
+    return m.TransformType<SimpleMatrixD>(EigenToSimpleMatrix);
+}
+
+IrrepSpinVectorD EigenToIrrepSpinVector(const BlockedEigenVector & v)
+{
+    return v.TransformType<SimpleVectorD>(EigenToSimpleVector);
+}
+
+
 SimpleVectorD EigenToSimpleVector(const Eigen::VectorXd & v)
 {
     return SimpleVectorD(v.size(), v.data());
 }
 
-Eigen::MatrixXd SimpleMatrixToEigen(const pulsar::math::SimpleMatrixD & m)
+Eigen::MatrixXd SimpleMatrixToEigen(const SimpleMatrixD & m)
 {
     using Eigen::Dynamic;
     using Eigen::RowMajor;
@@ -215,7 +251,7 @@ Eigen::MatrixXd SimpleMatrixToEigen(const pulsar::math::SimpleMatrixD & m)
     return em;
 }
 
-Eigen::VectorXd SimpleVectorToEigen(const pulsar::math::SimpleVectorD & v)
+Eigen::VectorXd SimpleVectorToEigen(const SimpleVectorD & v)
 {
     //! \todo can't use map because of const issues?
     Eigen::VectorXd ret(v.Size());
@@ -223,5 +259,59 @@ Eigen::VectorXd SimpleVectorToEigen(const pulsar::math::SimpleVectorD & v)
     return ret;
 }
 
+BlockedEigenMatrix IrrepSpinMatrixToEigen(const IrrepSpinMatrixD & m)
+{
+    return m.TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
+}
+
+BlockedEigenVector IrrepSpinVectorToEigen(const IrrepSpinVectorD & v)
+{
+    return v.TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+}
+
+MappedMatrix MapSimpleMatrix(SimpleMatrixD & m)
+{
+    return MappedMatrix(m.Data(), m.NRows(), m.NCols());
+}
+
+MappedConstMatrix MapConstSimpleMatrix(const SimpleMatrixD & m)
+{
+    return MappedConstMatrix(m.Data(), m.NRows(), m.NCols());
+}
+
+MappedVector MapSimpleVector(SimpleVectorD & v)
+{
+    return MappedVector(v.Data(), v.Size());
+}
+
+MappedConstVector MapConstSimpleVector(const SimpleVectorD & v)
+{
+    return MappedConstVector(v.Data(), v.Size());
+}
+
+
+BlockByIrrepSpin<MappedConstMatrix> MapIrrepSpinMatrix(const IrrepSpinMatrixD & m)
+{
+    return m.TransformType<MappedConstMatrix>(MapConstSimpleMatrix);
+}
+
+BlockByIrrepSpin<MappedConstVector> MapIrrepSpinVector(const IrrepSpinVectorD & v)
+{
+    return v.TransformType<MappedConstVector>(MapConstSimpleVector);
+}
+
+Wavefunction EigenToWavefunction(std::shared_ptr<const System> sys,
+                                 const BlockedEigenMatrix & cmat,
+                                 const BlockedEigenVector & epsilon,
+                                 const BlockedEigenVector & occ)
+{
+    Wavefunction newwfn;
+    newwfn.system = sys;
+    newwfn.cmat = std::make_shared<IrrepSpinMatrixD>(EigenToIrrepSpinMatrix(cmat));
+    newwfn.occupations = std::make_shared<IrrepSpinVectorD>(EigenToIrrepSpinVector(occ));
+    newwfn.epsilon = std::make_shared<IrrepSpinVectorD>(EigenToIrrepSpinVector(epsilon));
+    return newwfn;
+}
+                                 
 
 }//End namespace

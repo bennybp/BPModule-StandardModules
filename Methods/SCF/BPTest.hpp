@@ -10,7 +10,7 @@ namespace pulsarmethods {
 class BPTest : public pulsar::modulebase::EnergyMethod
 {
     public:
-        BPTest(ID_t id);
+        using pulsar::modulebase::EnergyMethod::EnergyMethod;
         
         virtual DerivReturnType Deriv_(size_t order, const pulsar::datastore::Wavefunction & wfn);
 };

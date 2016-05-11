@@ -81,9 +81,9 @@ double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
     twoelectron -= 0.5*oneelectron;
     energy = oneelectron + twoelectron;
 
-    out.Output("        One electron: %12.8e\n", oneelectron);
-    out.Output("        Two electron: %12.8e\n", twoelectron);
-    out.Output("    Total Electronic: %12.8e\n", energy);
+    out.Output("        One electron: %16.8e\n", oneelectron);
+    out.Output("        Two electron: %16.8e\n", twoelectron);
+    out.Output("    Total Electronic: %16.8e\n", energy);
 
     return energy;
 }
@@ -216,7 +216,7 @@ HFIterate::DerivReturnType HFIterate::Deriv_(size_t order, const Wavefunction & 
     newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
     newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
 
-    out.Output("Iteration energy: %12.8e\n", energy);
+    out.Output("Iteration energy: %16.8e\n", energy);
     return {std::move(newwfn), {energy}};
 }
     

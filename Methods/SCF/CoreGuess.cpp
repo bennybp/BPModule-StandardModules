@@ -36,16 +36,12 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     const System & sys = *(wfn.system);
     std::string bstag = Options().Get<std::string>("BASIS_SET");
 
-    out.Output("Obtaining basis set %? from system\n", bstag);
     const BasisSet bs = sys.GetBasisSet(bstag);
     size_t nao = bs.NFunctions();
     size_t nshell = bs.NShell();
     size_t maxnfunc = bs.MaxNFunctions();
     size_t maxnfunc2 = maxnfunc * maxnfunc;
 
-    out.Output("NAO: %? nshell: %?\n", nao, nshell);
-    bs.Print(out);
-    
 
     ///////////////////////////////////////////
     // Load the one electron integral matrices
@@ -89,13 +85,11 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
         throw GeneralException("Can't handle non-integer occupations", "nelectrons", nelec_d);
     size_t nelec = numeric_cast<size_t>(nelec_d);
 
-    out.Output("Number of electrons: %?\n", nelec);
-
 
     // Block some eigen matrices, etc, by irrep and spin
-    BlockByIrrepSpin<MatrixXd> cmat, dmat;
-    BlockByIrrepSpin<VectorXd> epsilon;
-    BlockByIrrepSpin<VectorXd> occ;
+    BlockedEigenMatrix cmat, dmat;
+    BlockedEigenVector epsilon;
+    BlockedEigenVector occ;
 
     // Fill in the occupations
     occ = FindOccupations(nelec);
@@ -144,20 +138,12 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     for(auto s : dmat.GetSpins(Irrep::A))
     {
         const auto & d = dmat.Get(Irrep::A, s);
-        for(size_t i = 0; i < d.rows(); i++)
-        for(size_t j = 0; j < d.cols(); j++)
-            energy += d(i,j) * Hcore(i,j);
+        energy += (d + Hcore).sum();
     }
 
 
-    out.Output("Initial guess energy: %12.8e\n", energy);
-
-
-    Wavefunction newwfn;
-    newwfn.system = wfn.system;
-    newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
-    newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
-    newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
+    out.Output("Formed initial guess. Total energy =  %16.8e\n", energy);
+    Wavefunction newwfn = EigenToWavefunction(wfn.system, cmat, epsilon, occ);
 
     return {std::move(newwfn), {energy}};
 }
