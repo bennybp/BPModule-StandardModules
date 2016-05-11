@@ -9,7 +9,8 @@ class ReferenceERI : public pulsar::modulebase::TwoElectronIntegral
 public:
     ReferenceERI(ID_t id);
 
-    virtual void SetBases_(const std::string & bs1, const std::string & bs2,
+    virtual void SetBases_(const pulsar::system::System & sys,
+                           const std::string & bs1, const std::string & bs2,
                            const std::string & bs3, const std::string & bs4);
 
 

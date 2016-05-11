@@ -6,11 +6,10 @@
 class NuclearRepulsion : public pulsar::modulebase::SystemIntegral
 {
 public:
-    NuclearRepulsion(ID_t id);
+    using pulsar::modulebase::SystemIntegral::SystemIntegral;
 
-    virtual uint64_t Calculate_(uint64_t deriv, double * outbuffer, size_t bufsize);
-
-    virtual ~NuclearRepulsion();
+    virtual uint64_t Calculate_(uint64_t deriv, const pulsar::system::System & sys,
+                                double * outbuffer, size_t bufsize);
 
 };
 

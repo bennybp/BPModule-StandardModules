@@ -12,7 +12,7 @@ class BPTest : public pulsar::modulebase::EnergyMethod
     public:
         BPTest(ID_t id);
         
-        virtual std::vector<double> Deriv_(size_t order);
+        virtual DerivReturnType Deriv_(size_t order, const pulsar::datastore::Wavefunction & wfn);
 };
 
 }

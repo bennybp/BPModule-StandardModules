@@ -6,27 +6,17 @@
 using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
+using namespace pulsar::datastore;
 
 
-NuclearRepulsion::NuclearRepulsion(ID_t id)
-    : SystemIntegral(id)
-{ }
-
-NuclearRepulsion::~NuclearRepulsion()
-{ }
-
-
-uint64_t NuclearRepulsion::Calculate_(uint64_t deriv, double * outbuffer,
-                                      size_t bufsize)
+uint64_t NuclearRepulsion::Calculate_(uint64_t deriv, const System & sys,
+                                      double * outbuffer, size_t bufsize)
 {
     if(deriv != 0)
         throw NotYetImplementedException("Not Yet Implemented: Nuclear Repulsion with deriv != 0");
 
     if(bufsize == 0)
         throw GeneralException("Not enough space in output buffer");
-
-
-    const System & sys = *(InitialWfn().GetSystem());
 
 
     double enuc = 0.0;

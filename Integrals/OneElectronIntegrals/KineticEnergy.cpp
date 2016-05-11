@@ -15,19 +15,12 @@
 using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
-
-
-KineticEnergy::KineticEnergy(ID_t id)
-    : OneElectronIntegral(id)
-{ }
-
-KineticEnergy::~KineticEnergy()
-{ }
+using namespace pulsar::datastore;
 
 
 uint64_t KineticEnergy::Calculate_(uint64_t deriv,
-                             uint64_t shell1, uint64_t shell2,
-                             double * outbuffer, size_t bufsize)
+                                   uint64_t shell1, uint64_t shell2,
+                                   double * outbuffer, size_t bufsize)
 {
     if(work_.size() == 0)
         throw GeneralException("Workspace not allocated. Did you set the bases?");
@@ -208,19 +201,12 @@ uint64_t KineticEnergy::Calculate_(uint64_t deriv,
 
 
 
-void KineticEnergy::SetBases_(const std::string & bs1, const std::string & bs2)
+void KineticEnergy::SetBases_(const System & sys,
+                              const std::string & bs1, const std::string & bs2)
 {
-    out.Debug("KineticEnergy: Initializing with bases %? %?\n", bs1, bs2);
-
-    if(!(InitialWfn().GetSystem()))
-        throw GeneralException("Error - not given a system in the initial wavefunction");
-
-    const BasisSet basisset1 = InitialWfn().GetSystem()->GetBasisSet(bs1);
-    const BasisSet basisset2 = InitialWfn().GetSystem()->GetBasisSet(bs2);
-
     // from common components
-    bs1_ = NormalizeBasis(Cache(), out, basisset1);
-    bs2_ = NormalizeBasis(Cache(), out, basisset2);
+    bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
+    bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
 
     ///////////////////////////////////////
     // Determine the size of the workspace

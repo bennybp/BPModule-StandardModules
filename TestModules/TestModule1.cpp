@@ -25,7 +25,6 @@ void TestModule1::RunTest_(void)
 {
     out.Output("+++ In TestModule1: RunTest. Info: (%?) %? %? v%?\n", ID(), Key(), Name(), Version());
 
-    out.Output("    Wavefunction: %?\n", InitialWfn().MyHash().String());
     out.Output("   Cache entries: %?\n", Cache().Size());
     for(const auto & it : Cache().GetKeys())
         out.Output("                  > %?\n", it);

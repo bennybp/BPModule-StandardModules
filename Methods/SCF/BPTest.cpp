@@ -93,22 +93,16 @@ double CalculateEnergy(const BlockByIrrepSpin<MatrixXd> & Dmat,
 }
 
     
-std::vector<double> BPTest::Deriv_(size_t order)
+BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
 {
     if(order != 0)
         throw NotYetImplementedException("Test with deriv != 0");
 
-    // make sure stuff is set in wavefunction
-    const Wavefunction & iwfn = InitialWfn();
-
-    if(!iwfn.GetSystem())
+    if(!wfn.system)
         throw GeneralException("System is not set!");
 
-    //if(!iwfn.cmat)
-    //    throw GeneralException("C matrix is not set!");
-
     // get the basis set
-    const System & sys = *(iwfn.GetSystem());
+    const System & sys = *(wfn.system);
     std::string bstag = Options().Get<std::string>("BASIS_SET");
 
     out.Output("Obtaining basis set %? from system\n", bstag);
@@ -123,6 +117,7 @@ std::vector<double> BPTest::Deriv_(size_t order)
   
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 
+    // These represent the "current" cmatrix, etc
     //////////////////////////////////////////////////////
     BlockByIrrepSpin<MatrixXd> Cmat, Dmat, Fmat;
     BlockByIrrepSpin<VectorXd> epsilon;
@@ -132,35 +127,32 @@ std::vector<double> BPTest::Deriv_(size_t order)
     //////////////////////////
     // Initial Guess
     //////////////////////////
-    if(!InitialWfn().HasCMat()) // c-matrix hasn't been set
+    if(!wfn.cmat) // c-matrix hasn't been set in the passwd wfn
     {
         out.Debug("Don't have C-matrices set. Will call initial guess module\n");
         if(!Options().Has("KEY_INITIAL_GUESS"))
             throw GeneralException("Missing initial guess module when I don't have a C-matrix");
         auto mod_iguess = CreateChildFromOption<EnergyMethod>("KEY_INITIAL_GUESS");
-        mod_iguess->Energy();
+        auto iguess_ret = mod_iguess->Energy(wfn);
+        const Wavefunction & guesswfn = iguess_ret.first;
 
-        // load the cmatrix and occupations from there
-        const auto & guesswfn = mod_iguess->FinalWfn();
-
-        Cmat = guesswfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
-        occ = guesswfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-        epsilon = guesswfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+        Cmat = guesswfn.cmat->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
+        occ = guesswfn.occupations->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+        epsilon = guesswfn.epsilon->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
     }
     else
     {
         out.Debug("Using initial wavefunction as a starting point");
  
         // c-matrices have been set. Make sure we have occupations, etc, as well
-        if(!InitialWfn().HasOccupations())
+        if(!wfn.occupations)
             throw GeneralException("Missing Occupations");
-        if(!InitialWfn().HasEpsilon())
+        if(!wfn.epsilon)
             throw GeneralException("Missing Epsilon");
 
-        const auto & iwfn = InitialWfn();
-        Cmat = iwfn.GetCMat()->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
-        occ = iwfn.GetOccupations()->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
-        epsilon = iwfn.GetEpsilon()->TransformType<Eigen::VectorXd>(SimpleMatrixToEigen);
+        Cmat = wfn.cmat->TransformType<Eigen::MatrixXd>(SimpleMatrixToEigen);
+        occ = wfn.occupations->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
+        epsilon = wfn.epsilon->TransformType<Eigen::VectorXd>(SimpleVectorToEigen);
     }
 
 
@@ -171,12 +163,12 @@ std::vector<double> BPTest::Deriv_(size_t order)
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
     double nucrep;
-    size_t n = mod_nuc_rep->Calculate(0, &nucrep, 1);
+    mod_nuc_rep->Calculate(0, *wfn.system, &nucrep, 1); //! \todo ignore return value?
 
     /////////////////////// 
     // Overlap
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(bstag, bstag);
+    mod_ao_overlap->SetBases(*wfn.system, bstag, bstag);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap
@@ -195,13 +187,13 @@ std::vector<double> BPTest::Deriv_(size_t order)
     //////////////////////////// 
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(bstag, bstag);
+    mod_ao_core->SetBases(*wfn.system, bstag, bstag);
     MatrixXd Hcore = FillOneElectronMatrix(mod_ao_core, bs);
 
 
     
     //////////////////////////////////////////////////////////////////
-    // Procedure
+    // Actual SCF Procedure
     //////////////////////////////////////////////////////////////////
     // Calculate the initial Density
     Dmat = FormDensity(Cmat, occ);
@@ -209,7 +201,6 @@ std::vector<double> BPTest::Deriv_(size_t order)
     // Initial fock matrix is just the core Hamiltonain
     for(const int s : Dmat.GetSpins(Irrep::A))
         Fmat.Set(Irrep::A, s, Hcore);
-    out << "Initial CMat\n" << Cmat.Get(Irrep::A, 0) << "\n";
 
     // initial energy
     out.Output("Initial guess\n");
@@ -218,10 +209,11 @@ std::vector<double> BPTest::Deriv_(size_t order)
     out.Output("   Nuclear Repulsion: %12.8e\n", nucrep);
     out.Output("               Total: %12.8e\n", energy);
 
-    double lastenergy = energy;
 
+    // Storing the results of the previous iterations
     BlockByIrrepSpin<MatrixXd> lastDmat, lastCmat;
     BlockByIrrepSpin<VectorXd> lastocc, lastepsilon;
+    double lastenergy;
 
 
     // obtain the options
@@ -232,42 +224,50 @@ std::vector<double> BPTest::Deriv_(size_t order)
     do
     {
         iter++; 
-        lastenergy = energy;
 
         auto mod_iter = CreateChildFromOption<EnergyMethod>("KEY_SCF_ITERATOR");
-        mod_iter->InitialWfn().SetCMat(Cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
-        mod_iter->InitialWfn().SetOccupations(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
-        mod_iter->InitialWfn().SetEpsilon(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
-        energy = mod_iter->Deriv(order)[0];
 
-        lastDmat = std::move(Dmat);
+        Wavefunction newwfn;
+        newwfn.system = wfn.system;
+        newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(Cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
+        newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
+        newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
+
+        auto energy_ret = mod_iter->Energy(newwfn);
+
+        // store what we did before
+        lastenergy = energy;
+        //lastDmat = std::move(Dmat);
         lastCmat = std::move(Cmat);
         lastocc = std::move(occ);
         lastepsilon = std::move(epsilon);
 
-        // New density
-        Cmat = mod_iter->FinalWfn().GetCMat()->TransformType<MatrixXd>(SimpleMatrixToEigen);
-        occ = mod_iter->FinalWfn().GetOccupations()->TransformType<VectorXd>(SimpleVectorToEigen);
-        epsilon = mod_iter->FinalWfn().GetEpsilon()->TransformType<VectorXd>(SimpleVectorToEigen);
-        Dmat = FormDensity(Cmat, occ);
+
+        // New energy and density
+        energy = energy_ret.second;
+        const Wavefunction & retwfn = energy_ret.first;
+        Cmat = retwfn.cmat->TransformType<MatrixXd>(SimpleMatrixToEigen);
+        occ = retwfn.occupations->TransformType<VectorXd>(SimpleVectorToEigen);
+        epsilon = retwfn.epsilon->TransformType<VectorXd>(SimpleVectorToEigen);
+
+        // new density
+        //Dmat = FormDensity(Cmat, occ);
 
         out.Output("Iteration %?\n", iter);
         out.Output("       Total energy: %12.8e\n", energy);
 
         out.Output(" Difference from last step: %12.8e\n", energy - lastenergy);
 
-    }while(fabs(energy-lastenergy) > etol && iter < maxniter);
+    } while(fabs(energy-lastenergy) > etol && iter < maxniter);
 
-    // create the occupations and other data that will eventually
-    // be saved
-    //std::shared_ptr<IrrepSpinVectorD> occ(new IrrepSpinVectorD);
-    //std::shared_ptr<IrrepSpinVectorD> epsilon(new IrrepSpinVectorD);
-    //std::shared_ptr<IrrepSpinMatrixD> cmat(new IrrepSpinMatrixD);
+    // What are we returning 
+    Wavefunction newwfn;
+    newwfn.system = wfn.system;
+    newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(Cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
+    newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
+    newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
 
-    // store the final information
-    //FinalWfn().SetOccupations(irrepspinocc);
-
-    return {0.0};
+    return {std::move(newwfn), {energy}};
 }
     
 

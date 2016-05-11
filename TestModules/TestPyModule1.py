@@ -8,7 +8,6 @@ class TestPyModule1(psr.modulebase.Test_Base):
   def RunTest_(self):
     psr.output.GlobalOutput("+++ In TestPyModule1: RunTest. Info: ({}) {} {} v{}\n".format(self.ID(), self.Key(), self.Name(), self.Version()))
 
-    psr.output.GlobalOutput("    Wavefunction: {}\n".format(self.InitialWfn().MyHash().String()))
     psr.output.GlobalOutput("   Cache entries: {}\n".format(self.Cache().Size()))
 
     for it in self.Cache().GetKeys():

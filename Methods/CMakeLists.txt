@@ -4,12 +4,12 @@ set(BPMETHODS_SRC creator.cpp)
 #Each method should append their include files to this variable
 set(BPMETHODS_INC "")
 
-add_subdirectory(BSSE)
-add_subdirectory(CBS)
-add_subdirectory(CC)
-add_subdirectory(MBE)
-add_subdirectory(MIM)
-add_subdirectory(MP2)
+#add_subdirectory(BSSE)
+#add_subdirectory(CBS)
+#add_subdirectory(CC)
+#add_subdirectory(MBE)
+#add_subdirectory(MIM)
+#add_subdirectory(MP2)
 add_subdirectory(SCF)
 
 

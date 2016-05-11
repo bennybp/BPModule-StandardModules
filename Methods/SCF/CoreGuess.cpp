@@ -22,20 +22,18 @@ using namespace pulsar::datastore;
 namespace pulsarmethods{
 
 
-std::vector<double> CoreGuess::Deriv_(size_t order)
+CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & wfn)
 {
     if(order != 0)
         throw NotYetImplementedException("CoreGuess with deriv != 0");
 
     // make sure stuff is set in wavefunction
-    const Wavefunction & iwfn = InitialWfn();
-
-    if(!iwfn.GetSystem())
+    if(!wfn.system)
         throw GeneralException("System is not set!");
 
 
     // get the basis set
-    const System & sys = *(iwfn.GetSystem());
+    const System & sys = *(wfn.system);
     std::string bstag = Options().Get<std::string>("BASIS_SET");
 
     out.Output("Obtaining basis set %? from system\n", bstag);
@@ -56,12 +54,12 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
     double nucrep;
-    size_t n = mod_nuc_rep->Calculate(0, &nucrep, 1);
+    size_t n = mod_nuc_rep->Calculate(0, *wfn.system, &nucrep, 1);
 
     /////////////////////// 
     // Overlap
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(bstag, bstag);
+    mod_ao_overlap->SetBases(*wfn.system, bstag, bstag);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap
@@ -79,7 +77,7 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
     //////////////////////////// 
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(bstag, bstag);
+    mod_ao_core->SetBases(*wfn.system, bstag, bstag);
     MatrixXd Hcore = FillOneElectronMatrix(mod_ao_core, bs);
 
 
@@ -155,17 +153,13 @@ std::vector<double> CoreGuess::Deriv_(size_t order)
     out.Output("Initial guess energy: %12.8e\n", energy);
 
 
-    // save the occupations and other initial guess info
-    IrrepSpinVectorD final_occ = occ.TransformType<SimpleVectorD>(EigenToSimpleVector);
-    IrrepSpinVectorD final_epsilon = epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector);
-    IrrepSpinMatrixD final_cmat = cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix);
+    Wavefunction newwfn;
+    newwfn.system = wfn.system;
+    newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(cmat.TransformType<SimpleMatrixD>(EigenToSimpleMatrix));
+    newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(occ.TransformType<SimpleVectorD>(EigenToSimpleVector));
+    newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(epsilon.TransformType<SimpleVectorD>(EigenToSimpleVector));
 
-    auto & fwfn = FinalWfn();
-    fwfn.SetCMat(std::move(final_cmat));
-    fwfn.SetOccupations(std::move(final_occ));
-    fwfn.SetEpsilon(std::move(final_epsilon));
-
-    return {energy};
+    return {std::move(newwfn), {energy}};
 }
     
 

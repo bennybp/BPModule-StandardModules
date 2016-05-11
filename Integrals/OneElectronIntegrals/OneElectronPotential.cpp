@@ -14,24 +14,21 @@
 using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
+using namespace pulsar::datastore;
 using namespace pulsar::math;
 
-
-
-
-
 OneElectronPotential::OneElectronPotential(ID_t id)
-    : OneElectronIntegral(id)
-{ }
+    : OneElectronIntegral(id), sys_(nullptr) { }
 
-OneElectronPotential::~OneElectronPotential()
-{ }
 
 uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
                                                   uint64_t shell1, uint64_t shell2,
                                                   const Grid & grid,
                                                   double * outbuffer, size_t bufsize)
 {
+    if(sys_ == nullptr)
+        throw GeneralException("Null pointer in OneElectronPotential");
+
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
     const BasisSetShell & sh2 = bs2_->Shell(shell2);
 
@@ -268,7 +265,7 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
     if(gridopt == "ATOMS")
     {
         // create the grid from the system
-        for(const auto & atom : *(InitialWfn().GetSystem()))
+        for(const auto & atom : *sys_)
             if(atom.GetZ() != 0.0)
                 gu.Insert({atom.GetCoords(), atom.GetZ()});
         
@@ -286,19 +283,14 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
 
 
 
-void OneElectronPotential::SetBases_(const std::string & bs1, const std::string & bs2)
+void OneElectronPotential::SetBases_(const System & sys,
+                                     const std::string & bs1, const std::string & bs2)
 {
-    out.Debug("OneElectronPotential: Initializing with bases %? %?\n", bs1, bs2);
-
-    if(!(InitialWfn().GetSystem()))
-        throw GeneralException("Error - not given a system in the initial wavefunction");
-
-    const BasisSet basisset1 = InitialWfn().GetSystem()->GetBasisSet(bs1);
-    const BasisSet basisset2 = InitialWfn().GetSystem()->GetBasisSet(bs2);
+    sys_ = &sys;
 
     // from common components
-    bs1_ = NormalizeBasis(Cache(), out, basisset1);
-    bs2_ = NormalizeBasis(Cache(), out, basisset2);
+    bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
+    bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
 
     ///////////////////////////////////////
     // Determine the size of the workspace

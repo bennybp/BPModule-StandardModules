@@ -13,10 +13,10 @@ extern "C" {
 
 ModuleCreationFuncs InsertSupermodule(void){
     ModuleCreationFuncs cf;
-    cf.AddCppCreator<pulsarmethods::CP>("CP");
-    cf.AddCppCreator<pulsarmethods::MBE>("MBE");
-    cf.AddCppCreator<pulsarmethods::MIM>("MIM");
-    cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
+    //cf.AddCppCreator<pulsarmethods::CP>("CP");
+    //cf.AddCppCreator<pulsarmethods::MBE>("MBE");
+    //cf.AddCppCreator<pulsarmethods::MIM>("MIM");
+    //cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
     cf.AddCppCreator<pulsarmethods::BPTest>("BPTest");
     cf.AddCppCreator<pulsarmethods::HFIterate>("HFIterate");
     cf.AddCppCreator<pulsarmethods::CoreGuess>("CoreGuess");
