@@ -162,21 +162,38 @@ minfo = {
   "HFIterate" :
   {
     "type"        : "c_module",
-    "base"        : "EnergyMethod",
+    "base"        : "SCFIterator",
     "modpath"     : "Methods.so",
     "version"     : "0.1a",
     "description" : "Quick HF test calculation",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [""],
     "options"     : {
-                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
-                            "Key of the nuclear repulsion module to use"),
+                        "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
+                            "Key of the ao overlap module to use"),
+                        "BASIS_SET"       :  (OptionType.String, "Primary", False, None,
+                            'Tag representing the basis set in the system'),
+                    }
+  },
+  "BasicFockBuild" :
+  {
+    "type"        : "c_module",
+    "base"        : "FockBuilder",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Quick HF test calculation",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [""],
+    "options"     : {
                         "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
                             "Key of the ao overlap module to use"),
                         "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
                             "Key of the core builder module to use"),
                         "KEY_AO_ERI": (OptionType.String, None, True, None,
                             "Key of the ERI module to use"),
+                        "BASIS_SET"       :  (OptionType.String, "Primary", False, None,
+                            'Tag representing the basis set in the system'),
+
                     }
   },
   "BPTest" :
@@ -193,10 +210,16 @@ minfo = {
                             "Key for the initial guess module"),
                         "KEY_SCF_ITERATOR": (OptionType.String, None, True, None,
                             "Key of the iterator module to use"),
+                        "KEY_FOCK_BUILDER": (OptionType.String, None, True, None,
+                            "Key of the fock builder module to use"),
                         "MAX_ITER": (OptionType.Int, 40, False, None,
                             "Key of the ao electron repulsion integral module to use"),
                         "DENS_TOLERANCE": (OptionType.Float, 1e-8, False, None,
                             "Maximum value for the change in density"),
+                        "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
+                            "Key of the core builder module to use"),
+                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
+                            "Key of the nuclear repulsion module to use"),
                     }
   },
   "CoreGuess" :

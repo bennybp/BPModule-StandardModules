@@ -3,6 +3,7 @@ set(BPTEST_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/SCF_Common.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/CoreGuess.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/HFIterate.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/BasicFockBuild.cpp
  )
 
 set(BPMETHODS_SRC

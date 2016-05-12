@@ -1,5 +1,5 @@
-#ifndef BPTEST_COMMON_HPP
-#define BPTEST_COMMON_HPP
+#ifndef PULSAR_GUARD_SCF__SCF_COMMON_HPP_
+#define PULSAR_GUARD_SCF__SCF_COMMON_HPP_
 
 #include <pulsar/modulebase/All.hpp>
 #include <pulsar/modulemanager/ModulePtr.hpp>

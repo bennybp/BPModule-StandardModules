@@ -2,6 +2,7 @@
 #include "Methods/SCF/SCF_Common.hpp"
 
 using namespace pulsar::datastore;
+using namespace pulsar::modulebase;
 using namespace pulsar::system;
 using namespace pulsar::math;
 using namespace pulsar::exception;
@@ -33,6 +34,65 @@ static double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatri
     return sqrt(rms);
 }
 
+void BPTest::Initialize_(const System & sys, const std::string & bstag)
+{
+    const BasisSet bs = sys.GetBasisSet(bstag);
+
+    ///////////////////////////////////////////
+    // Load the one electron integral matrices
+    // (and nuclear repulsion)
+    ///////////////////////////////////////////
+    // Nuclear repulsion
+    auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
+    size_t n = mod_nuc_rep->Calculate(0, sys, &nucrep_, 1);
+
+    ////////////////////////////
+    // One-electron hamiltonian
+    auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
+    mod_ao_core->SetBases(sys, bstag, bstag);
+    Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
+
+
+    initialized_ = true;
+}
+
+
+double BPTest::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
+                                const IrrepSpinMatrixD & Fmat)
+{
+    // calculate the energy
+    double energy = 0.0;
+    double oneelectron = 0.0;
+    double twoelectron = 0.0;
+
+    for(auto ir : Dmat.GetIrreps())
+    for(auto s : Dmat.GetSpins(ir))
+    {
+        const SimpleMatrixD & d = Dmat.Get(ir, s);
+        const SimpleMatrixD & f = Fmat.Get(ir, s);
+
+        for(size_t i = 0; i < d.NRows(); i++)
+        for(size_t j = 0; j < d.NCols(); j++)
+        {
+            oneelectron += d(i,j) * Hcore_(i,j);
+            twoelectron += 0.5 * d(i,j) * f(i,j);
+        }
+    }
+
+    twoelectron -= 0.5*oneelectron;
+    energy = oneelectron + twoelectron;
+
+    out.Output("            One electron: %16.8e\n", oneelectron);
+    out.Output("            Two electron: %16.8e\n", twoelectron);
+    out.Output("        Total Electronic: %16.8e\n", energy);
+    out.Output("       Nuclear Repulsion: %16.8e\n", nucrep_);
+
+    energy += nucrep_;
+    out.Output("            Total energy: %16.8e\n", energy);
+
+    return energy;
+}
+
 
 
 BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
@@ -46,6 +106,9 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     // get the basis set
     const System & sys = *(wfn.system);
     std::string bstag = Options().Get<std::string>("BASIS_SET");
+
+    if(!initialized_)
+        Initialize_(*wfn.system, bstag);
 
     out.Output("Obtaining basis set %? from system\n", bstag);
     const BasisSet bs = sys.GetBasisSet(bstag);
@@ -104,6 +167,11 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     //////////////////////////////////////////////////////////////////
     // Actual SCF Procedure
     //////////////////////////////////////////////////////////////////
+    // Load and set up the iterator  and fockbuild modules
+    auto mod_iter = CreateChildFromOption<SCFIterator>("KEY_SCF_ITERATOR");
+    auto mod_fock = CreateChildFromOption<FockBuilder>("KEY_FOCK_BUILDER");
+
+
     // Storing the results of the previous iterations
     // (right now, this is the initial guess)
     Wavefunction lastwfn = initial_wfn;
@@ -115,8 +183,7 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     // The last density
     IrrepSpinMatrixD lastdens = FormDensity(*lastwfn.cmat, *lastwfn.occupations);
 
-    // Load and set up the iterator module
-    auto mod_iter = CreateChildFromOption<EnergyMethod>("KEY_SCF_ITERATOR");
+
 
     // Start the SCF procedure
     size_t iter = 0;
@@ -124,23 +191,29 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     {
         iter++; 
 
+        // The Fock matrix
+        IrrepSpinMatrixD Fmat = mod_fock->Build(lastwfn);
+
         // Iterate, making a new wavefunction
-        auto iterate_ret = mod_iter->Energy(lastwfn);
+        Wavefunction newwfn = mod_iter->Next(lastwfn, Fmat);
 
-        // New energy
-        last_energy = current_energy;
-        current_energy = iterate_ret.second;
-        lastwfn = iterate_ret.first;
+        // Form the new density and calculate the energy
+        IrrepSpinMatrixD dens = FormDensity(*newwfn.cmat, *newwfn.occupations);
+        current_energy = CalculateEnergy_(dens, Fmat);
 
+        // store the energy for next time
         energy_diff = current_energy - last_energy;
+        last_energy = current_energy;
 
-        // Form the density and calculate the RMS difference
+        // Store this wfn as the last one
+        lastwfn = newwfn;
+
         // Note - we've already set lastwfn equal to the new iteration
-        IrrepSpinMatrixD dens = FormDensity(*lastwfn.cmat, *lastwfn.occupations);
         dens_diff = CalculateRMSDens(dens, lastdens);
 
         // store the new density
         lastdens = std::move(dens); 
+
 
         out.Output("%5?  %16.8e  %16.8e  %16.8e\n",
                     iter, current_energy, energy_diff, dens_diff);

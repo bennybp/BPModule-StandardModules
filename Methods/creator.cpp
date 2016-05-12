@@ -5,6 +5,7 @@
 #include "Methods/SCF/BPTest.hpp"
 #include "Methods/SCF/HFIterate.hpp"
 #include "Methods/SCF/CoreGuess.hpp"
+#include "Methods/SCF/BasicFockBuild.hpp"
 
 
 using pulsar::modulemanager::ModuleCreationFuncs;
@@ -20,6 +21,7 @@ ModuleCreationFuncs InsertSupermodule(void){
     cf.AddCppCreator<pulsarmethods::BPTest>("BPTest");
     cf.AddCppCreator<pulsarmethods::HFIterate>("HFIterate");
     cf.AddCppCreator<pulsarmethods::CoreGuess>("CoreGuess");
+    cf.AddCppCreator<pulsarmethods::BasicFockBuild>("BasicFockBuild");
     return cf;
 }
 
