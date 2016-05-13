@@ -162,6 +162,7 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     double etol = Options().Get<double>("E_TOLERANCE");
     size_t maxniter = Options().Get<size_t>("MAX_ITER");
     double dtol = Options().Get<double>("DENS_TOLERANCE");
+    double damp = Options().Get<double>("DAMPING_FACTOR");
 
 
     //////////////////////////////////////////////////////////////////
@@ -182,6 +183,7 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
 
     // The last density
     IrrepSpinMatrixD lastdens = FormDensity(*lastwfn.cmat, *lastwfn.occupations);
+    IrrepSpinMatrixD lastfmat;
 
 
 
@@ -194,11 +196,31 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
         // The Fock matrix
         IrrepSpinMatrixD Fmat = mod_fock->Build(lastwfn);
 
+        // apply damping if we are past the first iteration
+        if(iter > 1)
+        {
+            for(auto ir : Fmat.GetIrreps())
+            for(auto s : Fmat.GetSpins(ir))
+            {
+                auto & m = Fmat.Get(ir, s);
+                const auto & lastm = lastfmat.Get(ir, s);
+
+                for(size_t i = 0; i < m.NRows(); i++)
+                for(size_t j = 0; j < m.NCols(); j++)
+                    m(i,j) = damp*lastm(i,j) + (1.0-damp)*m(i,j);
+
+            }
+
+        } 
+
         // Iterate, making a new wavefunction
         Wavefunction newwfn = mod_iter->Next(lastwfn, Fmat);
 
         // Form the new density and calculate the energy
-        IrrepSpinMatrixD dens = FormDensity(*newwfn.cmat, *newwfn.occupations);
+        if(!newwfn.opdm)
+            throw GeneralException("Returned wfn doesn't have opdm");
+
+        const IrrepSpinMatrixD dens = *newwfn.opdm;
         current_energy = CalculateEnergy_(dens, Fmat);
 
         // store the energy for next time
@@ -213,6 +235,7 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
 
         // store the new density
         lastdens = std::move(dens); 
+        lastfmat = std::move(Fmat);
 
 
         out.Output("%5?  %16.8e  %16.8e  %16.8e\n",
@@ -221,6 +244,8 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
     } while(fabs(energy_diff) > etol &&
             dens_diff > dtol &&
             iter < maxniter);
+
+    //! \todo form C if only opdm is set in final wfn?
 
     // What are we returning 
     return {std::move(lastwfn), {current_energy}};

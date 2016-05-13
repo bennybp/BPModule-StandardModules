@@ -1,4 +1,5 @@
 from pulsar.datastore import OptionType
+from pulsar.datastore.OptionValidators import *
 
 MethodOption=(OptionType.String,None,True,None,
                     'The key of the method that should be used to compute the '\
@@ -220,6 +221,8 @@ minfo = {
                             "Key of the core builder module to use"),
                         "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
                             "Key of the nuclear repulsion module to use"),
+                        "DAMPING_FACTOR": (OptionType.Float, 0.0, False, RangeCheck(0.0, 1.0, True, False),
+                            "Amount of old fock matrix to use in constructing new fock matrix"),
                     }
   },
   "CoreGuess" :

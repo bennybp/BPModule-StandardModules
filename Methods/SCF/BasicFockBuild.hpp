@@ -23,7 +23,7 @@ class BasicFockBuild : public pulsar::modulebase::FockBuilder
         Eigen::MatrixXd S12_;
         Eigen::MatrixXd Hcore_;
 
-        void Initialize_(const pulsar::system::System & sys, const std::string & bstag);
+        void Initialize_(const pulsar::datastore::Wavefunction & wfn);
 };
 
 }

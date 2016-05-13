@@ -37,10 +37,6 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     std::string bstag = Options().Get<std::string>("BASIS_SET");
 
     const BasisSet bs = sys.GetBasisSet(bstag);
-    size_t nao = bs.NFunctions();
-    size_t nshell = bs.NShell();
-    size_t maxnfunc = bs.MaxNFunctions();
-    size_t maxnfunc2 = maxnfunc * maxnfunc;
 
 
     ///////////////////////////////////////////
@@ -155,6 +151,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     Wavefunction newwfn;
     newwfn.system = wfn.system;
     newwfn.cmat = std::make_shared<const IrrepSpinMatrixD>(std::move(cmat));
+    newwfn.opdm = std::make_shared<const IrrepSpinMatrixD>(std::move(dmat));
     newwfn.occupations = std::make_shared<const IrrepSpinVectorD>(std::move(occ));
     newwfn.epsilon = std::make_shared<const IrrepSpinVectorD>(std::move(epsilon));
 

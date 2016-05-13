@@ -130,28 +130,20 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 }
 
 
-BlockedEigenMatrix FormDensity(const BlockedEigenMatrix & Cmat,
-                               const BlockedEigenVector & occ)
+SimpleMatrixD FormDensity(const SimpleMatrixD & Cmat,
+                          const SimpleVectorD & occ)
 {
-    BlockedEigenMatrix Dmat;
+    SimpleMatrixD d(Cmat.NRows(), Cmat.NCols());
 
-    for(auto s : Cmat.GetSpins(Irrep::A))
+    for(size_t i = 0; i < Cmat.NRows(); i++)
+    for(size_t j = 0; j < Cmat.NCols(); j++)
     {
-        const MatrixXd & c = Cmat.Get(Irrep::A, s);
-        const VectorXd & o = occ.Get(Irrep::A, s);
-
-        MatrixXd d(c.rows(), c.cols());
-        for(size_t i = 0; i < c.rows(); i++)
-        for(size_t j = 0; j < c.cols(); j++)
-        {
-            d(i,j) = 0.0;
-            for(size_t m = 0; m < o.size(); m++)
-                d(i,j) += o(m) * c(i,m) * c(j,m);
-        }
-        Dmat.Take(Irrep::A, s, std::move(d));
+        d(i,j) = 0.0;
+        for(size_t m = 0; m < occ.Size(); m++)
+           d(i,j) += occ(m) * Cmat(i,m) * Cmat(j,m);
     }
 
-    return Dmat;
+    return d;
 }
 
 
@@ -160,20 +152,13 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
 {
     IrrepSpinMatrixD Dmat;
 
-    for(auto s : Cmat.GetSpins(Irrep::A))
+    for(auto ir : Cmat.GetIrreps())
+    for(auto s : Cmat.GetSpins(ir))
     {
-        const SimpleMatrixD & c = Cmat.Get(Irrep::A, s);
-        const SimpleVectorD & o = occ.Get(Irrep::A, s);
+        const SimpleMatrixD & c = Cmat.Get(ir, s);
+        const SimpleVectorD & o = occ.Get(ir, s);
 
-        SimpleMatrixD d(c.NRows(), c.NCols());
-        for(size_t i = 0; i < c.NRows(); i++)
-        for(size_t j = 0; j < c.NCols(); j++)
-        {
-            d(i,j) = 0.0;
-            for(size_t m = 0; m < o.Size(); m++)
-                d(i,j) += o(m) * c(i,m) * c(j,m);
-        }
-        Dmat.Take(Irrep::A, s, std::move(d));
+        Dmat.Take(ir, s, FormDensity(c, o));
     }
 
     return Dmat;

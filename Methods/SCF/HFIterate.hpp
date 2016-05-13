@@ -21,7 +21,7 @@ class HFIterate : public pulsar::modulebase::SCFIterator
         bool initialized_;
         Eigen::MatrixXd S12_;
 
-        void Initialize_(const pulsar::system::System & sys, const std::string & bstag);
+        void Initialize_(const pulsar::datastore::Wavefunction & wfn);
 };
 
 }

@@ -52,8 +52,15 @@ BlockedEigenMatrix BuildFock(const IrrepSpinMatrixD & Dmat,
 }
 
 
-void BasicFockBuild::Initialize_(const System & sys, const std::string & bstag)
+void BasicFockBuild::Initialize_(const Wavefunction & wfn)
 {
+    if(!wfn.system)
+        throw GeneralException("System is not set!");
+
+    // get the basis set
+    const System & sys = *(wfn.system);
+    std::string bstag = Options().Get<std::string>("BASIS_SET");
+
     out.Output("Obtaining basis set %? from system\n", bstag);
     const BasisSet bs = sys.GetBasisSet(bstag);
 
@@ -91,40 +98,26 @@ void BasicFockBuild::Initialize_(const System & sys, const std::string & bstag)
     mod_ao_core->SetBases(sys, bstag, bstag);
     Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
 
-
     initialized_ = true;
 }
 
 
 IrrepSpinMatrixD BasicFockBuild::Build_(const Wavefunction & wfn)
 {
-    if(!wfn.system)
-        throw GeneralException("System is not set!");
-
-    // get the basis set
-    const System & sys = *(wfn.system);
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
+    // has the density been set
+    if(!wfn.opdm)
+        throw GeneralException("Missing OPDM");
 
     if(!initialized_)
-        Initialize_(*wfn.system, bstag);
+        Initialize_(wfn);
 
-    // c-matrices have been set. Make sure we have occupations, etc, as well
-    if(!wfn.cmat)
-        throw GeneralException("Missing C matrix");
-    if(!wfn.occupations)
-        throw GeneralException("Missing Occupations");
-
-
-    // Calculate the density
-    IrrepSpinMatrixD Dmat = FormDensity(*wfn.cmat, *wfn.occupations);
-
-    // build the fock matrix
+    // the fock matrix we are returning
     IrrepSpinMatrixD Fmat;
 
-    for(auto ir : Dmat.GetIrreps())
-    for(auto s : Dmat.GetSpins(ir))
+    for(auto ir : wfn.opdm->GetIrreps())
+    for(auto s : wfn.opdm->GetSpins(ir))
     {
-        MappedConstMatrix D = MapConstSimpleMatrix(Dmat.Get(ir,s));
+        MappedConstMatrix D = MapConstSimpleMatrix(wfn.opdm->Get(ir,s));
 
         SimpleMatrixD simpleF(D.rows(), D.cols());
         MappedMatrix F = MapSimpleMatrix(simpleF);

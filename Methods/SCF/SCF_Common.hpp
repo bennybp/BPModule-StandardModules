@@ -34,12 +34,13 @@ std::vector<double>
 FillTwoElectronVector(pulsar::modulemanager::ModulePtr<pulsar::modulebase::TwoElectronIntegral> & mod,
                       const pulsar::system::BasisSet & bs);
 
-BlockedEigenMatrix
-FormDensity(const BlockedEigenMatrix & Cmat, const BlockedEigenVector & occ);
-
 pulsar::math::IrrepSpinMatrixD
 FormDensity(const pulsar::math::IrrepSpinMatrixD & Cmat, const pulsar::math::IrrepSpinVectorD & occ);
 
+
+pulsar::math::SimpleMatrixD
+FormDensity(const pulsar::math::SimpleMatrixD & Cmat,
+            const pulsar::math::SimpleVectorD & occ);
 
 pulsar::math::IrrepSpinVectorD FindOccupations(size_t nelec);
 
