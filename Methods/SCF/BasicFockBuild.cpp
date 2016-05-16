@@ -79,30 +79,66 @@ IrrepSpinMatrixD BasicFockBuild::Build_(const Wavefunction & wfn)
     IrrepSpinMatrixD Fmat;
 
     for(auto ir : wfn.opdm->GetIrreps())
-    for(auto s : wfn.opdm->GetSpins(ir))
     {
-        MappedConstMatrix D = MapConstSimpleMatrix(wfn.opdm->Get(ir,s));
-
-        SimpleMatrixD simpleF(D.rows(), D.cols());
-        MappedMatrix F = MapSimpleMatrix(simpleF);
-        F = Hcore_;
-
-        size_t nao1 = Hcore_.rows();
-        size_t nao2 = Hcore_.cols();
-
-        for(size_t mu = 0; mu < nao1; mu++)
-        for(size_t nu = 0; nu < nao2; nu++)
+        const auto & spins = wfn.opdm->GetSpins(ir);
+        if(spins == std::set<int>{0})
         {
-            for(size_t lambda = 0; lambda < nao1; lambda++)
-            for(size_t sigma = 0; sigma < nao2; sigma++)
-            {
-                size_t mnls = INDEX4(mu, nu, lambda, sigma);
-                size_t mlns = INDEX4(mu, lambda, nu, sigma);
-                F(mu, nu) += 0.5*D(lambda, sigma) * (2*eri_.at(mnls)-eri_.at(mlns));
-            }
-        }
+            // Restricted
+            MappedConstMatrix D = MapConstSimpleMatrix(wfn.opdm->Get(ir,0));
 
-        Fmat.Take(ir, s, std::move(simpleF));
+            SimpleMatrixD simpleF(D.rows(), D.cols());
+            MappedMatrix F = MapSimpleMatrix(simpleF);
+            F = Hcore_;
+
+            size_t nao1 = Hcore_.rows();
+            size_t nao2 = Hcore_.cols();
+
+            for(size_t mu = 0; mu < nao1; mu++)
+            for(size_t nu = 0; nu < nao2; nu++)
+            {
+                for(size_t lambda = 0; lambda < nao1; lambda++)
+                for(size_t sigma = 0; sigma < nao2; sigma++)
+                {
+                    size_t mnls = INDEX4(mu, nu, lambda, sigma);
+                    size_t mlns = INDEX4(mu, lambda, nu, sigma);
+                    F(mu, nu) += 0.5*D(lambda, sigma) * (2*eri_.at(mnls)-eri_.at(mlns));
+                }
+            }
+
+            Fmat.Take(ir, 0, std::move(simpleF));
+        }
+        else
+        {
+            // unrestricted
+            MappedConstMatrix Dalpha = MapConstSimpleMatrix(wfn.opdm->Get(ir, 1));
+            MappedConstMatrix Dbeta = MapConstSimpleMatrix(wfn.opdm->Get(ir, -1));
+
+            SimpleMatrixD simpleFalpha(Dalpha.rows(), Dalpha.cols());
+            SimpleMatrixD simpleFbeta(Dbeta.rows(), Dbeta.cols());
+            MappedMatrix Falpha = MapSimpleMatrix(simpleFalpha);
+            MappedMatrix Fbeta = MapSimpleMatrix(simpleFbeta);
+            Falpha = Hcore_;
+            Fbeta = Hcore_;
+
+            size_t nao1 = Hcore_.rows();
+            size_t nao2 = Hcore_.cols();
+
+            for(size_t mu = 0; mu < nao1; mu++)
+            for(size_t nu = 0; nu < nao2; nu++)
+            {
+                for(size_t lambda = 0; lambda < nao1; lambda++)
+                for(size_t sigma = 0; sigma < nao2; sigma++)
+                {
+                    size_t mnls = INDEX4(mu, nu, lambda, sigma);
+                    size_t mlns = INDEX4(mu, lambda, nu, sigma);
+                    Falpha(mu, nu) += (Dalpha(lambda, sigma) * (eri_.at(mnls)-eri_.at(mlns)) + Dbeta(lambda, sigma)*eri_.at(mnls));
+                    Fbeta(mu, nu) += (Dbeta(lambda, sigma) * (eri_.at(mnls)-eri_.at(mlns)) + Dalpha(lambda, sigma)*eri_.at(mnls));
+                }
+            }
+
+            Fmat.Take(ir, 1, std::move(simpleFalpha));
+            Fmat.Take(ir, -1, std::move(simpleFbeta));
+        }
     }
 
     return Fmat;

@@ -111,7 +111,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
 
     // Calculate the initial Density
     for(auto ir : cmat.GetIrreps())
-    for(auto s : cmat.GetSpins(Irrep::A))
+    for(auto s : cmat.GetSpins(ir))
     {
         const auto & c = cmat.Get(ir, s);
         const auto & o = occ.Get(ir, s);
