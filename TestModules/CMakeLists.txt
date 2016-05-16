@@ -17,6 +17,7 @@ set (TESTMODULES_PYFILES creator.py
 
 
 add_library(TestModules MODULE ${TESTMODULES_FILES})
+target_compile_options(TestModules PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
 
 target_link_libraries(TestModules dynlib staticlib pulsar)
 

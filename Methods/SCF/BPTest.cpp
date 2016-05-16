@@ -44,7 +44,7 @@ void BPTest::Initialize_(const System & sys, const std::string & bstag)
     ///////////////////////////////////////////
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
-    size_t n = mod_nuc_rep->Calculate(0, sys, &nucrep_, 1);
+    mod_nuc_rep->Calculate(0, sys, &nucrep_, 1);
 
     ////////////////////////////
     // One-electron hamiltonian
@@ -112,10 +112,6 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
 
     out.Output("Obtaining basis set %? from system\n", bstag);
     const BasisSet bs = sys.GetBasisSet(bstag);
-    size_t nao = bs.NFunctions();
-    size_t nshell = bs.NShell();
-    size_t maxnfunc = bs.MaxNFunctions();
-    size_t maxnfunc2 = maxnfunc * maxnfunc;
     bs.Print(out);
   
     //////////////////////////////////////////////////////

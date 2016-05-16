@@ -45,8 +45,6 @@ uint64_t ReferenceERI::Calculate_(size_t deriv,
     const BasisSetShell & sh4 = bs4_->Shell(shell4);
 
     size_t nfunc = sh1.NFunctions() * sh2.NFunctions() * sh3.NFunctions() * sh4.NFunctions();
-    size_t ncart =   NCartesianGaussianInShell(sh1) * NCartesianGaussianInShell(sh2)
-                   * NCartesianGaussianInShell(sh2) * NCartesianGaussianInShell(sh4);
 
     if(bufsize < nfunc)
         throw GeneralException("Buffer to small for ERI", "bufsize", bufsize, "nfunc", nfunc);

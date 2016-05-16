@@ -13,6 +13,7 @@ set (ONEELECTRONINTEGRALS_PYFILES
 add_library(OneElectronIntegrals MODULE ${ONEELECTRONINTEGRALS_FILES})
 
 target_link_libraries(OneElectronIntegrals pulsar Integral_Common)
+target_compile_options(OneElectronIntegrals PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
 
 install(TARGETS OneElectronIntegrals LIBRARY DESTINATION OneElectronIntegrals
                                      RUNTIME DESTINATION OneElectronIntegrals)

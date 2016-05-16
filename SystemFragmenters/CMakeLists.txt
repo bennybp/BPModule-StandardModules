@@ -6,6 +6,7 @@ set(SYSTEMFRAG_FILES creator.cpp
    )
 
 add_library(SystemFragmenters MODULE ${SYSTEMFRAG_FILES})
+target_compile_options(SystemFragmenters PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
 
 target_link_libraries(SystemFragmenters pulsar)
 

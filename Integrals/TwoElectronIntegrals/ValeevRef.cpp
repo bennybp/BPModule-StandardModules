@@ -72,9 +72,9 @@ static void Valeev_F(double *F, int n, double x)
     if (x > 20.0)   /* For big t's do upward recursion */
     {
         t2 = 2 * x;
-        et = expl(-x);
-        x = sqrtl(x);
-        F[0] = K * erfl(x) / x;
+        et = exp(-x);
+        x = sqrt(x);
+        F[0] = K * erf(x) / x;
         for (m = 0; m <= n - 1; m++)
         {
             F[m + 1] = ((2 * m + 1) * F[m] - et) / (t2);
@@ -86,7 +86,7 @@ static void Valeev_F(double *F, int n, double x)
          asymptotic series (see I. Shavitt in
          Methods in Computational Physics, ed. B. Alder eta l,
          vol 2, 1963, page 8) */
-        et = expl(-x);
+        et = exp(-x);
         t2 = 2 * x;
         m2 = 2 * n;
         num = DoubleFactorialD(m2-1);
@@ -159,10 +159,10 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
     double tmp;
     int u1max, u2max, v1max, v2max, w1max, w2max;
 
-    K1 = expl(-alpha1 * alpha2 * AB2 / gammap);
-    K2 = expl(-alpha3 * alpha4 * CD2 / gammaq);
-    pfac = 2 * powl(PI, 2.5) * K1 * K2 / (gammap * gammaq
-            * sqrtl(gammap + gammaq));
+    K1 = exp(-alpha1 * alpha2 * AB2 / gammap);
+    K2 = exp(-alpha3 * alpha4 * CD2 / gammaq);
+    pfac = 2 * pow(PI, 2.5) * K1 * K2 / (gammap * gammaq
+            * sqrt(gammap + gammaq));
 
     F = init_array(l1 + l2 + l3 + l4 + m1 + m2 + m3 + m4 + n1 + n2 + n3 + n4 + 1);
     Valeev_F(F, l1 + l2 + l3 + l4 + m1 + m2 + m3 + m4 + n1 + n2 + n3 + n4,
@@ -177,9 +177,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                 continue;
             tmp = BinomialCoefficient(l1,i) * BinomialCoefficient(l2,j);
             if (l1 - i > 0)
-                tmp *= powl(PAx, l1 - i);
+                tmp *= pow(PAx, l1 - i);
             if (l2 - j > 0)
-                tmp *= powl(PBx, l2 - j);
+                tmp *= pow(PBx, l2 - j);
             flp[k] += tmp;
         }
     fmp = init_array(m1 + m2 + 1);
@@ -191,9 +191,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                 continue;
             tmp = BinomialCoefficient(m1,i) * BinomialCoefficient(m2,j);
             if (m1 - i > 0)
-                tmp *= powl(PAy, m1 - i);
+                tmp *= pow(PAy, m1 - i);
             if (m2 - j > 0)
-                tmp *= powl(PBy, m2 - j);
+                tmp *= pow(PBy, m2 - j);
             fmp[k] += tmp;
         }
     fnp = init_array(n1 + n2 + 1);
@@ -205,9 +205,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                 continue;
             tmp = BinomialCoefficient(n1,i) * BinomialCoefficient(n2,j);
             if (n1 - i > 0)
-                tmp *= powl(PAz, n1 - i);
+                tmp *= pow(PAz, n1 - i);
             if (n2 - j > 0)
-                tmp *= powl(PBz, n2 - j);
+                tmp *= pow(PBz, n2 - j);
             fnp[k] += tmp;
         }
     flq = init_array(l3 + l4 + 1);
@@ -219,9 +219,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                 continue;
             tmp = BinomialCoefficient(l3,i) * BinomialCoefficient(l4,j);
             if (l3 - i > 0)
-                tmp *= powl(QCx, l3 - i);
+                tmp *= pow(QCx, l3 - i);
             if (l4 - j > 0)
-                tmp *= powl(QDx, l4 - j);
+                tmp *= pow(QDx, l4 - j);
             flq[k] += tmp;
         }
     fmq = init_array(m3 + m4 + 1);
@@ -233,9 +233,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                 continue;
             tmp = BinomialCoefficient(m3,i) * BinomialCoefficient(m4,j);
             if (m3 - i > 0)
-                tmp *= powl(QCy, m3 - i);
+                tmp *= pow(QCy, m3 - i);
             if (m4 - j > 0)
-                tmp *= powl(QDy, m4 - j);
+                tmp *= pow(QDy, m4 - j);
             fmq[k] += tmp;
         }
     fnq = init_array(n3 + n4 + 1);
@@ -247,9 +247,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                 continue;
             tmp = BinomialCoefficient(n3,i) * BinomialCoefficient(n4,j);
             if (n3 - i > 0)
-                tmp *= powl(QCz, n3 - i);
+                tmp *= pow(QCz, n3 - i);
             if (n4 - j > 0)
-                tmp *= powl(QDz, n4 - j);
+                tmp *= pow(QDz, n4 - j);
             fnq[k] += tmp;
         }
 
@@ -261,8 +261,8 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             for (u1 = 0; u1 <= u1max; u1++)
                 for (u2 = 0; u2 <= u2max; u2++)
                 {
-                    Gx = powl(-1, lp) * flp[lp] * flq[lq] * FactorialD(lp) * FactorialD(lq)
-                         * powl(gammap, u1 - lp) * powl(gammaq, u2 - lq) * FactorialD(lp + lq - 2 * u1 - 2 * u2) * powl(gammapq, lp + lq - 2 * u1 - 2 * u2)
+                    Gx = pow(-1, lp) * flp[lp] * flq[lq] * FactorialD(lp) * FactorialD(lq)
+                         * pow(gammap, u1 - lp) * pow(gammaq, u2 - lq) * FactorialD(lp + lq - 2 * u1 - 2 * u2) * pow(gammapq, lp + lq - 2 * u1 - 2 * u2)
                          / (FactorialD(u1) * FactorialD(u2) * FactorialD(lp - 2 * u1) * FactorialD(lq - 2 * u2));
                     for (mp = 0; mp <= m1 + m2; mp++)
                         for (mq = 0; mq <= m3 + m4; mq++)
@@ -272,8 +272,8 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                             for (v1 = 0; v1 <= v1max; v1++)
                                 for (v2 = 0; v2 <= v2max; v2++)
                                 {
-                                    Gy = powl(-1, mp) * fmp[mp] * fmq[mq] * FactorialD(mp) * FactorialD(mq)
-                                         * powl(gammap, v1 - mp) * powl(gammaq, v2 - mq) * FactorialD(mp + mq - 2 * v1 - 2 * v2) * powl(gammapq,
+                                    Gy = pow(-1, mp) * fmp[mp] * fmq[mq] * FactorialD(mp) * FactorialD(mq)
+                                         * pow(gammap, v1 - mp) * pow(gammaq, v2 - mq) * FactorialD(mp + mq - 2 * v1 - 2 * v2) * pow(gammapq,
                                                          mp + mq - 2 * v1 - 2 * v2)
                                          / (FactorialD(v1) * FactorialD(v2) * FactorialD(mp - 2 * v1)
                                             * FactorialD(mq - 2 * v2));
@@ -285,11 +285,11 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                                             for (w1 = 0; w1 <= w1max; w1++)
                                                 for (w2 = 0; w2 <= w2max; w2++)
                                                 {
-                                                    Gz = powl(-1, np) * fnp[np] * fnq[nq] * FactorialD(np)
-                                                         * FactorialD(nq) * powl(gammap, w1 - np) * powl(gammaq,
+                                                    Gz = pow(-1, np) * fnp[np] * fnq[nq] * FactorialD(np)
+                                                         * FactorialD(nq) * pow(gammap, w1 - np) * pow(gammaq,
                                                                  w2 - nq)
                                                          * FactorialD(np + nq - 2 * w1 - 2 * w2)
-                                                         * powl(gammapq, np + nq - 2 * w1 - 2 * w2)
+                                                         * pow(gammapq, np + nq - 2 * w1 - 2 * w2)
                                                          / (FactorialD(w1) * FactorialD(w2) * FactorialD(np - 2 * w1) * FactorialD(nq - 2 * w2));
                                                     txmax = (lp + lq - 2 * u1 - 2 * u2) / 2;
                                                     tymax = (mp + mq - 2 * v1 - 2 * v2) / 2;
@@ -302,21 +302,21 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                                                                        * u2 - 2 * v1 - 2 * v2 - 2 * w1 - 2 * w2
                                                                        - tx - ty - tz;
                                                                 result += Gx * Gy * Gz * F[zeta]
-                                                                          * powl(-1, tx + ty + tz) * powl(
+                                                                          * pow(-1, tx + ty + tz) * pow(
                                                                               PQx,
                                                                               lp + lq - 2
                                                                               * u1 - 2
                                                                               * u2 - 2
                                                                               * tx)
-                                                                          * powl(PQy,
+                                                                          * pow(PQy,
                                                                                 mp + mq - 2 * v1 - 2 * v2 - 2 * ty)
-                                                                          * powl(PQz,
+                                                                          * pow(PQz,
                                                                                 np + nq - 2 * w1 - 2 * w2 - 2 * tz)
-                                                                          / (powl(
+                                                                          / (pow(
                                                                                  4,
                                                                                  u1 + u2 + tx + v1 + v2 + ty + w1
-                                                                                 + w2 + tz) * powl(gammapq, tx)
-                                                                             * powl(gammapq, ty) * powl(gammapq, tz)
+                                                                                 + w2 + tz) * pow(gammapq, tx)
+                                                                             * pow(gammapq, ty) * pow(gammapq, tz)
                                                                              * FactorialD(lp + lq - 2 * u1 - 2 * u2 - 2 * tx) * FactorialD(tx) * FactorialD(mp + mq - 2 * v1 - 2 * v2 - 2 * ty) * FactorialD(ty)
                                                                              * FactorialD(np + nq - 2 * w1 - 2 * w2 - 2 * tz) * FactorialD(tz));
                                                             }

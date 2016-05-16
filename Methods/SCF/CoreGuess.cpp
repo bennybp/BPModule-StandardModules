@@ -46,7 +46,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
     double nucrep;
-    size_t n = mod_nuc_rep->Calculate(0, *wfn.system, &nucrep, 1);
+    mod_nuc_rep->Calculate(0, *wfn.system, &nucrep, 1);
 
     /////////////////////// 
     // Overlap
@@ -60,7 +60,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     VectorXd s_eval = esolve.eigenvalues();
 
     // not sure an easier way to do this
-    for(size_t i = 0; i < s_eval.size(); i++)
+    for(int i = 0; i < s_eval.size(); i++)
         s_eval(i) = 1.0/sqrt(s_eval(i));
 
     // the S^(-1/2) matrix

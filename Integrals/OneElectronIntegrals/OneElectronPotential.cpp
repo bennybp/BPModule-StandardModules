@@ -3,6 +3,7 @@
 #include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 #include <pulsar/math/Factorial.hpp>
+#include <pulsar/math/Cast.hpp>
 #include <pulsar/constants.h>
 
 #include "../Common.hpp"
@@ -92,7 +93,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
                 // boys function
                 const double T = PC2 * p;
                 CalculateF(amwork_[0][0], absam12, T); 
-                for(size_t i = 0; i <= absam12; i++)
+                for(int i = 0; i <= absam12; i++)
                     amwork_[0][0][i] *= 2*PI*oop*exp(-mu*AB2);
 
                 // nested recurrence
@@ -155,7 +156,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
                         const auto & am2info = ::lut::am_recur_map[j];
 
                         // number of cartesians in the previous two shells
-                        const size_t jncart   = NCartesianGaussian(j);
+                        //const size_t jncart   = NCartesianGaussian(j);
                         const size_t jncart_1 = NCartesianGaussian(j-1);   // j can't be zero (loop starts at 1)
                         const size_t jncart_2 = (j > 1) ? NCartesianGaussian(j-2) : 0;
 
@@ -266,8 +267,8 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
     {
         // create the grid from the system
         for(const auto & atom : *sys_)
-            if(atom.GetZ() != 0.0)
-                gu.Insert({atom.GetCoords(), atom.GetZ()});
+            if(atom.GetZ() != 0)
+                gu.Insert({atom.GetCoords(), numeric_cast<double>(atom.GetZ())});
         
     }
     else

@@ -41,7 +41,7 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
     VectorXd s_eval = esolve.eigenvalues();
 
     // not sure an easier way to do this
-    for(size_t i = 0; i < s_eval.size(); i++)
+    for(int i = 0; i < s_eval.size(); i++)
         s_eval(i) = 1.0/sqrt(s_eval(i));
 
     // the S^(-1/2) matrix

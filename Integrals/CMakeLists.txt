@@ -10,7 +10,7 @@ set(INTEGRAL_COMMON_FILES
 
 # See CMAKE bug https://cmake.org/Bug/view.php?id=14778
 add_library(Integral_Common SHARED ${INTEGRAL_COMMON_FILES})
-
+target_compile_options(Integral_Common PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
 target_link_libraries(Integral_Common pulsar)
 
 

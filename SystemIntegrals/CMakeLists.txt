@@ -9,6 +9,7 @@ set (SYSTEMINTEGRALS_PYFILES
 add_library(SystemIntegrals MODULE ${SYSTEMINTEGRALS_FILES})
 
 target_link_libraries(SystemIntegrals pulsar)
+target_compile_options(SystemIntegrals PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
 
 install(TARGETS SystemIntegrals LIBRARY DESTINATION SystemIntegrals
                                 RUNTIME DESTINATION SystemIntegrals)

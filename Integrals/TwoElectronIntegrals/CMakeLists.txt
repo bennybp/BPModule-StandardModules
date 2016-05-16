@@ -10,6 +10,7 @@ set (TWOELECTRONINTEGRALS_PYFILES
 add_library(TwoElectronIntegrals MODULE ${TWOELECTRONINTEGRALS_FILES})
 
 target_link_libraries(TwoElectronIntegrals pulsar Integral_Common)
+target_compile_options(TwoElectronIntegrals PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
 
 install(TARGETS TwoElectronIntegrals LIBRARY DESTINATION TwoElectronIntegrals
                                      RUNTIME DESTINATION TwoElectronIntegrals)

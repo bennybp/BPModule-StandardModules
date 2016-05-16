@@ -10,6 +10,7 @@ using namespace pulsar::modulebase;
 using namespace pulsar::system;
 using namespace pulsar::datastore;
 using namespace pulsar::math;
+using namespace pulsar::exception;
 
 
 namespace pulsarmethods{
@@ -34,19 +35,23 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
     {
         const auto & sh1 = bs.Shell(n1);
         const size_t rowstart = bs.ShellStart(n1);
-        const size_t nfunc1 = sh1.NFunctions();
 
         for(size_t n2 = 0; n2 <= n1; n2++)
         {
             const auto & sh2  = bs.Shell(n2);
             const size_t colstart = bs.ShellStart(n2);
-            const size_t nfunc2 = sh2.NFunctions();
 
             // calculate
             size_t ncalc = mod->Calculate(0, n1, n2, b.data(), maxnfunc2);
 
             // iterate and fill in the matrix
             AOIterator<2> aoit({sh1, sh2}, false);
+
+            // make sure the right number of integrals was returned
+            if(ncalc != aoit.NFunctions())
+                throw GeneralException("Bad number of integrals returned",
+                                       "ncalc", ncalc, "expected", aoit.NFunctions());
+
 
             do {
                 const size_t i = rowstart+aoit.ShellFunctionIdx<0>();
@@ -81,19 +86,16 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
     for(size_t i = 0; i < nshell; i++)
     {
         const auto & sh1 = bs.Shell(i);
-        const size_t ng1 = sh1.NGeneral();
         size_t j_start = 0;
 
         for(size_t j = 0; j <= i; j++)
         {
             const auto & sh2 = bs.Shell(j);
-            const size_t ng2 = sh2.NGeneral();
             size_t k_start = 0;
 
             for(size_t k = 0; k < nshell; k++)
             {
                 const auto & sh3 = bs.Shell(k);
-                const size_t ng3 = sh3.NGeneral();
                 size_t l_start = 0;
 
                 for(size_t l = 0; l <= k; l++)
@@ -102,11 +104,15 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
                         continue;
 
                     const auto & sh4 = bs.Shell(l);
-                    const size_t ng4 = sh4.NGeneral();
 
                     uint64_t ncalc = mod->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
 
                     AOIterator<4> aoit({sh1, sh2, sh3, sh4}, false);
+
+                    // make sure the right number of integrals was returned
+                    if(ncalc != aoit.NFunctions())
+                        throw GeneralException("Bad number of integrals returned",
+                                               "ncalc", ncalc, "expected", aoit.NFunctions());
 
                     do { 
                         const size_t full_i = i_start+aoit.ShellFunctionIdx<0>();
@@ -200,8 +206,8 @@ SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m)
 {
     // eigen stores in column major by default
     SimpleMatrixD s(m.rows(), m.cols());
-    for(size_t i = 0; i < m.rows(); i++)
-    for(size_t j = 0; j < m.cols(); j++)
+    for(int i = 0; i < m.rows(); i++)
+    for(int j = 0; j < m.cols(); j++)
         s(i,j) = m(i,j);
     return s;
 }

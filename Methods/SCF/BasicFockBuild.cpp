@@ -16,42 +16,6 @@ using namespace pulsar::modulebase;
 namespace pulsarmethods {
 
 
-static
-BlockedEigenMatrix BuildFock(const IrrepSpinMatrixD & Dmat,
-                             const MatrixXd & Hcore,
-                             const std::vector<double> & eri)
-{
-    BlockedEigenMatrix Fmat;
-
-    for(auto ir : Dmat.GetIrreps())
-    for(auto s : Dmat.GetSpins(ir))
-    {
-        MappedConstMatrix D = MapConstSimpleMatrix(Dmat.Get(ir,s));
-
-        MatrixXd F = Hcore;
-
-        size_t nao1 = Hcore.rows();
-        size_t nao2 = Hcore.cols();
-
-        for(size_t mu = 0; mu < nao1; mu++)
-        for(size_t nu = 0; nu < nao2; nu++)
-        {
-            for(size_t lambda = 0; lambda < nao1; lambda++)
-            for(size_t sigma = 0; sigma < nao2; sigma++)
-            {
-                size_t mnls = INDEX4(mu, nu, lambda, sigma);
-                size_t mlns = INDEX4(mu, lambda, nu, sigma);
-                F(mu, nu) += 0.5*D(lambda, sigma) * (2*eri.at(mnls)-eri.at(mlns));
-            }
-        }
-
-        Fmat.Take(ir, s, std::move(F));
-    }
-
-    return Fmat;
-}
-
-
 void BasicFockBuild::Initialize_(const Wavefunction & wfn)
 {
     if(!wfn.system)
@@ -85,7 +49,7 @@ void BasicFockBuild::Initialize_(const Wavefunction & wfn)
     VectorXd s_eval = esolve.eigenvalues();
 
     // not sure an easier way to do this
-    for(size_t i = 0; i < s_eval.size(); i++)
+    for(int i = 0; i < s_eval.size(); i++)
         s_eval(i) = 1.0/sqrt(s_eval(i));
 
     // the S^(-1/2) matrix
