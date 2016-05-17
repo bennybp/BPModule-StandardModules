@@ -259,5 +259,29 @@ MappedConstVector MapConstSimpleVector(const SimpleVectorD & v)
     return MappedConstVector(v.Data(), v.Size());
 }
 
+double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2)
+{
+    if(!m1.SameStructure(m2))
+        throw GeneralException("Density matrices have different structure");
+
+    double rms = 0.0;
+
+    for(Irrep ir : m1.GetIrreps())
+    for(int spin : m1.GetSpins(ir))
+    {
+        const auto & mat1 = m1.Get(ir, spin);
+        const auto & mat2 = m2.Get(ir, spin);
+
+        for(size_t i = 0; i < mat1.NRows(); i++)
+        for(size_t j = 0; j < mat1.NCols(); j++)
+        {
+            const double diff = mat1(i,j) - mat2(i,j);
+            rms += diff*diff;
+        }
+    }
+
+    return sqrt(rms);
+}
+
 
 }//End namespace

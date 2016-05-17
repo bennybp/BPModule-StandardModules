@@ -60,6 +60,9 @@ MappedVector MapSimpleVector(pulsar::math::SimpleVectorD & v);
 
 MappedConstVector MapConstSimpleVector(const pulsar::math::SimpleVectorD & v);
 
+double CalculateRMSDens(const pulsar::math::IrrepSpinMatrixD & m1,
+                        const pulsar::math::IrrepSpinMatrixD & m2);
+
 
 } // close namespace pulsarmethods
 

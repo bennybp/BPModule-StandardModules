@@ -1,4 +1,4 @@
-#include "Methods/SCF/BPTest.hpp"
+#include "Methods/SCF/Damping.hpp"
 #include "Methods/SCF/SCF_Common.hpp"
 
 using namespace pulsar::datastore;
@@ -10,31 +10,7 @@ using namespace pulsar::exception;
 
 namespace pulsarmethods {
 
-static double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2)
-{
-    if(!m1.SameStructure(m2))
-        throw GeneralException("Density matrices have different structure");
-
-    double rms = 0.0;
-
-    for(Irrep ir : m1.GetIrreps())
-    for(int spin : m1.GetSpins(ir))
-    {
-        const auto & mat1 = m1.Get(ir, spin);
-        const auto & mat2 = m2.Get(ir, spin);
-
-        for(size_t i = 0; i < mat1.NRows(); i++)
-        for(size_t j = 0; j < mat1.NCols(); j++)
-        {
-            const double diff = mat1(i,j) - mat2(i,j);
-            rms += diff*diff;
-        }
-    }
-
-    return sqrt(rms);
-}
-
-void BPTest::Initialize_(const System & sys, const std::string & bstag)
+void Damping::Initialize_(const System & sys, const std::string & bstag)
 {
     const BasisSet bs = sys.GetBasisSet(bstag);
 
@@ -57,7 +33,7 @@ void BPTest::Initialize_(const System & sys, const std::string & bstag)
 }
 
 
-double BPTest::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
+double Damping::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
                                 const IrrepSpinMatrixD & Fmat)
 {
     // calculate the energy
@@ -95,7 +71,7 @@ double BPTest::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
 
 
 
-BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
+Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
 {
     if(order != 0)
         throw NotYetImplementedException("Test with deriv != 0");
@@ -237,7 +213,7 @@ BPTest::DerivReturnType BPTest::Deriv_(size_t order, const Wavefunction & wfn)
         out.Output("%5?  %16.8e  %16.8e  %16.8e\n",
                     iter, current_energy, energy_diff, dens_diff);
 
-    } while(fabs(energy_diff) > etol &&
+    } while(fabs(energy_diff) > etol ||
             dens_diff > dtol &&
             iter < maxniter);
 

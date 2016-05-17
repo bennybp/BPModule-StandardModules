@@ -197,7 +197,7 @@ minfo = {
 
                     }
   },
-  "BPTest" :
+  "Damping" :
   {
     "type"        : "c_module",
     "base"        : "EnergyMethod",
@@ -223,6 +223,34 @@ minfo = {
                             "Key of the nuclear repulsion module to use"),
                         "DAMPING_FACTOR": (OptionType.Float, 0.0, False, RangeCheck(0.0, 1.0, True, False),
                             "Amount of old fock matrix to use in constructing new fock matrix"),
+                    }
+  },
+  "DIIS" :
+  {
+    "type"        : "c_module",
+    "base"        : "EnergyMethod",
+    "modpath"     : "Methods.so",
+    "version"     : "0.1a",
+    "description" : "Quick HF test calculation",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [""],
+    "options"     : {
+                        "KEY_INITIAL_GUESS": (OptionType.String, None, False, None,
+                            "Key for the initial guess module"),
+                        "KEY_SCF_ITERATOR": (OptionType.String, None, True, None,
+                            "Key of the iterator module to use"),
+                        "KEY_FOCK_BUILDER": (OptionType.String, None, True, None,
+                            "Key of the fock builder module to use"),
+                        "MAX_ITER": (OptionType.Int, 40, False, None,
+                            "Key of the ao electron repulsion integral module to use"),
+                        "DENS_TOLERANCE": (OptionType.Float, 1e-8, False, None,
+                            "Maximum value for the change in density"),
+                        "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
+                            "Key of the core builder module to use"),
+                        "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
+                            "Key of the nuclear repulsion module to use"),
+                        "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
+                            "Key of the ao overlap module to use"),
                     }
   },
   "CoreGuess" :
