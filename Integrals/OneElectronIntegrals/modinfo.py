@@ -1,4 +1,5 @@
 from pulsar.datastore import OptionType
+from pulsar.datastore.OptionValidators import *
 
 minfo = {
 
@@ -12,6 +13,8 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
+                        "TYPE": ( OptionType.String, None, True, InList(["OVERLAP", "DIPOLE_X", "DIPOLE_Y", "DIPOLE_Z"]),
+                                  "Type of integral to calculate"),
                     }
   },
 
@@ -38,7 +41,7 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
-                        "grid":   ( OptionType.String,  None, True, None,  "Grid of point charges to calculate the potential with" )
+                        "GRID":   ( OptionType.String,  None, True, None,  "Grid of point charges to calculate the potential with" )
                     }
   },
 

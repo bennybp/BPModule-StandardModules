@@ -1,5 +1,6 @@
 set(SYSTEMINTEGRALS_FILES creator.cpp
                           NuclearRepulsion.cpp
+                          NuclearDipole.cpp
    )
 
 set (SYSTEMINTEGRALS_PYFILES

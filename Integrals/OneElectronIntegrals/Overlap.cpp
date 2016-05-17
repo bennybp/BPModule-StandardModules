@@ -70,8 +70,28 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
 
     // Used for dimensioning and loops. Storage goes from
     // [0, am], so we need to add one.
-    const int nam1 = std::abs(am1) + 1;
-    const int nam2 = std::abs(am2) + 1;
+    int nam1 = std::abs(am1) + 1;
+    int nam2 = std::abs(am2) + 1;
+
+    // are we calculating a dipole integral?
+    bool isdipole = ( inttype_ == IntegralType_::Dipole_x ||
+                      inttype_ == IntegralType_::Dipole_y ||
+                      inttype_ == IntegralType_::Dipole_z );
+
+    // offset due to the dipole operator (ie, are we incrementing x, y, or z)
+    std::array<int, 3> dipoff{0, 0, 0};
+
+    if(isdipole)
+    {
+        nam2++; // need one more due to the dipole operator
+
+        if(inttype_ == IntegralType_::Dipole_x)
+            dipoff[0]++;
+        else if(inttype_ == IntegralType_::Dipole_y)
+            dipoff[1]++;
+        else if(inttype_ == IntegralType_::Dipole_z)
+            dipoff[2]++;
+    }
 
     // We need to zero the workspace. Actually, not all of it,
     // but this is easier
@@ -164,9 +184,9 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
                 for(const IJK & ijk1 : *(sh1_ordering[g1]))
                 for(const IJK & ijk2 : *(sh2_ordering[g2]))
                 {
-                    const int xidx = ijk1[0]*nam2 + ijk2[0];
-                    const int yidx = ijk1[1]*nam2 + ijk2[1];
-                    const int zidx = ijk1[2]*nam2 + ijk2[2];
+                    const int xidx = ijk1[0]*nam2 + ( ijk2[0] + dipoff[0] );
+                    const int yidx = ijk1[1]*nam2 + ( ijk2[1] + dipoff[1] );
+                    const int zidx = ijk1[2]*nam2 + ( ijk2[2] + dipoff[2] );
 
                     const double val = xyzwork_[0][xidx] *
                                        xyzwork_[1][yidx] *
@@ -190,6 +210,19 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
 void Overlap::SetBases_(const System & sys,
                         const std::string & bs1, const std::string & bs2)
 {
+    // determine the integral we are calculating
+    std::string inttype_str = Options().Get<std::string>("TYPE");
+    if(inttype_str == "OVERLAP")
+        inttype_ = IntegralType_::Overlap;
+    else if(inttype_str == "DIPOLE_X")
+        inttype_ = IntegralType_::Dipole_x;
+    else if(inttype_str == "DIPOLE_Y")
+        inttype_ = IntegralType_::Dipole_y;
+    else if(inttype_str == "DIPOLE_Z")
+        inttype_ = IntegralType_::Dipole_z;
+    else
+        throw GeneralException("Unknown integral type", "type", inttype_str);
+
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
     bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));

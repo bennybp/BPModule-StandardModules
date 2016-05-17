@@ -17,6 +17,16 @@ class Overlap : public pulsar::modulebase::OneElectronIntegral
                                     double * outbuffer, size_t bufsize);
 
     private:
+        enum class IntegralType_
+        {
+            Overlap,
+            Dipole_x,
+            Dipole_y,
+            Dipole_z
+        };
+
+        IntegralType_ inttype_;
+
         std::vector<double> work_;
 
         double * transformwork_;
