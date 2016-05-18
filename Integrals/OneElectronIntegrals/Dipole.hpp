@@ -1,10 +1,10 @@
-#ifndef _GUARD_OVERLAP_HPP_
-#define _GUARD_OVERLAP_HPP_
+#ifndef _GUARD_DIPOLE_HPP_
+#define _GUARD_DIPOLE_HPP_
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
 #include <pulsar/system/BasisSet.hpp>
 
-class Overlap : public pulsar::modulebase::OneElectronIntegral
+class Dipole : public pulsar::modulebase::OneElectronIntegral
 {
     public:
         using pulsar::modulebase::OneElectronIntegral::OneElectronIntegral;
@@ -17,6 +17,15 @@ class Overlap : public pulsar::modulebase::OneElectronIntegral
                                     double * outbuffer, size_t bufsize);
 
     private:
+        enum class IntegralType_
+        {
+            Dipole_x,
+            Dipole_y,
+            Dipole_z
+        };
+
+        IntegralType_ inttype_;
+
         std::vector<double> work_;
 
         double * transformwork_;

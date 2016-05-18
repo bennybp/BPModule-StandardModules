@@ -5,7 +5,7 @@
 #include <pulsar/constants.h>
 
 #include "../Common.hpp"
-#include "Overlap.hpp"
+#include "Dipole.hpp"
 
 
 // Get a value of S_IJ
@@ -18,14 +18,14 @@ using namespace pulsar::datastore;
 
 
 
-uint64_t Overlap::Calculate_(uint64_t deriv,
+uint64_t Dipole::Calculate_(uint64_t deriv,
                              uint64_t shell1, uint64_t shell2,
                              double * outbuffer, size_t bufsize)
 {
     if(work_.size() == 0)
         throw GeneralException("Workspace not allocated. Did you set the bases?");
     if(deriv != 0)
-        throw NotYetImplementedException("Not Yet Implemented: Overlap integral with deriv != 0");
+        throw NotYetImplementedException("Not Yet Implemented: Dipole integral with deriv != 0");
 
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
     const BasisSetShell & sh2 = bs2_->Shell(shell2);
@@ -70,9 +70,29 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
 
     // Used for dimensioning and loops. Storage goes from
     // [0, am], so we need to add one.
-    int nam1 = std::abs(am1) + 1;
-    int nam2 = std::abs(am2) + 1;
+    // We need an additional one for the dipole
+    int nam1 = std::abs(am1) + 1 + 1;
+    int nam2 = std::abs(am2) + 1 + 1;
 
+    // are we calculating a dipole integral?
+    bool isdipole = ( inttype_ == IntegralType_::Dipole_x ||
+                      inttype_ == IntegralType_::Dipole_y ||
+                      inttype_ == IntegralType_::Dipole_z );
+
+    // offset due to the dipole operator (ie, are we incrementing x, y, or z)
+    std::array<int, 3> dipoff{0, 0, 0};
+
+    if(isdipole)
+    {
+        nam2++; // need one more due to the dipole operator
+
+        if(inttype_ == IntegralType_::Dipole_x)
+            dipoff[0]++;
+        else if(inttype_ == IntegralType_::Dipole_y)
+            dipoff[1]++;
+        else if(inttype_ == IntegralType_::Dipole_z)
+            dipoff[2]++;
+    }
 
     // We need to zero the workspace. Actually, not all of it,
     // but this is easier
@@ -169,12 +189,23 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
                     const int yidx = ijk1[1]*nam2 + ijk2[1];
                     const int zidx = ijk1[2]*nam2 + ijk2[2];
 
-                    const double val = xyzwork_[0][xidx] *
-                                       xyzwork_[1][yidx] *
-                                       xyzwork_[2][zidx];
+                    double val = 0;
+
+                    if(inttype_ == IntegralType_::Dipole_x)
+                        val = (xyzwork_[0][xidx+1] + xyzwork_[0][xidx]*xyz2[0]) *
+                               xyzwork_[1][yidx] *
+                               xyzwork_[2][zidx];
+                    else if(inttype_ == IntegralType_::Dipole_y)
+                        val =  xyzwork_[0][xidx] *
+                              (xyzwork_[1][yidx+1] + xyzwork_[1][yidx]*xyz2[1]) *
+                               xyzwork_[2][zidx];
+                    else
+                        val =  xyzwork_[0][xidx] *
+                               xyzwork_[1][yidx] *
+                              (xyzwork_[2][zidx+1] + xyzwork_[2][zidx]*xyz2[2]);
 
                     // remember: a and b are indices of primitives
-                    sourcework_[outidx++] += val * sh1.Coef(g1, a) * sh2.Coef(g2, b);
+                    sourcework_[outidx++] -= val * sh1.Coef(g1, a) * sh2.Coef(g2, b);
                 }
             }
         }
@@ -188,9 +219,20 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
 
 
 
-void Overlap::SetBases_(const System & sys,
-                        const std::string & bs1, const std::string & bs2)
+void Dipole::SetBases_(const System & sys,
+                       const std::string & bs1, const std::string & bs2)
 {
+    // determine the integral we are calculating
+    std::string inttype_str = Options().Get<std::string>("TYPE");
+    if(inttype_str == "DIPOLE_X")
+        inttype_ = IntegralType_::Dipole_x;
+    else if(inttype_str == "DIPOLE_Y")
+        inttype_ = IntegralType_::Dipole_y;
+    else if(inttype_str == "DIPOLE_Z")
+        inttype_ = IntegralType_::Dipole_z;
+    else
+        throw GeneralException("Unknown integral type", "type", inttype_str);
+
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
     bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
@@ -202,7 +244,7 @@ void Overlap::SetBases_(const System & sys,
     // storage size for each x,y,z component
     int max1 = bs1_->MaxAM();
     int max2 = bs2_->MaxAM();
-    size_t worksize = (max1+1)*(max2+1);  // for each component, we store [0, am]
+    size_t worksize = (max1+2)*(max2+2);  // for each component, we store [0, am+1]
 
     // find the maximum number of cartesian functions, not including general contraction
     size_t maxsize1 = bs1_->MaxProperty(NCartesianGaussianForShellAM);

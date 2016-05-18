@@ -1,5 +1,6 @@
 set(ONEELECTRONINTEGRALS_FILES creator.cpp
                           Overlap.cpp
+                          Dipole.cpp
                           KineticEnergy.cpp
                           OneElectronPotential.cpp
                           OneElectronPotential_LUT.cpp

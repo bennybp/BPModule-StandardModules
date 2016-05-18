@@ -13,8 +13,22 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
-                        "TYPE": ( OptionType.String, None, True, InList(["OVERLAP", "DIPOLE_X", "DIPOLE_Y", "DIPOLE_Z"]),
-                                  "Type of integral to calculate"),
+                    }
+  },
+
+  "Dipole" :
+  {
+    "type"        : "c_module",
+    "base"        : "OneElectronIntegral",
+    "modpath"     : "OneElectronIntegrals.so",
+    "version"     : "0.1a",
+    "description" : "Calculation of AO overlap integrals over gaussian basis functions",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [],
+    "options"     : {
+                        "TYPE": ( OptionType.String, None, True, InList(["DIPOLE_X", "DIPOLE_Y", "DIPOLE_Z"]),
+                                 "Type of integral to calculate"),
+
                     }
   },
 
