@@ -21,10 +21,17 @@ uint64_t NuclearDipole::Calculate_(uint64_t deriv, const System & sys,
         throw GeneralException("Not enough space in output buffer");
 
 
-    Point dip = WeightedPointsCenter<Point>(sys, [](const Atom & atom){ return atom.GetZ(); });
-    outbuffer[0] = dip[0];
-    outbuffer[1] = dip[1];
-    outbuffer[2] = dip[2];
+    outbuffer[0] = 0.0;
+    outbuffer[1] = 0.0;
+    outbuffer[2] = 0.0;
 
-    return 1;
+    for(const auto & atom : sys)
+    {
+        CoordType c = atom.GetCoords();
+        outbuffer[0] += atom.GetZ()*c[0];
+        outbuffer[1] += atom.GetZ()*c[1];
+        outbuffer[2] += atom.GetZ()*c[2];
+    }
+
+    return 3;
 }

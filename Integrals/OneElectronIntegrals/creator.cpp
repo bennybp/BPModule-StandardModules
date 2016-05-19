@@ -3,6 +3,7 @@
 #include "KineticEnergy.hpp"
 #include "CoreBuild.hpp"
 #include "OneElectronPotential.hpp"
+#include "OneElectronProperty.hpp"
 
 using pulsar::modulemanager::ModuleCreationFuncs;
 
@@ -17,6 +18,7 @@ ModuleCreationFuncs InsertSupermodule(void)
     cf.AddCppCreator<KineticEnergy>("KineticEnergy");
     cf.AddCppCreator<OneElectronPotential>("OneElectronPotential");
     cf.AddCppCreator<CoreBuild>("CoreBuild");
+    cf.AddCppCreator<OneElectronProperty>("OneElectronProperty");
     return cf;
 }
 

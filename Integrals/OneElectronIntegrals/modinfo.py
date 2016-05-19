@@ -74,6 +74,19 @@ minfo = {
                         "KEY_AO_ADDITIONAL":   ( OptionType.ListString,  None, False, None,  "Additional one-electron integrals to incorporate ")
                     }
   },
+  "OneElectronProperty" :
+  {
+    "type"        : "c_module",
+    "base"        : "PropertyCalculator",
+    "modpath"     : "OneElectronIntegrals.so",
+    "version"     : "0.1a",
+    "description" : "A general one-electron property calculator",
+    "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
+    "refs"        : [],
+    "options"     : {
+                        "KEY_ONEEL_MOD":   ( OptionType.String,  None, True, None,  "Key of which one electron integral to use"),
+                    }
+  },
 
 }
 

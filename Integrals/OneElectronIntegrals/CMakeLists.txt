@@ -5,6 +5,7 @@ set(ONEELECTRONINTEGRALS_FILES creator.cpp
                           KineticEnergy.cpp
                           OneElectronPotential.cpp
                           OneElectronPotential_LUT.cpp
+                          OneElectronProperty.cpp
                           CoreBuild.cpp
    )
 
