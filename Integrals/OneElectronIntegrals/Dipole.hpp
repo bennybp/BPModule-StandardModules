@@ -17,14 +17,7 @@ class Dipole : public pulsar::modulebase::OneElectronIntegral
                                     double * outbuffer, size_t bufsize);
 
     private:
-        enum class IntegralType_
-        {
-            Dipole_x,
-            Dipole_y,
-            Dipole_z
-        };
-
-        IntegralType_ inttype_;
+        int dir_; // cartesian direction of the dipole
 
         std::vector<double> work_;
 

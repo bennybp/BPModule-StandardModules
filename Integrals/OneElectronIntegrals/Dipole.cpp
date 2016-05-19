@@ -1,15 +1,10 @@
-#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOOrdering.hpp>
-#include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
-#include <pulsar/constants.h>
 
 #include "../Common.hpp"
+#include "OSOverlap.hpp"
 #include "Dipole.hpp"
 
-
-// Get a value of S_IJ
-#define S_IJ(i,j) (s_ij[((i)*(nam2) + j)])
 
 using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
@@ -38,8 +33,8 @@ uint64_t Dipole::Calculate_(uint64_t deriv,
 
 
     // degree of general contraction
-    size_t ngen1 = sh1.NGeneral();
-    size_t ngen2 = sh2.NGeneral();
+    const size_t ngen1 = sh1.NGeneral();
+    const size_t ngen2 = sh2.NGeneral();
 
     ////////////////////////////////////////
     // These vectors store the ordering of
@@ -60,153 +55,61 @@ uint64_t Dipole::Calculate_(uint64_t deriv,
     const int am1 = sh1.AM();
     const int am2 = sh2.AM();
 
-
-    // coordinates from each shell
-    const CoordType xyz1 = sh1.GetCoords();
-    const CoordType xyz2 = sh2.GetCoords();
-
-    const double AB[3] = { xyz1[0] - xyz2[0], xyz1[1] - xyz2[1], xyz1[2] - xyz2[2] };
-    const double AB2[3] = { AB[0]*AB[0], AB[1]*AB[1], AB[2]*AB[2] };
-
     // Used for dimensioning and loops. Storage goes from
     // [0, am], so we need to add one.
     // We need an additional one for the dipole
-    int nam1 = std::abs(am1) + 1 + 1;
-    int nam2 = std::abs(am2) + 1 + 1;
+    const int nam1 = std::abs(am1) + 1 + 1;
+    const int nam2 = std::abs(am2) + 1 + 1;
 
-    // are we calculating a dipole integral?
-    bool isdipole = ( inttype_ == IntegralType_::Dipole_x ||
-                      inttype_ == IntegralType_::Dipole_y ||
-                      inttype_ == IntegralType_::Dipole_z );
-
-    // offset due to the dipole operator (ie, are we incrementing x, y, or z)
-    std::array<int, 3> dipoff{0, 0, 0};
-
-    if(isdipole)
-    {
-        nam2++; // need one more due to the dipole operator
-
-        if(inttype_ == IntegralType_::Dipole_x)
-            dipoff[0]++;
-        else if(inttype_ == IntegralType_::Dipole_y)
-            dipoff[1]++;
-        else if(inttype_ == IntegralType_::Dipole_z)
-            dipoff[2]++;
-    }
+    // coordinates from each shell
+    const double * xyz1 = sh1.CoordsPtr();
+    const double * xyz2 = sh2.CoordsPtr();
 
     // We need to zero the workspace. Actually, not all of it,
     // but this is easier
     std::fill(work_.begin(), work_.end(), 0.0);
 
-    /////////////////////////////////////////////////////////
-    // General notes about the following
-    //
-    // This is the OS algorithm taken pretty much verbatim
-    // from Helgaker, Jorgensen, & Olsen. For each x,y,z
-    // direction, we construct an array of Sij of length nam1*nam2.
-    // These are placed in the pre-allocated workspace.
-    //
-    // We then handle multiplication with coefficients within the
-    // general contractions.
-    //
-    // The indexing of these arrays is pretty straightforward.
-    // Sij = ptr[i*nam2+j]. This is in the S_IJ macro, hopefully
-    // to make the code clearer.
-    /////////////////////////////////////////////////////////
     // loop over primitives
     const size_t nprim1 = sh1.NPrim();
     const size_t nprim2 = sh2.NPrim();
 
     for(size_t a = 0; a < nprim1; a++)
+    for(size_t b = 0; b < nprim2; b++)
     {
-        const double a1 = sh1.Alpha(a);
-        const double a1xyz[3] = { a1*xyz1[0], a1*xyz1[1], a1*xyz1[2] };
+        OSOverlap(sh1.Alpha(a), xyz1,
+                  sh2.Alpha(b), xyz2,
+                  nam1, nam2, xyzwork_);
 
-        for(size_t b = 0; b < nprim2; b++)
+        // general contraction and combined am
+        size_t outidx = 0;
+        for(size_t g1 = 0; g1 < ngen1; g1++)
+        for(size_t g2 = 0; g2 < ngen2; g2++)
         {
-            const double a2 = sh2.Alpha(b);
-            const double oop = 1.0/(a1 + a2); // = 1/p = 1/(a1 + a2)
-            const double mu = a1*a2*oop; // (a1*a2)/(a1+a2)
-
-
-            const double oo2p = 0.5*oop;
-            const double a2xyz[3] = { a2*xyz2[0], a2*xyz2[1], a2*xyz2[2] };
-
-            const double P[3] = { (a1xyz[0]+a2xyz[0])*oop,
-                                  (a1xyz[1]+a2xyz[1])*oop,
-                                  (a1xyz[2]+a2xyz[2])*oop };
-
-            const double PA[3] = { P[0] - xyz1[0], P[1] - xyz1[1], P[2] - xyz1[2] };
-            const double PB[3] = { P[0] - xyz2[0], P[1] - xyz2[1], P[2] - xyz2[2] };
-
-
-            // three cartesian directions
-            for(int d = 0; d < 3; d++)
+            // go over the orderings for this AM
+            for(const IJK & ijk1 : *(sh1_ordering[g1]))
+            for(const IJK & ijk2 : *(sh2_ordering[g2]))
             {
-                // the workspace for this direction
-                // THIS IS THEN ACCESSED THROUGH THE S_IJ MACRO
-                double * const RESTRICT s_ij = xyzwork_[d];
+                const int xidx = ijk1[0]*nam2 + ijk2[0];
+                const int yidx = ijk1[1]*nam2 + ijk2[1];
+                const int zidx = ijk1[2]*nam2 + ijk2[2];
 
-                S_IJ(0,0) = sqrt(PI * oop) * exp(-mu * AB2[d]);
+                double val = 0;
 
-                // do j = 0 for all remaining i
-                for(int i = 1; i < nam1; i++)
-                {
-                    S_IJ(i,0) = PA[d]*S_IJ(i-1,0);
-                    if(i > 1)
-                        S_IJ(i,0) += (i-1)*oo2p*S_IJ(i-2,0);
-                }
+                if(dir_ == 0)
+                    val = (xyzwork_[0][xidx+1] + xyzwork_[0][xidx]*xyz2[0]) *
+                           xyzwork_[1][yidx] *
+                           xyzwork_[2][zidx];
+                else if(dir_ == 1)
+                    val =  xyzwork_[0][xidx] *
+                          (xyzwork_[1][yidx+1] + xyzwork_[1][yidx]*xyz2[1]) *
+                           xyzwork_[2][zidx];
+                else
+                    val =  xyzwork_[0][xidx] *
+                           xyzwork_[1][yidx] *
+                          (xyzwork_[2][zidx+1] + xyzwork_[2][zidx]*xyz2[2]);
 
- 
-                // now do i = 0 for all remaining j
-                for(int j = 1; j < nam2; j++)
-                {
-                    S_IJ(0,j) = PB[d]*S_IJ(0,j-1);
-                    if(j > 1)
-                        S_IJ(0,j) += (j-1)*oo2p*S_IJ(0,j-2);
-                }
-
-                // now all the rest
-                for(int i = 1; i < nam1; i++)
-                for(int j = 1; j < nam2; j++)
-                {
-                    S_IJ(i,j) = PB[d]*S_IJ(i,j-1) + oo2p*i*S_IJ(i-1,j-1);
-                    if(j > 1)
-                        S_IJ(i,j) += oo2p*(j-1)*S_IJ(i,j-2);
-                }
-            }
-
-            // general contraction and combined am
-            size_t outidx = 0;
-            for(size_t g1 = 0; g1 < ngen1; g1++)
-            for(size_t g2 = 0; g2 < ngen2; g2++)
-            {
-                // go over the orderings for this AM
-                for(const IJK & ijk1 : *(sh1_ordering[g1]))
-                for(const IJK & ijk2 : *(sh2_ordering[g2]))
-                {
-                    const int xidx = ijk1[0]*nam2 + ijk2[0];
-                    const int yidx = ijk1[1]*nam2 + ijk2[1];
-                    const int zidx = ijk1[2]*nam2 + ijk2[2];
-
-                    double val = 0;
-
-                    if(inttype_ == IntegralType_::Dipole_x)
-                        val = (xyzwork_[0][xidx+1] + xyzwork_[0][xidx]*xyz2[0]) *
-                               xyzwork_[1][yidx] *
-                               xyzwork_[2][zidx];
-                    else if(inttype_ == IntegralType_::Dipole_y)
-                        val =  xyzwork_[0][xidx] *
-                              (xyzwork_[1][yidx+1] + xyzwork_[1][yidx]*xyz2[1]) *
-                               xyzwork_[2][zidx];
-                    else
-                        val =  xyzwork_[0][xidx] *
-                               xyzwork_[1][yidx] *
-                              (xyzwork_[2][zidx+1] + xyzwork_[2][zidx]*xyz2[2]);
-
-                    // remember: a and b are indices of primitives
-                    sourcework_[outidx++] -= val * sh1.Coef(g1, a) * sh2.Coef(g2, b);
-                }
+                // remember: a and b are indices of primitives
+                sourcework_[outidx++] -= val * sh1.Coef(g1, a) * sh2.Coef(g2, b);
             }
         }
     }
@@ -225,11 +128,11 @@ void Dipole::SetBases_(const System & sys,
     // determine the integral we are calculating
     std::string inttype_str = Options().Get<std::string>("TYPE");
     if(inttype_str == "DIPOLE_X")
-        inttype_ = IntegralType_::Dipole_x;
+        dir_ = 0;
     else if(inttype_str == "DIPOLE_Y")
-        inttype_ = IntegralType_::Dipole_y;
+        dir_ = 1;
     else if(inttype_str == "DIPOLE_Z")
-        inttype_ = IntegralType_::Dipole_z;
+        dir_ = 2;
     else
         throw GeneralException("Unknown integral type", "type", inttype_str);
 

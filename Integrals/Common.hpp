@@ -3,6 +3,7 @@
 
 #include <pulsar/system/BasisSet.hpp>
 #include <pulsar/datastore/CacheData.hpp>
+#include <pulsar/output/OutputStream.hpp>
 
 
 std::shared_ptr<pulsar::system::BasisSet>

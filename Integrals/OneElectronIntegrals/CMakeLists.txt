@@ -1,4 +1,5 @@
 set(ONEELECTRONINTEGRALS_FILES creator.cpp
+                          OSOverlap.cpp
                           Overlap.cpp
                           Dipole.cpp
                           KineticEnergy.cpp
