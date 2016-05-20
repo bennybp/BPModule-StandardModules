@@ -26,9 +26,6 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
-                        "TYPE": ( OptionType.String, None, True, InList(["DIPOLE_X", "DIPOLE_Y", "DIPOLE_Z"]),
-                                 "Type of integral to calculate"),
-
                     }
   },
 

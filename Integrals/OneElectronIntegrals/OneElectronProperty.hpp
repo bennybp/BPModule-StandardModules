@@ -9,8 +9,8 @@ class OneElectronProperty : public pulsar::modulebase::PropertyCalculator
         using pulsar::modulebase::PropertyCalculator::PropertyCalculator;
 
         virtual std::vector<double> Calculate_(const pulsar::datastore::Wavefunction & wfn,
-                                               const std::string & bs1,
-                                               const std::string & bs2);
+                                               const pulsar::system::BasisSet & bs1,
+                                               const pulsar::system::BasisSet & bs2);
 };
 
 

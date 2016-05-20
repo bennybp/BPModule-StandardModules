@@ -8,6 +8,7 @@
 using namespace pulsar::output;
 using namespace pulsar::exception;
 using namespace pulsar::system;
+using namespace pulsar::datastore;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // In ValeevRef.cpp
@@ -17,17 +18,6 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                      int l4, int m4, int n4, double alpha4, const double* D);
 ////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-ReferenceERI::ReferenceERI(ID_t id)
-    : TwoElectronIntegral(id)
-{ }
-
-
-
-ReferenceERI::~ReferenceERI()
-{ }
 
 
 
@@ -99,22 +89,24 @@ uint64_t ReferenceERI::Calculate_(size_t deriv,
     }
 
 
-    CartesianToSpherical_4Center(sh1, sh2, sh3, sh4, sourcework_, outbuffer, transformwork_);
+    CartesianToSpherical_4Center(sh1, sh2, sh3, sh4, sourcework_, outbuffer, transformwork_, 1);
 
     return nfunc;
 }
 
 
 
-void ReferenceERI::SetBases_(const System & sys,
-                             const std::string & bs1, const std::string & bs2,
-                             const std::string & bs3, const std::string & bs4)
+void ReferenceERI::SetBases_(const Wavefunction & wfn,
+                             const BasisSet & bs1,
+                             const BasisSet & bs2,
+                             const BasisSet & bs3,
+                             const BasisSet & bs4)
 {
     // from common components
-    bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
-    bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
-    bs3_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs3));
-    bs4_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs4));
+    bs1_ = NormalizeBasis(Cache(), out, bs1);
+    bs2_ = NormalizeBasis(Cache(), out, bs2);
+    bs3_ = NormalizeBasis(Cache(), out, bs3);
+    bs4_ = NormalizeBasis(Cache(), out, bs4);
 
     size_t maxsize1 = bs1_->MaxProperty(NCartesianGaussianForShellAM);
     size_t maxsize2 = bs2_->MaxProperty(NCartesianGaussianForShellAM);

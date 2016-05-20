@@ -1,7 +1,6 @@
 #include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/NShellFunction.hpp>
-#include <pulsar/system/SphericalTransformIntegral.hpp>
 #include <pulsar/constants.h>
 
 #include "../Common.hpp"
@@ -70,8 +69,9 @@ uint64_t CoreBuild::Calculate_(uint64_t deriv,
 
 
 
-void CoreBuild::SetBases_(const System & sys,
-                          const std::string & bs1, const std::string & bs2)
+void CoreBuild::SetBases_(const Wavefunction & wfn,
+                          const BasisSet & bs1,
+                          const BasisSet & bs2)
 {
     ///////////////////////////////// 
     // load all the required modules
@@ -80,13 +80,13 @@ void CoreBuild::SetBases_(const System & sys,
     /////////////////////// 
     // Kinetic Energy
     auto mod_ao_kinetic = CreateChildFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
-    mod_ao_kinetic->SetBases(sys, bs1, bs2);
+    mod_ao_kinetic->SetBases(wfn, bs1, bs2);
     modules_.emplace("Kinetic Energy", std::move(mod_ao_kinetic));
 
     /////////////////////// 
     // Nuclear Attraction
     auto mod_ao_nucatt = CreateChildFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
-    mod_ao_nucatt->SetBases(sys, bs1, bs2);
+    mod_ao_nucatt->SetBases(wfn, bs1, bs2);
     modules_.emplace("Electron-Nuclear Attraction", std::move(mod_ao_nucatt));
 
     // do the additional terms
@@ -96,7 +96,7 @@ void CoreBuild::SetBases_(const System & sys,
         for(const auto & a : add)
         {
             auto mod_add = CreateChild<OneElectronIntegral>(a);
-            mod_add->SetBases(sys, bs1, bs2);
+            mod_add->SetBases(wfn, bs1, bs2);
             modules_.emplace(a, std::move(mod_add));
         }
     }

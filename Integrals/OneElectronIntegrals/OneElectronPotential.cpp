@@ -18,17 +18,14 @@ using namespace pulsar::system;
 using namespace pulsar::datastore;
 using namespace pulsar::math;
 
-OneElectronPotential::OneElectronPotential(ID_t id)
-    : OneElectronIntegral(id), sys_(nullptr) { }
-
 
 uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
                                                   uint64_t shell1, uint64_t shell2,
                                                   const Grid & grid,
                                                   double * outbuffer, size_t bufsize)
 {
-    if(sys_ == nullptr)
-        throw GeneralException("Null pointer in OneElectronPotential");
+    if(!sys_)
+        throw GeneralException("No system given");
 
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
     const BasisSetShell & sh2 = bs2_->Shell(shell2);
@@ -248,7 +245,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
     } // close loop over atoms
 
     // performs the spherical transform, if necessary
-    CartesianToSpherical_2Center(sh1, sh2, sourcework_, outbuffer, transformwork_);
+    CartesianToSpherical_2Center(sh1, sh2, sourcework_, outbuffer, transformwork_, 1);
 
     return nfunc;
 }
@@ -284,14 +281,15 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
 
 
 
-void OneElectronPotential::SetBases_(const System & sys,
-                                     const std::string & bs1, const std::string & bs2)
+void OneElectronPotential::SetBases_(const Wavefunction & wfn,
+                                     const BasisSet & bs1,
+                                     const BasisSet & bs2)
 {
-    sys_ = &sys;
+    sys_ = wfn.system;
 
     // from common components
-    bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
-    bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
+    bs1_ = NormalizeBasis(Cache(), out, bs1);
+    bs2_ = NormalizeBasis(Cache(), out, bs2);
 
     ///////////////////////////////////////
     // Determine the size of the workspace

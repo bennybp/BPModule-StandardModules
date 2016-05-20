@@ -51,7 +51,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     /////////////////////// 
     // Overlap
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(*wfn.system, bstag, bstag);
+    mod_ao_overlap->SetBases(wfn, bs, bs);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap
@@ -69,7 +69,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     //////////////////////////// 
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(*wfn.system, bstag, bstag);
+    mod_ao_core->SetBases(wfn, bs, bs);
     MatrixXd Hcore = FillOneElectronMatrix(mod_ao_core, bs);
 
 

@@ -87,6 +87,8 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
         for(size_t g1 = 0; g1 < ngen1; g1++)
         for(size_t g2 = 0; g2 < ngen2; g2++)
         {
+            const double prefac = sh1.Coef(g1, a) * sh2.Coef(g2, b);
+
             // go over the orderings for this AM
             for(const IJK & ijk1 : *(sh1_ordering[g1]))
             for(const IJK & ijk2 : *(sh2_ordering[g2]))
@@ -100,25 +102,26 @@ uint64_t Overlap::Calculate_(uint64_t deriv,
                                    xyzwork_[2][zidx];
 
                 // remember: a and b are indices of primitives
-                sourcework_[outidx++] += val * sh1.Coef(g1, a) * sh2.Coef(g2, b);
+                sourcework_[outidx++] += prefac * val;
             }
         }
     }
 
     // performs the spherical transform, if necessary
-    CartesianToSpherical_2Center(sh1, sh2, sourcework_, outbuffer, transformwork_);
+    CartesianToSpherical_2Center(sh1, sh2, sourcework_, outbuffer, transformwork_, 1);
 
     return nfunc;
 }
 
 
 
-void Overlap::SetBases_(const System & sys,
-                        const std::string & bs1, const std::string & bs2)
+void Overlap::SetBases_(const Wavefunction & wfn,
+                        const BasisSet & bs1,
+                        const BasisSet & bs2)
 {
     // from common components
-    bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
-    bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
+    bs1_ = NormalizeBasis(Cache(), out, bs1);
+    bs2_ = NormalizeBasis(Cache(), out, bs2);
 
     ///////////////////////////////////////
     // Determine the size of the workspace

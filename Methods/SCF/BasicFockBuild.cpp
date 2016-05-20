@@ -32,7 +32,7 @@ void BasicFockBuild::Initialize_(const Wavefunction & wfn)
     // Load the ERI to core
     /////////////////////////
     auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
-    mod_ao_eri->SetBases(sys, bstag, bstag, bstag, bstag);
+    mod_ao_eri->SetBases(wfn, bs, bs, bs, bs);
     eri_ = FillTwoElectronVector(mod_ao_eri, bs);
 
 
@@ -40,7 +40,7 @@ void BasicFockBuild::Initialize_(const Wavefunction & wfn)
     // Overlap
     ///////////////////////
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(sys, bstag, bstag);
+    mod_ao_overlap->SetBases(wfn, bs, bs);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap
@@ -59,7 +59,7 @@ void BasicFockBuild::Initialize_(const Wavefunction & wfn)
     ////////////////////////////
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(sys, bstag, bstag);
+    mod_ao_core->SetBases(wfn, bs, bs);
     Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
 
     initialized_ = true;

@@ -24,7 +24,6 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
     // get the basis set
     const System & sys = *(wfn.system);
     std::string bstag = Options().Get<std::string>("BASIS_SET");
-
     const BasisSet bs = sys.GetBasisSet(bstag);
 
 
@@ -32,7 +31,7 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
     // Overlap
     ///////////////////////
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(sys, bstag, bstag);
+    mod_ao_overlap->SetBases(wfn, bs, bs);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap and form S^(-1/2)

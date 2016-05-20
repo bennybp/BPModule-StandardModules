@@ -20,7 +20,7 @@ class DIIS : public pulsar::modulebase::EnergyMethod
         Eigen::MatrixXd Hcore_;
         Eigen::MatrixXd S_;
 
-        void Initialize_(const pulsar::system::System & sys, const std::string & bstag);
+        void Initialize_(const pulsar::datastore::Wavefunction & wfn);
 
         double CalculateEnergy_(const pulsar::math::IrrepSpinMatrixD & Dmat,
                                 const pulsar::math::IrrepSpinMatrixD & Fmat);

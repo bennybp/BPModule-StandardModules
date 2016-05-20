@@ -10,10 +10,12 @@ using namespace pulsar::exception;
 
 namespace pulsarmethods {
 
-
-void DIIS::Initialize_(const System & sys, const std::string & bstag)
+void DIIS::Initialize_(const Wavefunction & wfn)
 {
-    const BasisSet bs = sys.GetBasisSet(bstag);
+    // get the basis set
+    std::string bstag = Options().Get<std::string>("BASIS_SET");
+
+    const BasisSet bs = wfn.system->GetBasisSet(bstag);
 
     ///////////////////////////////////////////
     // Load the one electron integral matrices
@@ -21,21 +23,23 @@ void DIIS::Initialize_(const System & sys, const std::string & bstag)
     ///////////////////////////////////////////
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
-    mod_nuc_rep->Calculate(0, sys, &nucrep_, 1);
+    mod_nuc_rep->Calculate(0, *wfn.system, &nucrep_, 1);
 
-    ////////////////////////////
-    // One-electron hamiltonian
-    auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(sys, bstag, bstag);
-    Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
 
     ////////////////////////////
     // Overlap
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(sys, bstag, bstag);
+    mod_ao_overlap->SetBases(wfn, bs, bs);
     S_ = FillOneElectronMatrix(mod_ao_overlap, bs);
 
-    initialized_ = true;
+
+    ////////////////////////////
+    // One-electron hamiltonian
+    auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
+    mod_ao_core->SetBases(wfn, bs, bs);
+    Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
+
+    bs.Print(out);
 }
 
 
@@ -85,16 +89,8 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
     if(!wfn.system)
         throw GeneralException("System is not set!");
 
-    // get the basis set
-    const System & sys = *(wfn.system);
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
+    Initialize_(wfn); // will only use the system from the wfn
 
-    if(!initialized_)
-        Initialize_(*wfn.system, bstag);
-
-    out.Output("Obtaining basis set %? from system\n", bstag);
-    const BasisSet bs = sys.GetBasisSet(bstag);
-    bs.Print(out);
   
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 

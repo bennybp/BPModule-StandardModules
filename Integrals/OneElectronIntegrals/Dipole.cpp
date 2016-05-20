@@ -14,8 +14,8 @@ using namespace pulsar::datastore;
 
 
 uint64_t Dipole::Calculate_(uint64_t deriv,
-                             uint64_t shell1, uint64_t shell2,
-                             double * outbuffer, size_t bufsize)
+                            uint64_t shell1, uint64_t shell2,
+                            double * outbuffer, size_t bufsize)
 {
     if(work_.size() == 0)
         throw GeneralException("Workspace not allocated. Did you set the bases?");
@@ -27,7 +27,7 @@ uint64_t Dipole::Calculate_(uint64_t deriv,
 
     const size_t nfunc = sh1.NFunctions() * sh2.NFunctions();
 
-    if(bufsize < nfunc)
+    if(bufsize < 3*nfunc)
         throw GeneralException("Buffer is too small", "size", bufsize, "required", nfunc);
 
 
@@ -85,6 +85,8 @@ uint64_t Dipole::Calculate_(uint64_t deriv,
         for(size_t g1 = 0; g1 < ngen1; g1++)
         for(size_t g2 = 0; g2 < ngen2; g2++)
         {
+            const double prefac = sh1.Coef(g1, a) * sh2.Coef(g2, b);
+
             // go over the orderings for this AM
             for(const IJK & ijk1 : *(sh1_ordering[g1]))
             for(const IJK & ijk2 : *(sh2_ordering[g2]))
@@ -93,52 +95,42 @@ uint64_t Dipole::Calculate_(uint64_t deriv,
                 const int yidx = ijk1[1]*nam2 + ijk2[1];
                 const int zidx = ijk1[2]*nam2 + ijk2[2];
 
-                double val = 0;
+                double valx = (xyzwork_[0][xidx+1] + xyzwork_[0][xidx]*xyz2[0]) *
+                               xyzwork_[1][yidx] *
+                               xyzwork_[2][zidx];
 
-                if(dir_ == 0)
-                    val = (xyzwork_[0][xidx+1] + xyzwork_[0][xidx]*xyz2[0]) *
-                           xyzwork_[1][yidx] *
-                           xyzwork_[2][zidx];
-                else if(dir_ == 1)
-                    val =  xyzwork_[0][xidx] *
-                          (xyzwork_[1][yidx+1] + xyzwork_[1][yidx]*xyz2[1]) *
-                           xyzwork_[2][zidx];
-                else
-                    val =  xyzwork_[0][xidx] *
-                           xyzwork_[1][yidx] *
-                          (xyzwork_[2][zidx+1] + xyzwork_[2][zidx]*xyz2[2]);
+                double valy =  xyzwork_[0][xidx] *
+                              (xyzwork_[1][yidx+1] + xyzwork_[1][yidx]*xyz2[1]) *
+                               xyzwork_[2][zidx];
+
+                double valz =  xyzwork_[0][xidx] *
+                               xyzwork_[1][yidx] *
+                              (xyzwork_[2][zidx+1] + xyzwork_[2][zidx]*xyz2[2]);
 
                 // remember: a and b are indices of primitives
-                sourcework_[outidx++] -= val * sh1.Coef(g1, a) * sh2.Coef(g2, b);
+                sourcework_[outidx]         -= prefac * valx;
+                sourcework_[outidx+nfunc]   -= prefac * valy;
+                sourcework_[outidx+2*nfunc] -= prefac * valz;
+                outidx++;
             }
         }
     }
 
     // performs the spherical transform, if necessary
-    CartesianToSpherical_2Center(sh1, sh2, sourcework_, outbuffer, transformwork_);
+    CartesianToSpherical_2Center(sh1, sh2, sourcework_, outbuffer, transformwork_, 3);
 
     return nfunc;
 }
 
 
 
-void Dipole::SetBases_(const System & sys,
-                       const std::string & bs1, const std::string & bs2)
+void Dipole::SetBases_(const Wavefunction & wfn,
+                       const BasisSet & bs1,
+                       const BasisSet & bs2)
 {
-    // determine the integral we are calculating
-    std::string inttype_str = Options().Get<std::string>("TYPE");
-    if(inttype_str == "DIPOLE_X")
-        dir_ = 0;
-    else if(inttype_str == "DIPOLE_Y")
-        dir_ = 1;
-    else if(inttype_str == "DIPOLE_Z")
-        dir_ = 2;
-    else
-        throw GeneralException("Unknown integral type", "type", inttype_str);
-
     // from common components
-    bs1_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs1));
-    bs2_ = NormalizeBasis(Cache(), out, sys.GetBasisSet(bs2));
+    bs1_ = NormalizeBasis(Cache(), out, bs1);
+    bs2_ = NormalizeBasis(Cache(), out, bs2);
 
     ///////////////////////////////////////
     // Determine the size of the workspace
@@ -157,7 +149,7 @@ void Dipole::SetBases_(const System & sys,
     // find the maximum number of cartesian functions, including general contraction
     maxsize1 = bs1_->MaxProperty(NCartesianGaussianInShell);
     maxsize2 = bs2_->MaxProperty(NCartesianGaussianInShell);
-    size_t sourcework_size = maxsize1 * maxsize2;
+    size_t sourcework_size = 3 * maxsize1 * maxsize2;
 
     // allocate all at once, then partition
     work_.resize(3*worksize + transformwork_size + sourcework_size);

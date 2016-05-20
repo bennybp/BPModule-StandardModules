@@ -16,32 +16,35 @@ using namespace pulsar::math;
 
 std::vector<double>
 OneElectronProperty::Calculate_(const Wavefunction & wfn,
-                                const std::string & bs1,
-                                const std::string & bs2)
+                                const BasisSet & bs1,
+                                const BasisSet & bs2)
 
 {
-    const auto basisset1 = wfn.system->GetBasisSet(bs1);
-    const auto basisset2 = wfn.system->GetBasisSet(bs2);
-    const size_t nshell1 = basisset1.NShell();
-    const size_t nshell2 = basisset2.NShell();
+    const size_t nshell1 = bs1.NShell();
+    const size_t nshell2 = bs2.NShell();
 
-    size_t worksize = basisset1.MaxNFunctions()*basisset2.MaxNFunctions();
 
-    std::vector<double> work(worksize);
 
     auto mod = CreateChildFromOption<OneElectronIntegral>("KEY_ONEEL_MOD");
-    mod->SetBases(*wfn.system, bs1, bs2);
+    mod->SetBases(wfn, bs1, bs2);
+    const unsigned int ncomp = mod->NComponents(); 
 
-    double val = 0; 
+    // size of the workspace depends on the number of components
+    size_t worksize = ncomp*bs1.MaxNFunctions()*bs2.MaxNFunctions();
+    std::vector<double> work(worksize);
+
+    std::vector<double> val(ncomp);
+    std::fill(val.begin(), val.end(), 0.0);
+
     for(size_t n1 = 0; n1 < nshell1; n1++)
     {
-        const auto & sh1 = basisset1.Shell(n1);
-        const size_t rowstart = basisset1.ShellStart(n1);
+        const auto & sh1 = bs1.Shell(n1);
+        const size_t rowstart = bs1.ShellStart(n1);
 
         for(size_t n2 = 0; n2 < nshell2; n2++)
         {
-            const auto & sh2  = basisset2.Shell(n2);
-            const size_t colstart = basisset2.ShellStart(n2);
+            const auto & sh2  = bs2.Shell(n2);
+            const size_t colstart = bs2.ShellStart(n2);
 
             // calculate
             size_t ncalc = mod->Calculate(0, n1, n2, work.data(), worksize);
@@ -60,11 +63,13 @@ OneElectronProperty::Calculate_(const Wavefunction & wfn,
                 const size_t j = colstart+aoit.ShellFunctionIdx<1>();
 
                 for(auto s : wfn.opdm->GetSpins(Irrep::A))
-                    val += wfn.opdm->Get(Irrep::A, s)(i,j) * work[aoit.TotalIdx()];
+                {
+                    for(unsigned int c = 0; c < ncomp; c++)
+                        val[c] += wfn.opdm->Get(Irrep::A, s)(i,j) * work[aoit.TotalIdx() + c*ncalc];
+                }
             } while(aoit.Next());
         }
     }
 
-    return {val};
-
+    return val;
 }
