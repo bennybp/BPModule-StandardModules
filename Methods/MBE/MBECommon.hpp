@@ -22,6 +22,7 @@
 #include <pulsar/modulebase/SystemFragmenter.hpp>
 #include <pulsar/modulebase/EnergyMethod.hpp>
 #include <pulsar/datastore/OptionMap.hpp>
+#include <pulsar/datastore/Wavefunction.hpp>
 
 
 using pulsar::system::System;
@@ -30,6 +31,7 @@ using pulsar::system::SystemMap;
 using pulsar::modulebase::SystemFragmenter;
 using pulsar::modulebase::EnergyMethod;
 using pulsar::datastore::OptionMap;
+using pulsar::datastore::Wavefunction;
 
 typedef pulsar::modulemanager::ModulePtr<SystemFragmenter> Fragmenter_t;
 typedef pulsar::modulemanager::ModulePtr<EnergyMethod> EMethod_t;

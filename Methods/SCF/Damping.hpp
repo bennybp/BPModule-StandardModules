@@ -2,7 +2,7 @@
 #define PULSAR_GUARD_SCF__BPTEST_HPP_
 
 #include <pulsar/modulebase/EnergyMethod.hpp>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 namespace pulsarmethods {
 

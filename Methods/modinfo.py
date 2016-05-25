@@ -4,7 +4,7 @@ from pulsar.datastore.OptionValidators import *
 MethodOption=(OptionType.String,None,True,None,
                     'The key of the method that should be used to compute the '\
                     'energy derivative.')
-FraggerOption=(OptionType.String,"BP_BOND_FRAG",False,None,
+FraggerOption=(OptionType.String,"PSR_BOND_FRAG",False,None,
                'The key used to fragment the system')
 
 DerivOption=(OptionType.Int,255,False,None,
@@ -13,7 +13,7 @@ DerivOption=(OptionType.Int,255,False,None,
 
 BasisOption=(OptionType.String,"Primary",False,None,
                     'What basis set tag should be used')
-MIMOption=(OptionType.String,"BP_MIM",False,None,
+MIMOption=(OptionType.String,"PSR_MIM",False,None,
                     "A way for changing which MIM module is called.")
 
 

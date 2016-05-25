@@ -79,7 +79,7 @@ E_X-\frac{E^2_N}{E_D}.
   def __init__(self, myid):
     super(FellerCBS, self).__init__(myid)
 
-  def Deriv_(self,order):
+  def Deriv_(self,order,wfn):
       #Get derivatives of numerator, denominator, and smallest basis set
       Derivs[{},{},{}]
       Cs=[[1.0],[1.0,-1.0],[1.0,-2.0,1.0]]
@@ -98,7 +98,7 @@ E_X-\frac{E^2_N}{E_D}.
       if order==1:
          return [Deriv[0][1][i]-G[i] for i in G]
       H=Hess(Deriv[1],Deriv[2],Epsilon,G)
-      return [Deriv[0][2][i]-H[i] for i in H]
+      return (Wfn,[Deriv[0][2][i]-H[i] for i in H])
          
       
 

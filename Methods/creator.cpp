@@ -15,10 +15,10 @@ extern "C" {
 
 ModuleCreationFuncs InsertSupermodule(void){
     ModuleCreationFuncs cf;
-    //cf.AddCppCreator<pulsarmethods::CP>("CP");
-    //cf.AddCppCreator<pulsarmethods::MBE>("MBE");
-    //cf.AddCppCreator<pulsarmethods::MIM>("MIM");
-    //cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
+    cf.AddCppCreator<pulsarmethods::CP>("CP");
+    cf.AddCppCreator<pulsarmethods::MBE>("MBE");
+    cf.AddCppCreator<pulsarmethods::MIM>("MIM");
+    cf.AddCppCreator<pulsarmethods::VMFC>("VMFC");
     cf.AddCppCreator<pulsarmethods::Damping>("Damping");
     cf.AddCppCreator<pulsarmethods::DIIS>("DIIS");
     cf.AddCppCreator<pulsarmethods::HFIterate>("HFIterate");

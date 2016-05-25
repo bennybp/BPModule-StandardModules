@@ -6,5 +6,5 @@ class CCSDT(psr.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(CCSDT, self).__init__(myid)
 
-  def Deriv_(self,order):
-      return CallPsi4(self,"CCSD(T)",order)
+  def Deriv_(self,order,wfn):
+      return CallPsi4(self,"CCSD(T)",order,wfn)

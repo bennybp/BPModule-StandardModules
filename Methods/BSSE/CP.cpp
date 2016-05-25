@@ -13,8 +13,8 @@ namespace pulsarmethods{
 using std::vector;    
 using std::string;    
 
-vector<double> CP::Deriv_(size_t Order){
-        const System& Mol=*InitialWfn().GetSystem();
+EnergyMethod::DerivReturnType CP::Deriv_(size_t Order,const Wavefunction& Wfn){
+        const System& Mol=*Wfn.system;
         RealGhostData NewSys=GhostTheSystem(Mol);
         Fragmenter_t Fragger=CreateChild<SystemFragmenter>(
                                    Options().Get<string>("FRAGMENTIZER"));
@@ -35,7 +35,7 @@ vector<double> CP::Deriv_(size_t Order){
         NMers.emplace(ss.str(),*NewSys.RealSystem);
         Coeffs.emplace(ss.str(),1.0);
                 
-        return RunCalcs(NMers,Coeffs,NewSys,Order,ID(),MManager(),
+        return RunCalcs(NMers,Wfn,Coeffs,NewSys,Order,ID(),MManager(),
                         Options().Get<string>("METHOD"),
                         Options().Get<string>("MIM_KEY"));
         

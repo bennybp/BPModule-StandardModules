@@ -31,7 +31,7 @@ class FPA(psr.modulebase.EnergyMethod):
    def __init__(self,myid):
       """Registers this module with ModuleManager.  Internal use only!!!""" 
       super(FPA,self).__init__(myid)
-   def Deriv_(self,order):
+   def Deriv_(self,order,wfn):
       """ The function that computes the derivative
 
       Args:
@@ -52,4 +52,4 @@ class FPA(psr.modulebase.EnergyMethod):
             ]
       )
       MIM.ChangeOption("FPA_MIM","WEIGHTS",[1.0,-1.0,1.0])
-      return MIM.Deriv(order)
+      return MIM.Deriv(order,wfn)

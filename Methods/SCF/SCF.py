@@ -6,5 +6,5 @@ class SCF(psr.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(SCF, self).__init__(myid)
 
-  def Deriv_(self,order):
-      return CallPsi4(self,"SCF",order)
+  def Deriv_(self,order,wfn):
+      return CallPsi4(self,"SCF",order,wfn)

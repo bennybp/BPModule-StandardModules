@@ -25,6 +25,7 @@
 #include <pulsar/system/System.hpp>
 #include <pulsar/system/Atom.hpp>
 #include <pulsar/modulemanager/ModuleManager.hpp>
+#include <pulsar/modulebase/EnergyMethod.hpp>
 #include "Methods/MBE/MBEUtils.hpp"
 
 namespace pulsarmethods{
@@ -94,7 +95,9 @@ std::map<std::string,double> SSFCKernel(pulsar::system::SystemMap& NMers,
  *  \param[in] MIMName The key for MIM method you want us to call
  *  \return The derivative you were interested in
  */ 
-std::vector<double> RunCalcs(const pulsar::system::SystemMap& AllFrags,
+pulsar::modulebase::EnergyMethod::DerivReturnType 
+    RunCalcs(const pulsar::system::SystemMap& AllFrags,
+        const pulsar::datastore::Wavefunction& Wfn,
                         const std::map<std::string,double>& Coeffs,
                         const RealGhostData& Data,
                         size_t Order,

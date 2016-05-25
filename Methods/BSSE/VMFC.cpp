@@ -18,6 +18,7 @@ using pulsar::system::AtomSetUniverse;
 using pulsar::system::MakeGhost;
 using pulsar::system::IsGhost;
 using pulsar::math::PowerSetItr;
+using pulsar::datastore::Wavefunction;
 
 typedef std::shared_ptr<const AtomSetUniverse> SharedUniverse;
 typedef vector<double> Return_t;
@@ -31,10 +32,11 @@ namespace pulsarmethods{
                             return OldRealSys.Contains(AtomI);});
    }
    
-    vector<double> VMFC::Deriv_(size_t Order){
-        const System& Mol=*InitialWfn().GetSystem();
+    EnergyMethod::DerivReturnType VMFC::Deriv_(size_t Order,
+                                               const Wavefunction& Wfn){
+        const System& Mol=*Wfn.system;
         
-        size_t NAtoms=Mol.Size();
+        size_t NAtoms=Mol.size();
         size_t DoF=1;
         for(size_t i=0;i<Order;++i)DoF*=3*NAtoms;
         
@@ -74,7 +76,7 @@ namespace pulsarmethods{
             }
         }
 
-        return RunCalcs(AllFrags,Coeffs,NewSys,Order,ID(),MManager(),
+        return RunCalcs(AllFrags,Wfn,Coeffs,NewSys,Order,ID(),MManager(),
                         Options().Get<string>("METHOD"),
                         Options().Get<string>("MIM_KEY"));
         

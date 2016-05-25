@@ -1,9 +1,9 @@
-#from .SCF import SCF
-#from .MP2 import MP2
-#from .CC import CCSDT
-#from .CBS import Helgaker
-#from .CBS import Feller
-#from .MIM import FPA
+from .SCF import SCF
+from .MP2 import MP2
+from .CC import CCSDT
+from .CBS import Helgaker
+from .CBS import Feller
+from .MIM import FPA
 from pulsar.modulemanager import ModuleCreationFuncs
 
 

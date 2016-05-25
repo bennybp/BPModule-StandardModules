@@ -19,7 +19,6 @@ using std::set;
 using std::stringstream;
 
 using pulsar::modulemanager::ModuleManager;
-
 typedef vector<double> Return_t;
 typedef map<string,Return_t> DerivMap;
 
@@ -30,14 +29,14 @@ typedef map<string,Return_t> DerivMap;
 
 namespace pulsarmethods{
     
-    Return_t MBE::Deriv_(size_t Order){
+    EnergyMethod::DerivReturnType MBE::Deriv_(size_t Order,const Wavefunction& Wfn){
         //Load options
         const OptionMap& DaOptions=Options();
         string MethodName=DaOptions.Get<string>("METHOD");
         string Fragmentizer=DaOptions.Get<string>("FRAGMENTIZER");
 
         //Make N-Mers
-        const System& Mol=*InitialWfn().GetSystem();
+        const System& Mol=*Wfn.system;
         Fragmenter_t Fragger=CreateChild<SystemFragmenter>(Fragmentizer);
         SystemMap NMers=Fragger->Fragmentize(Mol);
         
@@ -69,7 +68,7 @@ namespace pulsarmethods{
         MManager().ChangeOption(MIMName,"FRAGMENTIZER",Fragmentizer);
         MManager().ChangeOption(MIMName,"WEIGHTS",SortedWeights);
         EMethod_t MIM=CreateChild<EnergyMethod>(MIMName);
-        return MIM->Deriv(Order);
+        return MIM->Deriv(Order,Wfn);
     }
     
 

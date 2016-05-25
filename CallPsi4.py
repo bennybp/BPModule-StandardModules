@@ -1,8 +1,8 @@
 import pulsar as psr
 from subprocess import call
 
-def CallPsi4(EMethod,MethodName,order):
-      Mol=EMethod.InitialWfn().GetSystem()
+def CallPsi4(EMethod,MethodName,order,Wfn):
+      Mol=Wfn.system
       f=open(MethodName+".in","w")
       f.write("molecule{\n")
       f.write("units=bohr\n")
@@ -54,6 +54,6 @@ def CallPsi4(EMethod,MethodName,order):
                  line=next(f)
              break
       f.close()
-      return egy
+      return (Wfn,egy)
      
 

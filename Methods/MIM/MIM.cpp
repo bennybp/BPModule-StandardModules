@@ -20,7 +20,7 @@ using std::map;
 using std::unordered_map;
 using std::string;
 
-typedef vector<double> Return_t;
+typedef pulsar::modulebase::EnergyMethod::DerivReturnType Return_t;
 typedef map<string,Return_t> DerivMap;
 typedef unsigned long ULI;
 typedef unordered_map<Atom,size_t> AtomMap_t;
@@ -29,24 +29,23 @@ namespace pulsarmethods{
 
 class Task{
    private:
-
       ModuleManager& MM_;
       string Key_;
       ULI ID_;
+      Wavefunction Wfn_;
       const System& Sys_;
       size_t TaskNum_;
    public:
-      Task(ModuleManager& MM, const string& Key, ULI ID, const System& Sys,
-           size_t TaskNum=0):
-         MM_(MM),Key_(Key),ID_(ID),Sys_(Sys),TaskNum_(TaskNum){}
+      Task(ModuleManager& MM, const string& Key, ULI ID,const Wavefunction& Wfn,
+           const System& Sys, size_t TaskNum=0):
+         MM_(MM),Key_(Key),ID_(ID),Wfn_(Wfn),Sys_(Sys),TaskNum_(TaskNum){
+         Wfn_.system=std::make_shared<System>(Sys_);
+         }
       Return_t operator()(size_t Order)const{ 
         EMethod_t DaMethod=MM_.GetModule<EnergyMethod>(Key_,ID_);
-        DaMethod->InitialWfn().GetSystem()=std::make_shared<System>(Sys_);
-        return DaMethod->Deriv(Order);
+        return DaMethod->Deriv(Order,Wfn_);
       }
 };
-
-
 
 void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs);
 void PrintGradTable(const vector<string>& Rows,const DerivMap& Derivs,
@@ -59,23 +58,21 @@ AtomMap_t MapAtoms(const System& Mol){
    return AtomMap;
 }
 
-Return_t MIM::DerivImpl(size_t Order)const{
+Return_t MIM::Deriv_(size_t Order,const Wavefunction& Wfn){
    //Get the system and compute the number of degrees of freedom for the result
-   const System& Mol=*InitialWfn().GetSystem();
+   const System& Mol=*Wfn.system;
    size_t DoF=1;
-   for(size_t i=0;i<Order;++i)DoF*=3*Mol.Size();
+   for(size_t i=0;i<Order;++i)DoF*=3*Mol.size();
     
    //Establish an atom order
    AtomMap_t AtomMap=MapAtoms(Mol);
    
    const OptionMap& DaOptions=Options();
    vector<string> MethodNames=DaOptions.Get<vector<string>>("METHODS");
-   Return_t Coeffs=DaOptions.Get<Return_t>("WEIGHTS");
+   vector<double> Coeffs=DaOptions.Get<vector<double>>("WEIGHTS");
    
-
    //Get the subsystems
-   Fragmenter_t Fragger=CreateChild<SystemFragmenter>(
-           DaOptions.Get<string>("FRAGMENTIZER"));
+   Fragmenter_t Fragger=CreateChildFromOption<SystemFragmenter>("FRAGMENTIZER");
    SystemMap Systems=Fragger->Fragmentize(Mol);
      
    //For the time-being the user is required to give us a coefficient for 
@@ -97,21 +94,23 @@ Return_t MIM::DerivImpl(size_t Order)const{
    const Communicator& ParentComm=pulsar::parallel::GetEnv().Comm();
    Communicator NewComm=ParentComm.Split(ParentComm.NThreads(),1,
                                          std::min(ParentComm.NProcs(),NTasks));
-   TaskResults<Return_t> Results(NewComm);
-   
+   //TaskResults<EnergyMethod::DerivReturnType> Results(NewComm);
+   vector<EnergyMethod::DerivReturnType> Results;
    //Use two loops. Gets all tasks queued before we start asking for results
    SystemMap::const_iterator SysI=Systems.begin();
+   
    for(size_t TaskI=0; TaskI<NTasks; ++TaskI){
       Results.push_back(
-         NewComm.AddTask(
+         //NewComm.AddTask(
             Task(MManager(),
                 MethodNames[SameMethod?0:TaskI],
                 ID(),
+                Wfn,
                 SysI->second
                 //,NewComm.NTasks()
-            ),
-            Order
-         )
+            //),
+            //Order
+         ).operator()(Order)
       );
       if(!SameSystem)++SysI;
    }
@@ -119,7 +118,8 @@ Return_t MIM::DerivImpl(size_t Order)const{
    
    //Loop two, gettin results
    DerivMap Derivs; //Will be the derivatives per system
-   Return_t TotalDeriv(DoF,0.0);//Final, total derivative
+   Return_t TotalDeriv;
+   TotalDeriv.second=vector<double>(DoF,0.0);//Final, total derivative
    
    SysI=Systems.begin();
    vector<string> RowTitles(NTasks);
@@ -130,7 +130,7 @@ Return_t MIM::DerivImpl(size_t Order)const{
       ss<<" ["<<MethodNames[SameMethod?0:TaskI]<<"]";
       Derivs[ss.str()]=Results[TaskI];
       RowTitles[TaskI]=ss.str();
-      FillDeriv(TotalDeriv,Results[TaskI],Coeffs[TaskI],SubSys,
+      FillDeriv(TotalDeriv.second,Results[TaskI].second,Coeffs[TaskI],SubSys,
                 AtomMap,MapAtoms(SubSys),Order);
       if(!SameSystem)++SysI;
    }
@@ -150,7 +150,7 @@ void PrintEgyTable(const vector<string>& Rows,const DerivMap& Derivs){
    ResultTable.FillRow(ColTitles,0,0,NCols);
    ResultTable.FillCol(Rows,0,1,NRows);
    for(size_t i=0;i<Rows.size();++i)
-         ResultTable.FillRow(&Derivs.at(Rows[i])[0],i+1,1,NCols);
+         ResultTable.FillRow(Derivs.at(Rows[i]).second.data(),i+1,1,NCols);
    pulsar::output::GetGlobalOut()<<ResultTable<<std::endl;
 }
 
@@ -160,7 +160,7 @@ void PrintGradTable(const vector<string>& Rows,
     
    const size_t NCols=4;
    size_t NRows=1;
-   for(const auto& Di: Derivs)NRows+=(Di.second.size()/3);
+   for(const auto& Di: Derivs)NRows+=(Di.second.second.size()/3);
    pulsar::output::Table ResultTable(NRows,NCols);
    std::array<string,NCols> ColTitles=
             {"System [Method Key]","dE/dx (a.u.)","dE/dy (a.u.)","dE/dz (a.u.)"};
@@ -171,11 +171,11 @@ void PrintGradTable(const vector<string>& Rows,
    size_t counter=0;
    for(const auto& RowI: Rows){
        ResultTable.SetHBorder(counter+1,'-');
-       size_t NAtoms=Derivs.at(RowI).size()/3;
+       size_t NAtoms=Derivs.at(RowI).second.size()/3;
        for(size_t AtomI=0;AtomI<NAtoms;++AtomI){
            if(AtomI==(NAtoms-NAtoms%2)/2)
                ResultTable.GetCell(counter+1,0).AddData(RowI);
-           ResultTable.FillRow(&Derivs.at(RowI)[AtomI*3],++counter,1,NCols);
+           ResultTable.FillRow(&Derivs.at(RowI).second[AtomI*3],++counter,1,NCols);
        }
    }
    pulsar::output::GetGlobalOut()<<ResultTable<<std::endl;

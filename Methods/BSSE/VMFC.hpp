@@ -51,7 +51,8 @@ class VMFC : public pulsar::modulebase::EnergyMethod {
       typedef pulsar::modulebase::EnergyMethod Base_t;
    public:
       using Base_t::EnergyMethod;
-      virtual std::vector<double> Deriv_(size_t Order);
+      DerivReturnType Deriv_(size_t Order,
+      const pulsar::datastore::Wavefunction& Wfn);
 };
 
 }//End namespace

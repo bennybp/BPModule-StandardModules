@@ -35,7 +35,7 @@ class HelgakerCBS(psr.modulebase.EnergyMethod):
     """Registers this module with the ModuleManager.  Internal use only!!!"""
     super(HelgakerCBS, self).__init__(myid)
 
-  def Deriv_(self,order):
+  def Deriv_(self,order,wfn):
       """ The function that computes the derivative
 
       Args:
@@ -55,7 +55,7 @@ class HelgakerCBS(psr.modulebase.EnergyMethod):
       Cs=[l23/denom,-l13/denom]
       MIM=self.CreateChild(self.Options().Get("MIM_KEY"))
       MIM.Options().Change("WEIGHTS",Cs)
-      return MIM.Deriv(order)
+      return MIM.Deriv(order,wfn)
 
      
          

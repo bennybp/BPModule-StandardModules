@@ -38,16 +38,14 @@ class MIM : public pulsar::modulebase::EnergyMethod {
    private:
       ///The type of the base class
       typedef pulsar::modulebase::EnergyMethod Base_t;
-      ///The function that actually implements the derivative computation
-      std::vector<double> DerivImpl(size_t Order)const;
+
    public:
       ///Pulls in the base class's methods
       using Base_t::EnergyMethod;
       
       ///The method that the base class will actually call
-      std::vector<double> Deriv_(size_t Order){
-         return DerivImpl(Order);
-      }
+      DerivReturnType Deriv_(size_t Order, 
+        const pulsar::datastore::Wavefunction& Wfn);
 };
 
 }//End namespace

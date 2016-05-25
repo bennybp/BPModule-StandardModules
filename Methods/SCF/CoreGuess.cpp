@@ -2,7 +2,7 @@
 #include <pulsar/system/BasisSet.hpp>
 #include <pulsar/system/AOIterator.hpp>
 #include <pulsar/math/Cast.hpp>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include "Methods/SCF/CoreGuess.hpp"
 #include "Methods/SCF/SCF_Common.hpp"
 

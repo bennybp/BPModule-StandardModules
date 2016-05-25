@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <pulsar/modulebase/FockBuilder.hpp>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 namespace pulsarmethods {
 

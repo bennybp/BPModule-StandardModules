@@ -25,7 +25,8 @@ class MBE : public pulsar::modulebase::EnergyMethod{
         //Pull in energy method's constructors
         using Base_t::EnergyMethod;
         
-        virtual std::vector<double> Deriv_(size_t Order);
+        DerivReturnType Deriv_(size_t Order,
+        const pulsar::datastore::Wavefunction& wfn);
 
 };
 }

@@ -29,7 +29,7 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
        Data.NewSystem<<AtomI;
        Data.Atom2Idx.emplace(AtomI,Data.Atom2Idx.size());
    }
-   size_t NAtoms=Sys.Size();
+   size_t NAtoms=Sys.size();
    Data.Atom2RealIdx=Data.Atom2Idx;
    for(const Atom& AtomI: Sys){
        Atom Ghost=MakeGhost(NAtoms++,AtomI); 
@@ -124,7 +124,9 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
    }
    
     
-   Return_t RunCalcs(const pulsar::system::SystemMap& AllFrags,
+   pulsar::modulebase::EnergyMethod::DerivReturnType
+        RunCalcs(const pulsar::system::SystemMap& AllFrags,
+                 const Wavefunction& Wfn,
                            const map<string,double>& Coeffs,
                            const RealGhostData& Data,
                            size_t Order,
@@ -132,7 +134,7 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
                            pulsar::modulemanager::ModuleManager& MM,
                            const string& MethodName,
                            const string& MIMName){
-        size_t NAtoms=Data.RealSystem->Size();
+        size_t NAtoms=Data.RealSystem->size();
         size_t DoF=1;
         for(size_t i=0;i<Order;++i)DoF*=3*NAtoms;
        
@@ -145,7 +147,7 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
             const System& Frag=NMerI.second;
             Names.push_back(Name);
             Cs.push_back(Coeffs.at(Name));
-            Offsets.push_back(Frag.Size());
+            Offsets.push_back(Frag.size());
             for(const Atom& AtomI: Frag)
                 FragAtoms.push_back(Data.Atom2Idx.at(AtomI));
         }
@@ -154,7 +156,7 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
         string MIMKey=MM.GenerateUniqueKey();
         string FragKey=MM.GenerateUniqueKey();
         MM.DuplicateKey(MIMName,MIMKey);
-        MM.DuplicateKey("BP_UD_FRAG",FragKey);
+        MM.DuplicateKey("PSR_UD_FRAG",FragKey);
         //TODO: get rid of dependence on BP_UD_FRAG
         MM.ChangeOption(FragKey,"FRAGMENT_NAMES",Names);
         MM.ChangeOption(FragKey,"ATOMS_PER_FRAG",Offsets);
@@ -165,10 +167,13 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
 
         
         EMethod_t MIM=MM.GetModule<EnergyMethod>(MIMKey,ID);
-        MIM->InitialWfn().GetSystem()=std::make_shared<System>(Data.NewSystem,true);
-        Return_t FullDeriv=MIM->Deriv(Order);
-        Return_t FinalDeriv(DoF,0.0);
-        FillDeriv(FinalDeriv,FullDeriv,1.0,NewU,Data.Atom2RealIdx,
+        Wavefunction NewWfn(Wfn);
+        NewWfn.system=std::make_shared<System>(Data.NewSystem,true);
+        pulsar::modulebase::EnergyMethod::DerivReturnType FullDeriv=MIM->Deriv(Order,NewWfn);
+        pulsar::modulebase::EnergyMethod::DerivReturnType FinalDeriv;
+        FinalDeriv.first=FullDeriv.first;
+        FinalDeriv.second=std::vector<double>(DoF,0.0);
+        FillDeriv(FinalDeriv.second,FullDeriv.second,1.0,NewU,Data.Atom2RealIdx,
                                                 Data.Atom2Idx,Order);
         return FinalDeriv;
    }

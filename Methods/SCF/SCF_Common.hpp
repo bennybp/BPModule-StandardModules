@@ -7,7 +7,7 @@
 #include <pulsar/math/BlockByIrrepSpin.hpp>
 #include <pulsar/datastore/Wavefunction.hpp>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <vector>
 
