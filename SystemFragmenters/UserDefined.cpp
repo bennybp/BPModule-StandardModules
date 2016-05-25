@@ -36,8 +36,9 @@ SystemMap UserDefined::Fragmentize_(const System & mol){
     
     for(size_t i=0,counter=0;i<Names.size();++i){
         NMers.emplace(Names[i],Empty);
-        for(size_t j=0;j<AtomsPerFrag[i];++j)
+        for(int j=0;j<AtomsPerFrag[i];++j)
             NMers.at(Names[i]).Insert(Atoms[Frags[counter++]]);
     }
     return NMers;
 }
+
