@@ -29,10 +29,9 @@ RealGhostData GhostTheSystem(const pulsar::system::System& Sys){
        Data.NewSystem<<AtomI;
        Data.Atom2Idx.emplace(AtomI,Data.Atom2Idx.size());
    }
-   size_t NAtoms=Sys.size();
    Data.Atom2RealIdx=Data.Atom2Idx;
    for(const Atom& AtomI: Sys){
-       Atom Ghost=MakeGhost(NAtoms++,AtomI); 
+       Atom Ghost=MakeGhost(AtomI); 
        Data.Real2Ghost.emplace(AtomI,Ghost);
        Data.NewSystem<<Ghost;
        Data.Atom2Idx.emplace(Ghost,Data.Atom2Idx.size());
