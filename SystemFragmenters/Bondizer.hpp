@@ -37,7 +37,7 @@ class Bondizer : public pulsar::modulebase::SystemFragmenter
 public:
     using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
 
-    virtual pulsar::system::SystemMap Fragmentize_(const pulsar::system::System & mol);
+    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
 
 };
 

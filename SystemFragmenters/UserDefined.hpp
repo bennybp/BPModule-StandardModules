@@ -38,8 +38,7 @@ class UserDefined : public pulsar::modulebase::SystemFragmenter
 public:
 using SystemFragmenter::SystemFragmenter;
 
-virtual pulsar::system::SystemMap 
-    Fragmentize_(const pulsar::system::System & mol);
+virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
 
 };
 

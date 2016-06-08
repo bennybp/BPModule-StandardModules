@@ -1,23 +1,23 @@
 #include "Atomizer.hpp"
 
 using namespace pulsar::system;
+using namespace pulsar::modulebase;
 
-SystemMap Atomizer::Fragmentize_(const System & mol)
+NMerSetType Atomizer::Fragmentize_(const System & mol)
 {
-    SystemMap ret;
-
-    //! \todo best way to do this? Could we copy
-    //        the System (universe only) and then
-    //        insert?
+    NMerSetType ret;
     size_t idx = 0;
-    for(const auto & atom : mol)
+    for(const Atom & atom : mol.AsUniverse())
     {
         std::string idxstr = std::to_string(idx);
-        auto hash = atom.MyHash();
-        ret.emplace(idxstr, mol.Partition([hash](const Atom & a) { return a.MyHash() == hash; }));
+        NMerInfo Temp;
+        Temp.SN.insert(idxstr);
+        AtomSetUniverse DaAtom(atom);
+        Temp.NMer=System(DaAtom,true);
+        ret.emplace(Temp.SN,Temp);
         idx++;
     }
 
-    return ret;
+    return MakeNMers(ret);
 }
 

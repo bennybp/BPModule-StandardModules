@@ -22,6 +22,8 @@
  *  with the entire system we need a way of telling MIM not to fragment.
  *  We do this with this class, which just returns a SystemMap that is
  *  the input system.
+ * 
+ *  This will go away shortly
  *  
  */
 class NullFragmenter: public pulsar::modulebase::SystemFragmenter{
@@ -30,8 +32,7 @@ class NullFragmenter: public pulsar::modulebase::SystemFragmenter{
     using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
 
     ///Returns a SystemMap with the input system
-    virtual pulsar::system::SystemMap Fragmentize_
-           (const pulsar::system::System & mol);
+    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
 };
 
 

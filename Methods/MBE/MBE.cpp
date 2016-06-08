@@ -3,72 +3,60 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#include <string>
-#include <pulsar/math/PowerSetItr.hpp>
-#include <pulsar/math/Binomial.hpp>
+
+#include<pulsar/modulebase/SystemFragmenter.hpp>
+#include<pulsar/modulemanager/ModuleManager.hpp>
+#include<pulsar/util/IterTools.hpp>
 #include "Methods/MBE/MBE.hpp"
-#include "Methods/MBE/MBECommon.hpp"
-#include "Methods/MBE/MBEUtils.hpp"
-
-
-
-using std::string;
-using std::vector;
-using std::map;
-using std::set;
-using std::stringstream;
-
-using pulsar::modulemanager::ModuleManager;
-typedef vector<double> Return_t;
-typedef map<string,Return_t> DerivMap;
+#include "Methods/MethodHelpers/MethodHelpers.hpp"
 
 /*
  * TODO once computations cache results, compute interactions by
  *   "Re-running" the computations and then assembling derivatives
  */
 
+using std::vector;
+using std::string;
+using Wfn_t=pulsar::datastore::Wavefunction;
+using pulsar::util::Range;
+using namespace pulsar::modulebase;
+using SFer=SystemFragmenter;
+using Return_t=DerivReturnType;
+using namespace pulsar::system;
+using Map_t=std::unordered_map<Atom,size_t>;
+
 namespace pulsarmethods{
     
-    EnergyMethod::DerivReturnType MBE::Deriv_(size_t Order,const Wavefunction& Wfn){
-        //Load options
-        const OptionMap& DaOptions=Options();
-        string MethodName=DaOptions.Get<string>("METHOD");
-        string Fragmentizer=DaOptions.Get<string>("FRAGMENTIZER");
-
-        //Make N-Mers
+    Return_t MBE::Deriv_(size_t Order,const Wfn_t& Wfn)
+    {
+        vector<string> Keys(1,Options().Get<string>("METHOD"));
         const System& Mol=*Wfn.system;
-        Fragmenter_t Fragger=CreateChild<SystemFragmenter>(Fragmentizer);
-        SystemMap NMers=Fragger->Fragmentize(Mol);
+        NMerSetType NMers=
+                CreateChildFromOption<SFer>("FRAGMENTIZER")->Fragmentize(Mol);
+        vector<double> Cs;
+        vector<Wfn_t> Wfns;
+        for(const typename NMerSetType::value_type& NMerI : NMers){
+            Cs.push_back(NMerI.second.Weight);
+            Wfns.push_back(Wfn);
+            Wfns.back().system=std::make_shared<System>(NMerI.second.NMer);
+        }
+        vector<Return_t> Results=
+                RunSeriesOfMethods(MManager(),ID(),Keys,Wfns,Cs,Order);
+        Map_t SprMap;
+        vector<double> Result(std::pow(3*Mol.size(),Order));
+        for(const Atom& AtomI: Mol)SprMap.insert({AtomI,SprMap.size()});
+        const size_t Offset=SprMap.size();
+        for(const Atom& AtomI: Mol)
+            SprMap.insert({MakeGhost(AtomI),SprMap.size()-Offset});
         
-        //Parse the names, bin n-mers by size, zero weights
-        SNList_t SNs=BinNMers(NMers);
-        map<string,double> Weights;
-        for(const auto& NMerI:NMers)Weights[NMerI.first]=0.0;
-
-        
-        /* For the MBE we have the sum of all one-body interactions, the
-         * sum of all two-body interactions, etc.  For each n-mer, GetCoef
-         * adjusts the coefficients of the systems needed to get the energy
-         * of the n-body interaction unique to that n-mer.  To get the
-         * total we thus have to loop over all orders
-         */
-        for(size_t i=0;i<SNs.size();++i)
-            for(const auto& NMerI: SNs[i])
-                GetCoef(true,NMerI.first,SNs,Weights);        
-        
-        //Now we need the weights in the same order as the systems
-        Return_t SortedWeights;
-        for(const auto& NMerI: NMers)
-            SortedWeights.push_back(Weights[NMerI.first]);
-            
-        
-        //Pass info to MIM
-        const string MIMName=Options().Get<string>("MIM_KEY");
-        MManager().ChangeOption(MIMName,"METHODS",vector<string>({MethodName}));
-        MManager().ChangeOption(MIMName,"FRAGMENTIZER",Fragmentizer);
-        MManager().ChangeOption(MIMName,"WEIGHTS",SortedWeights);
-        EMethod_t MIM=CreateChild<EnergyMethod>(MIMName);
-        return MIM->Deriv(Order,Wfn);
+        for(size_t i: Range<0>(Results.size())){
+            Map_t SubMap;
+            const System& NMerI=*Results[i].first.system;
+            for(const Atom& AtomI: NMerI)
+                SubMap.insert({AtomI,SubMap.size()});
+            FillDeriv(Result,Results[i].second,Cs[i],NMerI,SprMap,SubMap,Order);
+        }
+        return {Wfn,Result};
     }
     
 
