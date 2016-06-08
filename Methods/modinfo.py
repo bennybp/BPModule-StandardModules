@@ -16,15 +16,22 @@ BasisOption=(OptionType.String,"Primary",False,None,
 MIMOption=(OptionType.String,"PSR_MIM",False,None,
                     "A way for changing which MIM module is called.")
 
-
-CommonBSSEOptions={
-                    "METHOD" : MethodOption,
-                    "FRAGMENTIZER" : FraggerOption,
-                    "MIM_KEY" : MIMOption
-                  }
-
 minfo = {
-
+  "CP":{
+    "type"        : "python_module",
+    "base"        : "EnergyMethod",
+    "version"     : "0.1a",
+    "description" : "Performs a standard CP correctio on a system",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {"METHOD" : MethodOption,
+                     "GHOSTER_KEY": (OptionType.String,"PSR_CP_FRAG",False,None,
+                     'The key used to put ghosts on the system'),
+                     "MBE_KEY":(OptionType.String,"PSR_MBE",False,None,
+                     'The key used for MBEs on the system.  For CP,'\
+                     ' the MBE should be truncated at order 1')
+                    }
+  },
   "MBE" :
   {
     "type"        : "c_module",
@@ -34,7 +41,9 @@ minfo = {
     "description" : "Performs a many-body expansion on a system",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
-    "options"     :CommonBSSEOptions                    
+    "options"     : {"METHOD" : MethodOption,
+                     "FRAGMENTIZER": FraggerOption
+                    }
   },
   "MIM" :
   {
@@ -88,28 +97,6 @@ minfo = {
     "refs"        : [""], 
     "options"     : {
                     }
-  },
-  "VMFC" :
-  {
-    "type"        : "c_module",
-    "base"        : "EnergyMethod",
-    "modpath"     : "Methods.so",
-    "version"     : "0.1a",
-    "description" : "Performs a Valiron-Mayer Functional Counterpoise correction",
-    "authors"     : ["Ryan Richard"],
-    "refs"        : [""],
-    "options"     : CommonBSSEOptions
-  },
-  "CP" :
-  {
-    "type"        : "c_module",
-    "base"        : "EnergyMethod",
-    "modpath"     : "Methods.so",
-    "version"     : "0.1a",
-    "description" : "Performs a Boys and Bernardi Counterpoise correction",
-    "authors"     : ["Ryan Richard"],
-    "refs"        : [""],
-    "options"     : CommonBSSEOptions
   },
   "HelgakerCBS" :
     {

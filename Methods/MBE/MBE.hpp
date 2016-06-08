@@ -14,22 +14,26 @@
 #ifndef MBE_HPP
 #define MBE_HPP
 
-#include <vector>
 #include <pulsar/modulebase/EnergyMethod.hpp>
 
 namespace pulsarmethods{
+
+/** \brief A common routine for many-body expansions
+ 
+ */
 class MBE : public pulsar::modulebase::EnergyMethod{
     private:
-        typedef pulsar::modulebase::EnergyMethod Base_t;
+        using Base_t=pulsar::modulebase::EnergyMethod;
+        using Wfn_t=pulsar::datastore::Wavefunction;
     public:
-        //Pull in energy method's constructors
+        //Uses constructor of base class
         using Base_t::EnergyMethod;
-        
-        DerivReturnType Deriv_(size_t Order,
-        const pulsar::datastore::Wavefunction& wfn);
+        ///Returns the \p Order -th derivative of the MBE of system in \p wfn
+        DerivReturnType Deriv_(size_t Order,const Wfn_t& wfn);
 
 };
-}
+
+}//End namespace pulsarmethods
 
 #endif /* MBE_HPP */
 

@@ -8,37 +8,32 @@
 
 using std::vector;
 using std::string;
-
-using pulsar::system::System;
-using pulsar::system::Atom;
-using pulsar::system::SystemMap;
-using pulsar::datastore::OptionMap;
+using namespace pulsar::system;
 using pulsar::exception::GeneralException;
+using namespace pulsar::modulebase;
 
-SystemMap UserDefined::Fragmentize_(const System & mol){
-    SystemMap NMers;
-    const OptionMap& DaOptions=Options();
-    vector<string> Names=
-            DaOptions.Get<vector<string>>("FRAGMENT_NAMES");
-    vector<int> AtomsPerFrag=DaOptions.Get<vector<int>>("ATOMS_PER_FRAG");
-    vector<int> Frags=DaOptions.Get<vector<int>>("FRAGMENTS");
-    
+NMerSetType UserDefined::Fragmentize_(const System & mol){
+    NMerSetType NMers;
+    vector<string> Names=Options().Get<vector<string>>("FRAGMENT_NAMES");
+    vector<int> AtomsPerFrag=Options().Get<vector<int>>("ATOMS_PER_FRAG");
+    vector<int> Frags=Options().Get<vector<int>>("FRAGMENTS");
     if(Names.size()!=AtomsPerFrag.size())
         throw GeneralException("The number of names for your fragments must"
                 " match the length of the array of fragment sizes",
                 "NNames",Names.size(),
                  "NSizes",AtomsPerFrag.size());
     
-    std::vector<Atom> Atoms;
+    vector<Atom> Atoms;
     for(const Atom& AtomI: mol)Atoms.push_back(AtomI);
-        
-    System Empty=mol.Partition([](const Atom&){return false;});
-    
+    System Empty(mol.AsUniverse(),false);
     for(size_t i=0,counter=0;i<Names.size();++i){
-        NMers.emplace(Names[i],Empty);
+        NMerInfo NMer;
+        NMer.SN.insert(Names[i]);
+        NMer.NMer=Empty;
         for(int j=0;j<AtomsPerFrag[i];++j)
-            NMers.at(Names[i]).Insert(Atoms[Frags[counter++]]);
+            NMer.NMer.Insert(Atoms[Frags[counter++]]);
+        NMers.emplace(NMer.SN,NMer);
     }
-    return NMers;
+    return MakeNMers(NMers);
 }
 

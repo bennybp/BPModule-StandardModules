@@ -1,6 +1,8 @@
 set(SYSTEMFRAG_FILES creator.cpp
                      Atomizer.cpp
                      Bondizer.cpp
+                     CrystalFragger.cpp
+                     Ghoster.cpp
                      UserDefined.cpp
                      Null.cpp
    )

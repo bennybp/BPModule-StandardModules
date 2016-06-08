@@ -1,17 +1,13 @@
 from pulsar.datastore import OptionType
 
-DistThreshOption=(OptionType.DictIntFloat,{},False,
-                    None,'A int->float dictionary where the int, call it n, is'\
-                    ' the n-mer and the float is the maximum distance '\
-                    'that the n monomers can be apart, e.g. {2:3.14} means '\
-                    'that dimers whose centers of mass are more than 3.14 '\
-                    'Angstroms apart are excluded.')   
-
 TruncOrderOption=(OptionType.Int,1,False,None,
-                 'Unions of up to how many fragments should be created?'\
-                 'In other words, do you want dimers, trimers,... to be made'\
-                 'as well?')
-
+        'Unions of up to how many fragments should be created?'\
+        'In other words, do you want dimers, trimers,... to be made as well?')
+SubFragger=(OptionType.String,"PSR_BOND_FRAG",False,None,
+        'The SystemFragmenter used to chop the supercell into fragments.')
+GhosterKey=(OptionType.String,"PSR_GHOST_FRAG",False,None,
+        'The generic ghoted frament maker.')
+    
 minfo = {
 
   "Atomizer" :
@@ -43,8 +39,64 @@ minfo = {
                     'covalently bonded atoms are in the same fragment '\
                     '(assuming they are within 2,147,483,647 bonds of each '\
                     'other).'),
-                    "TRUNCATION_ORDER": TruncOrderOption,
-                    "DISTANCE_THRESHOLDS": DistThreshOption
+                    }
+  },
+  "CrystalFragger" :
+  {
+    "type"        : "c_module",
+    "base"        : "SystemFragmenter",
+    "modpath"     : "SystemFragmenters.so",
+    "version"     : "0.1a",
+    "description" : "Fragments a periodic system",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                      "SYSTEM_FRAGMENTER_KEY":SubFragger,
+                      "LATTICE_SIZE":(OptionType.ListInt,[3,3,3],False,None,
+                      'How large of a supercell should we fragment?'),
+                    },
+  },
+  "Ghoster":
+  {
+    "type"        : "c_module",
+    "base"        : "SystemFragmenter",
+    "modpath"     : "SystemFragmenters.so",
+    "version"     : "0.1a",
+    "description" : "Makes fragments with ghost atoms",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                      "SYSTEM_FRAGMENTER_KEY":SubFragger,
+                      "GHOST_TRUNCATION_ORDERS":(OptionType.DictIntInt,{},False,
+                      None,'A map describing the maximum number of ghost'\
+                      ' fragments, g, for a real-mer.  The map is of the form '
+                      ' {{r:g}}.  Any r not specified is assumed to be 0.')
+                    }
+  },
+  "CPGhoster":
+  {
+    "type"        : "c_module",
+    "base"        : "SystemFragmenter",
+    "modpath"     : "SystemFragmenters.so",
+    "version"     : "0.1a",
+    "description" : "Makes fragments with ghost atoms consistent with CP",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                     "GHOSTER_KEY":GhosterKey,
+                    }
+  }, 
+  "VMFCGhoster":
+  {
+    "type"        : "c_module",
+    "base"        : "SystemFragmenter",
+    "modpath"     : "SystemFragmenters.so",
+    "version"     : "0.1a",
+    "description" : "Makes fragments with ghost atoms consistent with VMFC",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                     "GHOSTER_KEY":GhosterKey
                     }
   },
   "UserDefined" :
@@ -53,7 +105,7 @@ minfo = {
     "base"        : "SystemFragmenter",
     "modpath"     : "SystemFragmenters.so",
     "version"     : "0.1a",
-    "description" : "Makes all atoms within N bonds a fragment",
+    "description" : "Makes whatever you asked for into fragments",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
@@ -63,8 +115,6 @@ minfo = {
                      'Number of atoms in each fragment'),
                      "FRAGMENTS":(OptionType.ListInt,None,True,None,
                      'The atoms in each fragment'),
-                     "TRUNCATION_ORDER": TruncOrderOption,
-                     "DISTANCE_THRESHOLDS":DistThreshOption 
                     }
   },
   "NullFragmenter" :
@@ -79,7 +129,6 @@ minfo = {
     "options"     : {
                       "TRUNCATION_ORDER":(OptionType.Int,0,False,None,
                       "Should not be set for a NullFragmenter"),
-                      "DISTANCE_THRESHOLDS": DistThreshOption
                     }
   },
 }

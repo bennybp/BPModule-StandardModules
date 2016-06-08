@@ -6,15 +6,13 @@
 
 /** \brief A simple fragmenter that makes each atom its own fragment
  * 
- *   RMR-Is this just a test?  Wouldn't using the iterators of the system
- *   accomplish the same thing?
  */ 
 class Atomizer : public pulsar::modulebase::SystemFragmenter
 {
 public:
     using SystemFragmenter::SystemFragmenter;
 
-    virtual pulsar::system::SystemMap Fragmentize_(const pulsar::system::System & mol);
+    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
 
 };
 
