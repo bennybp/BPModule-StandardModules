@@ -89,13 +89,15 @@ std::shared_ptr<BasisSet> NormalizeBasis(CacheData & cache,
                                          OutputStream & out,
                                          const BasisSet & bs)
 {
-    std::string cachekey = std::string("bs:") + bs.MyHash().String();
+    using bphash::hash_to_string;
+
+    std::string cachekey = std::string("bs:") + hash_to_string(bs.MyHash());
     if(cache.Count(cachekey)) // options are unimportant
     {
         auto ret = cache.Get<std::shared_ptr<BasisSet>>(cachekey);
 
         out.Debug("Found normalized basis in cache: %? -> %?\n",
-                  bs.MyHash().String(), ret->MyHash().String());
+                  hash_to_string(bs.MyHash()), hash_to_string(ret->MyHash()));
 
         return ret;
     }
