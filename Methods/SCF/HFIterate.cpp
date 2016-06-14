@@ -31,7 +31,7 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
     // Overlap
     ///////////////////////
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(wfn, bs, bs);
+    mod_ao_overlap->Initialize(0, wfn, bs, bs);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap and form S^(-1/2)

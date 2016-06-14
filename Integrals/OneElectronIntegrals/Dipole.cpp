@@ -13,14 +13,11 @@ using namespace pulsar::datastore;
 
 
 
-uint64_t Dipole::Calculate_(uint64_t deriv,
-                            uint64_t shell1, uint64_t shell2,
+uint64_t Dipole::Calculate_(uint64_t shell1, uint64_t shell2,
                             double * outbuffer, size_t bufsize)
 {
     if(work_.size() == 0)
         throw GeneralException("Workspace not allocated. Did you set the bases?");
-    if(deriv != 0)
-        throw NotYetImplementedException("Not Yet Implemented: Dipole integral with deriv != 0");
 
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
     const BasisSetShell & sh2 = bs2_->Shell(shell2);
@@ -124,10 +121,14 @@ uint64_t Dipole::Calculate_(uint64_t deriv,
 
 
 
-void Dipole::SetBases_(const Wavefunction & wfn,
-                       const BasisSet & bs1,
-                       const BasisSet & bs2)
+void Dipole::Initialize_(unsigned int deriv,
+                         const Wavefunction & wfn,
+                         const BasisSet & bs1,
+                         const BasisSet & bs2)
 {
+    if(deriv != 0)
+        throw NotYetImplementedException("Not Yet Implemented: Dipole integral with deriv != 0");
+
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, bs1);
     bs2_ = NormalizeBasis(Cache(), out, bs2);

@@ -42,7 +42,7 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
             const size_t colstart = bs.ShellStart(n2);
 
             // calculate
-            size_t ncalc = mod->Calculate(0, n1, n2, b.data(), maxnfunc2);
+            size_t ncalc = mod->Calculate(n1, n2, b.data(), maxnfunc2);
 
             // iterate and fill in the matrix
             AOIterator<2> aoit({sh1, sh2}, false);
@@ -105,7 +105,7 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 
                     const auto & sh4 = bs.Shell(l);
 
-                    uint64_t ncalc = mod->Calculate(0, i, j, k, l, eribuf.data(), bufsize); 
+                    uint64_t ncalc = mod->Calculate(i, j, k, l, eribuf.data(), bufsize); 
 
                     AOIterator<4> aoit({sh1, sh2, sh3, sh4}, false);
 

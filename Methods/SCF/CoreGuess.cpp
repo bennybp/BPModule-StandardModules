@@ -46,12 +46,13 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
     double nucrep;
-    mod_nuc_rep->Calculate(0, *wfn.system, &nucrep, 1);
+    mod_nuc_rep->Initialize(0, *wfn.system);
+    mod_nuc_rep->Calculate(&nucrep, 1);
 
     /////////////////////// 
     // Overlap
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(wfn, bs, bs);
+    mod_ao_overlap->Initialize(0, wfn, bs, bs);
     MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
 
     // diagonalize the overlap
@@ -69,7 +70,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     //////////////////////////// 
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(wfn, bs, bs);
+    mod_ao_core->Initialize(0, wfn, bs, bs);
     MatrixXd Hcore = FillOneElectronMatrix(mod_ao_core, bs);
 
 

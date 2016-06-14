@@ -23,20 +23,21 @@ void DIIS::Initialize_(const Wavefunction & wfn)
     ///////////////////////////////////////////
     // Nuclear repulsion
     auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
-    mod_nuc_rep->Calculate(0, *wfn.system, &nucrep_, 1);
+    mod_nuc_rep->Initialize(0, *wfn.system);
+    mod_nuc_rep->Calculate(&nucrep_, 1);
 
 
     ////////////////////////////
     // Overlap
     auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->SetBases(wfn, bs, bs);
+    mod_ao_overlap->Initialize(0, wfn, bs, bs);
     S_ = FillOneElectronMatrix(mod_ao_overlap, bs);
 
 
     ////////////////////////////
     // One-electron hamiltonian
     auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->SetBases(wfn, bs, bs);
+    mod_ao_core->Initialize(0, wfn, bs, bs);
     Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
 
     bs.Print(out);

@@ -21,14 +21,10 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
 
 
 
-uint64_t ReferenceERI::Calculate_(size_t deriv,
-                                  size_t shell1, size_t shell2,
+uint64_t ReferenceERI::Calculate_(size_t shell1, size_t shell2,
                                   size_t shell3, size_t shell4,
                                   double * outbuffer, size_t bufsize)
 {
-    if(deriv != 0)
-        throw NotYetImplementedException("Not Yet Implemented: Overlap integral with deriv != 0");
-
     const BasisSetShell & sh1 = bs1_->Shell(shell1);
     const BasisSetShell & sh2 = bs2_->Shell(shell2);
     const BasisSetShell & sh3 = bs3_->Shell(shell3);
@@ -96,12 +92,16 @@ uint64_t ReferenceERI::Calculate_(size_t deriv,
 
 
 
-void ReferenceERI::SetBases_(const Wavefunction & wfn,
-                             const BasisSet & bs1,
-                             const BasisSet & bs2,
-                             const BasisSet & bs3,
-                             const BasisSet & bs4)
+void ReferenceERI::Initialize_(unsigned int deriv,
+                               const Wavefunction & wfn,
+                               const BasisSet & bs1,
+                               const BasisSet & bs2,
+                               const BasisSet & bs3,
+                               const BasisSet & bs4)
 {
+    if(deriv != 0)
+        throw NotYetImplementedException("Not Yet Implemented: ReferenceERI integral with deriv != 0");
+
     // from common components
     bs1_ = NormalizeBasis(Cache(), out, bs1);
     bs2_ = NormalizeBasis(Cache(), out, bs2);

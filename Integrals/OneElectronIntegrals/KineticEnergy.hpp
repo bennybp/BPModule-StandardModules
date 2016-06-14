@@ -9,11 +9,12 @@ class KineticEnergy : public pulsar::modulebase::OneElectronIntegral
     public:
         using pulsar::modulebase::OneElectronIntegral::OneElectronIntegral;
 
-        virtual void SetBases_(const pulsar::datastore::Wavefunction & wfn,
-                               const pulsar::system::BasisSet & bs1,
-                               const pulsar::system::BasisSet & bs2);
+        virtual void Initialize_(unsigned int deriv,
+                                 const pulsar::datastore::Wavefunction & wfn,
+                                 const pulsar::system::BasisSet & bs1,
+                                 const pulsar::system::BasisSet & bs2);
 
-        virtual uint64_t Calculate_(uint64_t deriv, uint64_t shell1, uint64_t shell2,
+        virtual uint64_t Calculate_(uint64_t shell1, uint64_t shell2,
                                     double * outbuffer, size_t bufsize);
 
     private:

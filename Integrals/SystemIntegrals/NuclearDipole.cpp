@@ -11,21 +11,24 @@ using namespace pulsar::datastore;
 using namespace pulsar::math;
 
 
-uint64_t NuclearDipole::Calculate_(uint64_t deriv, const System & sys,
-                                   double * outbuffer, size_t bufsize)
+void NuclearDipole::Initialize_(unsigned int deriv, const System & sys)
 {
     if(deriv != 0)
         throw NotYetImplementedException("Not Yet Implemented: Nuclear Dipole with deriv != 0");
 
+    sys_ = &sys;
+}
+
+uint64_t NuclearDipole::Calculate_(double * outbuffer, size_t bufsize)
+{
     if(bufsize < 3)
         throw GeneralException("Not enough space in output buffer");
-
 
     outbuffer[0] = 0.0;
     outbuffer[1] = 0.0;
     outbuffer[2] = 0.0;
 
-    for(const auto & atom : sys)
+    for(const auto & atom : *sys_)
     {
         CoordType c = atom.GetCoords();
         outbuffer[0] += atom.GetZ()*c[0];

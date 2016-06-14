@@ -19,8 +19,7 @@ using namespace pulsar::datastore;
 using namespace pulsar::math;
 
 
-uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
-                                                  uint64_t shell1, uint64_t shell2,
+uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shell2,
                                                   const Grid & grid,
                                                   double * outbuffer, size_t bufsize)
 {
@@ -251,8 +250,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t deriv,
 }
 
 
-uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
-                                          uint64_t shell1, uint64_t shell2,
+uint64_t OneElectronPotential::Calculate_(uint64_t shell1, uint64_t shell2,
                                           double * outbuffer, size_t bufsize)
 {
     // what grid are we using?
@@ -276,15 +274,19 @@ uint64_t OneElectronPotential::Calculate_(uint64_t deriv,
     out.Debug("Calculating one-electron potential with grid %? (%? points)\n", gridopt, grid.Size());
 
     // will check sizes of buffer, etc
-    return CalculateWithGrid_(deriv, shell1, shell2, grid, outbuffer, bufsize);
+    return CalculateWithGrid_(shell1, shell2, grid, outbuffer, bufsize);
 }
 
 
 
-void OneElectronPotential::SetBases_(const Wavefunction & wfn,
-                                     const BasisSet & bs1,
-                                     const BasisSet & bs2)
+void OneElectronPotential::Initialize_(unsigned int deriv,
+                                       const Wavefunction & wfn,
+                                       const BasisSet & bs1,
+                                       const BasisSet & bs2)
 {
+    if(deriv != 0)
+        throw NotYetImplementedException("Not Yet Implemented: OneElectronPotential integral with deriv != 0");
+
     sys_ = wfn.system;
 
     // from common components

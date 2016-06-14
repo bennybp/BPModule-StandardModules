@@ -19,11 +19,10 @@ using namespace pulsar::datastore;
 
 static void CallAndBuild(ModulePtr<OneElectronIntegral> & mod,
                          double * tmpbuf, size_t nexpected,
-                         uint64_t deriv,
                          uint64_t shell1, uint64_t shell2,
                          double * outbuffer, size_t bufsize)
 {
-    uint64_t n = mod->Calculate(deriv, shell1, shell2,
+    uint64_t n = mod->Calculate(shell1, shell2,
                                 tmpbuf, bufsize);
 
 
@@ -37,8 +36,7 @@ static void CallAndBuild(ModulePtr<OneElectronIntegral> & mod,
 }
 
 
-uint64_t CoreBuild::Calculate_(uint64_t deriv,
-                               uint64_t shell1, uint64_t shell2,
+uint64_t CoreBuild::Calculate_(uint64_t shell1, uint64_t shell2,
                                double * outbuffer, size_t bufsize)
 {
     if(modules_.size() == 0)
@@ -47,7 +45,7 @@ uint64_t CoreBuild::Calculate_(uint64_t deriv,
     auto it = modules_.begin();
 
     // put the first directly in the output buffer
-    uint64_t n_initial = it->second->Calculate(deriv, shell1, shell2,
+    uint64_t n_initial = it->second->Calculate(shell1, shell2,
                                                outbuffer, bufsize);
 
     // now allocate the buffer and loop over the rest
@@ -59,7 +57,6 @@ uint64_t CoreBuild::Calculate_(uint64_t deriv,
     {
         CallAndBuild(it->second,
                      tmpbuf.data(), n_initial,
-                     deriv,
                      shell1, shell2, outbuffer, bufsize);
         ++it;
     }
@@ -69,9 +66,10 @@ uint64_t CoreBuild::Calculate_(uint64_t deriv,
 
 
 
-void CoreBuild::SetBases_(const Wavefunction & wfn,
-                          const BasisSet & bs1,
-                          const BasisSet & bs2)
+void CoreBuild::Initialize_(unsigned int deriv,
+                            const Wavefunction & wfn,
+                            const BasisSet & bs1,
+                            const BasisSet & bs2)
 {
     ///////////////////////////////// 
     // load all the required modules
@@ -80,13 +78,13 @@ void CoreBuild::SetBases_(const Wavefunction & wfn,
     /////////////////////// 
     // Kinetic Energy
     auto mod_ao_kinetic = CreateChildFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
-    mod_ao_kinetic->SetBases(wfn, bs1, bs2);
+    mod_ao_kinetic->Initialize(deriv, wfn, bs1, bs2);
     modules_.emplace("Kinetic Energy", std::move(mod_ao_kinetic));
 
     /////////////////////// 
     // Nuclear Attraction
     auto mod_ao_nucatt = CreateChildFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
-    mod_ao_nucatt->SetBases(wfn, bs1, bs2);
+    mod_ao_nucatt->Initialize(deriv, wfn, bs1, bs2);
     modules_.emplace("Electron-Nuclear Attraction", std::move(mod_ao_nucatt));
 
     // do the additional terms
@@ -96,7 +94,7 @@ void CoreBuild::SetBases_(const Wavefunction & wfn,
         for(const auto & a : add)
         {
             auto mod_add = CreateChild<OneElectronIntegral>(a);
-            mod_add->SetBases(wfn, bs1, bs2);
+            mod_add->Initialize(deriv, wfn, bs1, bs2);
             modules_.emplace(a, std::move(mod_add));
         }
     }

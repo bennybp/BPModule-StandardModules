@@ -15,7 +15,8 @@ using namespace pulsar::math;
 
 
 std::vector<double>
-OneElectronProperty::Calculate_(const Wavefunction & wfn,
+OneElectronProperty::Calculate_(unsigned int deriv,
+                                const Wavefunction & wfn,
                                 const BasisSet & bs1,
                                 const BasisSet & bs2)
 
@@ -23,10 +24,8 @@ OneElectronProperty::Calculate_(const Wavefunction & wfn,
     const size_t nshell1 = bs1.NShell();
     const size_t nshell2 = bs2.NShell();
 
-
-
     auto mod = CreateChildFromOption<OneElectronIntegral>("KEY_ONEEL_MOD");
-    mod->SetBases(wfn, bs1, bs2);
+    mod->Initialize(deriv, wfn, bs1, bs2);
     const unsigned int ncomp = mod->NComponents(); 
 
     // size of the workspace depends on the number of components
@@ -47,7 +46,7 @@ OneElectronProperty::Calculate_(const Wavefunction & wfn,
             const size_t colstart = bs2.ShellStart(n2);
 
             // calculate
-            size_t ncalc = mod->Calculate(0, n1, n2, work.data(), worksize);
+            size_t ncalc = mod->Calculate(n1, n2, work.data(), worksize);
 
             // iterate and fill in the matrix
             AOIterator<2> aoit({sh1, sh2}, false);
