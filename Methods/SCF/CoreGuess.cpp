@@ -17,6 +17,7 @@ using namespace pulsar::system;
 using namespace pulsar::math;
 using namespace pulsar::output;
 using namespace pulsar::datastore;
+using namespace pulsar::tensor;
 
 
 namespace pulsarmethods{
@@ -105,8 +106,8 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     // Use the irrep/spin from occupations
     for(auto s : occ.GetSpins(Irrep::A))
     {
-        cmat.Set(Irrep::A, s, EigenToSimpleMatrix(C0));
-        epsilon.Set(Irrep::A, s, EigenToSimpleVector(e0));
+        cmat.Take(Irrep::A, s, std::make_shared<EigenMatrixImpl>(C0));
+        epsilon.Take(Irrep::A, s, std::make_shared<EigenVectorImpl>(e0));
     }
 
 
@@ -114,20 +115,22 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     for(auto ir : cmat.GetIrreps())
     for(auto s : cmat.GetSpins(ir))
     {
-        const auto & c = cmat.Get(ir, s);
-        const auto & o = occ.Get(ir, s);
+        std::shared_ptr<const MatrixXd> cptr = convert_to_eigen(cmat.Get(ir, s));
+        std::shared_ptr<const VectorXd> optr = convert_to_eigen(occ.Get(ir, s));
+        const auto & o = *optr;
+        const auto & c = *cptr;
 
-        SimpleMatrixD d(c.NRows(), c.NCols());
+        MatrixXd d(c.rows(), c.cols());
 
-        for(size_t i = 0; i < c.NRows(); i++)
-        for(size_t j = 0; j < c.NCols(); j++)
+        for(long i = 0; i < c.rows(); i++)
+        for(long j = 0; j < c.cols(); j++)
         {
             d(i,j) = 0.0;
-            for(size_t m = 0; m < o.Size(); m++)
+            for(long m = 0; m < o.size(); m++)
                 d(i,j) += o(m) * c(i,m) * c(j,m);
         }
 
-        dmat.Take(ir, s, std::move(d));
+        dmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(d)));
     }
 
     // initial energy
@@ -136,9 +139,9 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     for(auto s : dmat.GetSpins(ir))
     {
         const auto & d = dmat.Get(ir, s);
-        for(size_t i = 0; i < d.NRows(); i++)
-        for(size_t j = 0; j < d.NCols(); j++)
-            energy += d(i,j) * Hcore(i,j);
+        for(size_t i = 0; i < d->size(0); i++)
+        for(size_t j = 0; j < d->size(1); j++)
+            energy += d->get_value({i,j}) * Hcore(i,j);
     }
 
 

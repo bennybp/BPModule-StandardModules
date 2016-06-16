@@ -11,7 +11,6 @@ using namespace pulsar::math;
 using namespace pulsar::exception;
 using namespace pulsar::output;
 using namespace pulsar::modulebase;
-using namespace pulsar::tensor;
 
 
 namespace pulsarmethods {
@@ -22,6 +21,8 @@ void BasicFockBuild::Initialize_(unsigned int deriv, const Wavefunction & wfn,
 {
     if(!wfn.system)
         throw GeneralException("System is not set!");
+    if(!wfn.opdm)
+        throw GeneralException("Missing OPDM");
 
     /////////////////////////
     // Load the ERI to core
@@ -60,47 +61,32 @@ void BasicFockBuild::Initialize_(unsigned int deriv, const Wavefunction & wfn,
 }
 
 
-IrrepSpinMatrixD BasicFockBuild::Calculate_(const Wavefunction & wfn)
+IrrepSpinMatrixD BasicFockBuild::Calculate_(void)
 {
-    if(!wfn.opdm)
-        throw GeneralException("Missing OPDM");
-
-    const size_t nao1 = Hcore_.rows();
-    const size_t nao2 = Hcore_.cols();
+    size_t nao1 = Hcore_.rows();
+    size_t nao2 = Hcore_.cols();
 
 
-    // the fock matrix we are returning
-    IrrepSpinMatrixD Fmat;
+    
 
-    for(auto ir : wfn.opdm->GetIrreps())
+    double val = 0.0;
+
+    if(spin != 0)
+        throw GeneralException("Unrestricted fock build not supported");
+    
+    auto D = MapConstSimpleMatrix(wfn.opdm->Get(ir, spin));
+
+    //! \todo ERI is not stored by symmetry, etc
+
+    for(size_t lambda = 0; lambda < nao1; lambda++)
+    for(size_t sigma = 0; sigma < nao2; sigma++)
     {
-        const auto & spins = wfn.opdm->GetSpins(ir);
-        if(spins == std::set<int>{0})
-        {
-            // Restricted
-            std::shared_ptr<const MatrixXd> Dptr = convert_to_eigen(wfn.opdm->Get(ir,0));
-            const auto & D = *Dptr;
+        size_t mnls = INDEX4(i, j, lambda, sigma);
+        size_t mlns = INDEX4(i, lambda, j, sigma);
+        val += 0.5*D(lambda, sigma) * (2*eri_.at(mnls)-eri_.at(mlns));
+    }
 
-            MatrixXd F(Hcore_);
-
-            for(size_t mu = 0; mu < nao1; mu++)
-            for(size_t nu = 0; nu < nao2; nu++)
-            {
-                for(size_t lambda = 0; lambda < nao1; lambda++)
-                for(size_t sigma = 0; sigma < nao2; sigma++)
-                {
-                    size_t mnls = INDEX4(mu, nu, lambda, sigma);
-                    size_t mlns = INDEX4(mu, lambda, nu, sigma);
-                    F(mu, nu) += 0.5*D(lambda, sigma) * (2*eri_.at(mnls)-eri_.at(mlns));
-                }
-            }
-
-            auto Fimpl = std::make_shared<EigenMatrixImpl>(std::move(F));
-            Fmat.Take(ir, 0, std::move(Fimpl));
-        }
-        else
-        {
-            /*
+    /*
             // unrestricted
             MappedConstMatrix Dalpha = MapConstSimpleMatrix(wfn.opdm->Get(ir, 1));
             MappedConstMatrix Dbeta = MapConstSimpleMatrix(wfn.opdm->Get(ir, -1));
@@ -130,11 +116,11 @@ IrrepSpinMatrixD BasicFockBuild::Calculate_(const Wavefunction & wfn)
 
             Fmat.Take(ir, 1, std::move(simpleFalpha));
             Fmat.Take(ir, -1, std::move(simpleFbeta));
-            */
         }
     }
+    */
 
-    return Fmat;
+    return val;
 }
 
 

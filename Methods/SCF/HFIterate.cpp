@@ -11,6 +11,7 @@ using namespace pulsar::math;
 using namespace pulsar::exception;
 using namespace pulsar::output;
 using namespace pulsar::modulebase;
+using namespace pulsar::tensor;
 
 
 namespace pulsarmethods {
@@ -56,30 +57,29 @@ Wavefunction HFIterate::Next_(const Wavefunction & wfn, const IrrepSpinMatrixD &
         Initialize_(wfn);
 
     // The density and C matrix we are returning
-    IrrepSpinMatrixD Dmat, Cmat;
+    IrrepSpinMatrixD Cmat;
     IrrepSpinVectorD epsilon;
 
     // Diagonalize, etc
     for(auto ir : fmat.GetIrreps())
     for(auto s : fmat.GetSpins(ir))
     {
-        MappedConstMatrix mapped_f = MapConstSimpleMatrix(fmat.Get(ir, s));
+        std::shared_ptr<const MatrixXd> fptr = convert_to_eigen(fmat.Get(ir, s));
+        const MatrixXd & f = *fptr;
 
-        MatrixXd Fprime = S12_.transpose() * mapped_f * S12_;
+        MatrixXd Fprime = S12_.transpose() * f * S12_;
 
         SelfAdjointEigenSolver<MatrixXd> fsolve(Fprime);
         MatrixXd c = fsolve.eigenvectors();
         VectorXd e = fsolve.eigenvalues();
         c = S12_*c;
 
-        // form the density matrix, and store both in the wfn
-        SimpleMatrixD simple_c = EigenToSimpleMatrix(c);
-        SimpleMatrixD simple_d = FormDensity(simple_c, wfn.occupations->Get(ir, s));
-        SimpleVectorD simple_e = EigenToSimpleVector(e);
-        Dmat.Take(ir, s, std::move(simple_d));
-        Cmat.Take(ir, s, std::move(simple_c));
-        epsilon.Take(ir, s, std::move(simple_e));
+        Cmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(c)));
+        epsilon.Take(ir, s, std::make_shared<EigenVectorImpl>(std::move(e)));
     }
+
+    // build the density
+    IrrepSpinMatrixD Dmat = FormDensity(Cmat, *wfn.occupations);
 
     // build the new wavefunction
     Wavefunction newwfn;

@@ -16,7 +16,7 @@ ModuleCreationFuncs InsertSupermodule(void){
     ModuleCreationFuncs cf;
     cf.AddCppCreator<pulsarmethods::MBE>("MBE");
     cf.AddCppCreator<pulsarmethods::MIM>("MIM");
-    cf.AddCppCreator<pulsarmethods::Damping>("Damping");
+    //cf.AddCppCreator<pulsarmethods::Damping>("Damping");
     cf.AddCppCreator<pulsarmethods::DIIS>("DIIS");
     cf.AddCppCreator<pulsarmethods::HFIterate>("HFIterate");
     cf.AddCppCreator<pulsarmethods::CoreGuess>("CoreGuess");

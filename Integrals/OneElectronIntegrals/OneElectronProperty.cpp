@@ -64,7 +64,7 @@ OneElectronProperty::Calculate_(unsigned int deriv,
                 for(auto s : wfn.opdm->GetSpins(Irrep::A))
                 {
                     for(unsigned int c = 0; c < ncomp; c++)
-                        val[c] += wfn.opdm->Get(Irrep::A, s)(i,j) * work[aoit.TotalIdx() + c*ncalc];
+                        val[c] += wfn.opdm->Get(Irrep::A, s)->get_value({i,j}) * work[aoit.TotalIdx() + c*ncalc];
                 }
             } while(aoit.Next());
         }

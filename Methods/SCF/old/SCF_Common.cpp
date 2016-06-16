@@ -66,6 +66,22 @@ FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
 }
 
 
+MatrixXd
+FillFockMatrix(ModulePtr<FockBuilder> & mod,
+               Irrep ir, int spin, uint64_t n)
+{
+    size_t nao = bs.NFunctions();
+
+    MatrixXd mat(n, n);
+
+    for(size_t i = 0; i < n; i++)
+    for(size_t j = 0; j < n; j++)
+        mat(i, j) = mod->Calculate(ir, spin, i, j); 
+
+    return mat;
+}
+
+
 std::vector<double>
 FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
                       const BasisSet & bs)
@@ -135,32 +151,20 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 }
 
 
-IrrepSpinVectorD FindOccupations(size_t nelec)
+SimpleMatrixD FormDensity(const SimpleMatrixD & Cmat,
+                          const SimpleVectorD & occ)
 {
-    IrrepSpinVectorD occ;
+    SimpleMatrixD d(Cmat.NRows(), Cmat.NCols());
 
-    if(nelec %2 == 0)
+    for(size_t i = 0; i < Cmat.NRows(); i++)
+    for(size_t j = 0; j < Cmat.NCols(); j++)
     {
-        size_t ndocc = nelec/2;
-        VectorXd docc(ndocc);
-        for(size_t i = 0; i < ndocc; i++)
-            docc(i) = 2.0;
-        occ.Take(Irrep::A, 0, std::make_shared<EigenVectorImpl>(std::move(docc)));
-    }
-    else
-    {
-        size_t nbetaocc = nelec/2; // integer division
-        size_t nalphaocc = nelec - nbetaocc;
-
-        VectorXd alphaocc(nalphaocc), betaocc(nbetaocc);
-        for(size_t i = 0; i < nalphaocc; i++) alphaocc(i) = 1.0;
-        for(size_t i = 0; i < nbetaocc; i++) betaocc(i) = 1.0;
-
-        occ.Take(Irrep::A,  1, std::make_shared<EigenVectorImpl>(std::move(alphaocc)));
-        occ.Take(Irrep::A, -1, std::make_shared<EigenVectorImpl>(std::move(betaocc)));
+        d(i,j) = 0.0;
+        for(size_t m = 0; m < occ.Size(); m++)
+           d(i,j) += occ(m) * Cmat(i,m) * Cmat(j,m);
     }
 
-    return occ;
+    return d;
 }
 
 
@@ -172,26 +176,103 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
     for(auto ir : Cmat.GetIrreps())
     for(auto s : Cmat.GetSpins(ir))
     {
-        const MatrixXd & c = *(convert_to_eigen(Cmat.Get(ir, s)));
-        const VectorXd & o = *(convert_to_eigen(occ.Get(ir, s)));
+        const SimpleMatrixD & c = Cmat.Get(ir, s);
+        const SimpleVectorD & o = occ.Get(ir, s);
 
-        MatrixXd d(c.rows(), c.cols());
-
-        for(long i = 0; i < c.rows(); i++)
-        for(long j = 0; j < c.cols(); j++)
-        {
-            d(i,j) = 0.0;
-            for(long m = 0; m < o.size(); m++)
-               d(i,j) += o(m) * c(i,m) * c(j,m);
-        }
-
-        auto dimpl = std::make_shared<EigenMatrixImpl>(std::move(d));
-        Dmat.Take(ir, s, std::move(dimpl));
+        Dmat.Take(ir, s, FormDensity(c, o));
     }
 
     return Dmat;
 }
 
+
+
+IrrepSpinVectorD FindOccupations(size_t nelec)
+{
+    IrrepSpinVectorD occ;
+
+    if(nelec %2 == 0)
+    {
+        size_t ndocc = nelec/2;
+        SimpleVectorD docc(ndocc);
+        for(size_t i = 0; i < ndocc; i++)
+            docc(i) = 2.0;
+        occ.Take(Irrep::A, 0, std::move(docc));
+    }
+    else
+    {
+        size_t nbetaocc = nelec/2; // integer division
+        size_t nalphaocc = nelec - nbetaocc;
+
+        SimpleVectorD alphaocc(nalphaocc), betaocc(nbetaocc);
+        for(size_t i = 0; i < nalphaocc; i++) alphaocc(i) = 1.0;
+        for(size_t i = 0; i < nbetaocc; i++) betaocc(i) = 1.0;
+
+        occ.Take(Irrep::A,  1, std::move(alphaocc));
+        occ.Take(Irrep::A, -1, std::move(betaocc));
+    }
+
+    return occ;
+}
+
+
+
+SimpleMatrixD EigenToSimpleMatrix(const Eigen::MatrixXd & m)
+{
+    // eigen stores in column major by default
+    SimpleMatrixD s(m.rows(), m.cols());
+    for(int i = 0; i < m.rows(); i++)
+    for(int j = 0; j < m.cols(); j++)
+        s(i,j) = m(i,j);
+    return s;
+}
+
+
+SimpleVectorD EigenToSimpleVector(const Eigen::VectorXd & v)
+{
+    return SimpleVectorD(v.size(), v.data());
+}
+
+Eigen::MatrixXd SimpleMatrixToEigen(const SimpleMatrixD & m)
+{
+    using Eigen::Dynamic;
+    using Eigen::RowMajor;
+
+    //! \todo can't use map because of const issues?
+    MatrixXd em(m.NRows(), m.NCols());
+    for(size_t i = 0; i < m.NRows(); i++)
+    for(size_t j = 0; j < m.NCols(); j++)
+        em(i,j) = m(i,j);
+    return em;
+}
+
+Eigen::VectorXd SimpleVectorToEigen(const SimpleVectorD & v)
+{
+    //! \todo can't use map because of const issues?
+    Eigen::VectorXd ret(v.Size());
+    std::copy(v.Data(), v.Data() + v.Size(), ret.data());
+    return ret;
+}
+
+MappedMatrix MapSimpleMatrix(SimpleMatrixD & m)
+{
+    return MappedMatrix(m.Data(), m.NRows(), m.NCols());
+}
+
+MappedConstMatrix MapConstSimpleMatrix(const SimpleMatrixD & m)
+{
+    return MappedConstMatrix(m.Data(), m.NRows(), m.NCols());
+}
+
+MappedVector MapSimpleVector(SimpleVectorD & v)
+{
+    return MappedVector(v.Data(), v.Size());
+}
+
+MappedConstVector MapConstSimpleVector(const SimpleVectorD & v)
+{
+    return MappedConstVector(v.Data(), v.Size());
+}
 
 double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2)
 {
@@ -206,17 +287,16 @@ double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2
         const auto & mat1 = m1.Get(ir, spin);
         const auto & mat2 = m2.Get(ir, spin);
 
-        for(size_t i = 0; i < mat1->size(0); i++)
-        for(size_t j = 0; j < mat1->size(1); j++)
+        for(size_t i = 0; i < mat1.NRows(); i++)
+        for(size_t j = 0; j < mat1.NCols(); j++)
         {
-            const double diff = mat1->get_value({i,j}) - mat2->get_value({i,j});
+            const double diff = mat1(i,j) - mat2(i,j);
             rms += diff*diff;
         }
     }
 
     return sqrt(rms);
 }
-
 
 
 }//End namespace

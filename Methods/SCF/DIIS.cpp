@@ -1,6 +1,9 @@
 #include "Methods/SCF/DIIS.hpp"
 #include "Methods/SCF/SCF_Common.hpp"
 
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+
 using namespace pulsar::datastore;
 using namespace pulsar::modulebase;
 using namespace pulsar::system;
@@ -55,11 +58,11 @@ double DIIS::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
     for(auto ir : Dmat.GetIrreps())
     for(auto s : Dmat.GetSpins(ir))
     {
-        const SimpleMatrixD & d = Dmat.Get(ir, s);
-        const SimpleMatrixD & f = Fmat.Get(ir, s);
+        const MatrixXd & d = *(convert_to_eigen(Dmat.Get(ir, s)));
+        const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
 
-        for(size_t i = 0; i < d.NRows(); i++)
-        for(size_t j = 0; j < d.NCols(); j++)
+        for(long i = 0; i < d.rows(); i++)
+        for(long j = 0; j < d.cols(); j++)
         {
             oneelectron += d(i,j) * Hcore_(i,j);
             twoelectron += 0.5 * d(i,j) * f(i,j);
@@ -92,6 +95,9 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
 
     Initialize_(wfn); // will only use the system from the wfn
 
+    std::string bstag = Options().Get<std::string>("BASIS_SET");
+
+    const BasisSet bs = wfn.system->GetBasisSet(bstag);
   
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 
@@ -146,6 +152,7 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
     // Load and set up the iterator  and fockbuild modules
     auto mod_iter = CreateChildFromOption<SCFIterator>("KEY_SCF_ITERATOR");
     auto mod_fock = CreateChildFromOption<FockBuilder>("KEY_FOCK_BUILDER");
+    mod_fock->Initialize(order, wfn, bs); 
 
 
     // Storing the results of the previous iterations
@@ -171,7 +178,7 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
         iter++; 
 
         // The Fock matrix
-        IrrepSpinMatrixD Fmat = mod_fock->Build(lastwfn);
+        IrrepSpinMatrixD Fmat = mod_fock->Calculate(lastwfn);
 
         // pop the last one if we are beyond our limit
         if(errqueue.size() > 5)
@@ -188,12 +195,12 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
         for(auto ir : Fmat.GetIrreps())
         for(auto s : Fmat.GetSpins(ir))
         {
-            const auto f = MapConstSimpleMatrix(Fmat.Get(ir, s));
-            const auto d = MapConstSimpleMatrix(lastwfn.opdm->Get(ir, s));
+            const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
+            const MatrixXd & d = *(convert_to_eigen(lastwfn.opdm->Get(ir, s)));
 
-            Eigen::MatrixXd e = f*d*S_ - S_*d*f;
+            MatrixXd e = f*d*S_ - S_*d*f;
             it_err.Take(ir, s, std::move(e));
-            it_f.Set(ir, s, MapSimpleMatrix(Fmat.Get(ir, s)));
+            it_f.Set(ir, s, f);
         }
 
         // add to the queues
@@ -239,21 +246,21 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
                 // solve the system of linear equations
                 Eigen::VectorXd c = b.inverse()*r;
 
-                // form the new F matrix
-                auto & f = Fmat.Get(ir, s);
-
-                f.Zero();
+                // form the new F matrix, and place it where we
+                // got the original
+                const size_t nrow = Fmat.Get(ir, s)->size(0);
+                const size_t ncol = Fmat.Get(ir, s)->size(1);
+                MatrixXd f = MatrixXd::Zero(nrow, ncol);
                 i = 0;
 
                 for(const auto & it : Fqueue)
                 {
-                    const auto & itf = it.Get(ir, s);
-                    for(int row = 0; row < itf.rows(); row++)
-                    for(int col = 0; col < itf.cols(); col++)
-                        f(row, col) += c(i) * itf(row, col);
+                    const MatrixXd & itf = it.Get(ir, s);
+                    f += c(i) * itf;
                     i++;
                 }
 
+                Fmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(f)));
             }
         }
         //else if(nvec == 1)

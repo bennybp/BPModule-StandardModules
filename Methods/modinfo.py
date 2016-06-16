@@ -179,9 +179,6 @@ minfo = {
                             "Key of the core builder module to use"),
                         "KEY_AO_ERI": (OptionType.String, None, True, None,
                             "Key of the ERI module to use"),
-                        "BASIS_SET"       :  (OptionType.String, "Primary", False, None,
-                            'Tag representing the basis set in the system'),
-
                     }
   },
   "Damping" :

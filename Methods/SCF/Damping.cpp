@@ -161,7 +161,7 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
         iter++; 
 
         // The Fock matrix
-        IrrepSpinMatrixD Fmat = mod_fock->Build(lastwfn);
+        BlockEigenMatrix Fmat = FillFockMatrix(mod_fock, bs);
 
         // apply damping if we are past the first iteration
         if(iter > 1)
@@ -172,8 +172,8 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
                 auto & m = Fmat.Get(ir, s);
                 const auto & lastm = lastfmat.Get(ir, s);
 
-                for(size_t i = 0; i < m.NRows(); i++)
-                for(size_t j = 0; j < m.NCols(); j++)
+                for(size_t i = 0; i < m.rows(); i++)
+                for(size_t j = 0; j < m.cols(); j++)
                     m(i,j) = damp*lastm(i,j) + (1.0-damp)*m(i,j);
 
             }
