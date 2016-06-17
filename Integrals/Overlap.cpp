@@ -1,15 +1,14 @@
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 
-#include "../Common.hpp"
-#include "OSOverlap.hpp"
-#include "Overlap.hpp"
+#include "Common/BasisSetCommon.hpp"
+#include "Integrals/OSOverlap.hpp"
+#include "Integrals/Overlap.hpp"
 
 
 // Get a value of S_IJ
 #define S_IJ(i,j) (s_ij[((i)*(nam2) + j)])
 
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;

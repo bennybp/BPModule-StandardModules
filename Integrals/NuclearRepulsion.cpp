@@ -1,6 +1,7 @@
 #include <pulsar/output/Output.hpp>
 #include <pulsar/modulemanager/ModuleManager.hpp>
-#include "NuclearRepulsion.hpp"
+
+#include "Integrals/NuclearRepulsion.hpp"
 
 
 using namespace pulsar::modulemanager;

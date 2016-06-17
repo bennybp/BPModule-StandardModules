@@ -1,6 +1,5 @@
-#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOIterator.hpp>
-#include "Methods/SCF/SCF_Common.hpp"
+#include "Methods/SCF/SCFCommon.hpp"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -11,6 +10,7 @@ using namespace pulsar::system;
 using namespace pulsar::datastore;
 using namespace pulsar::math;
 using namespace pulsar::exception;
+using namespace pulsar::output;
 
 
 namespace pulsarmethods{
@@ -218,5 +218,41 @@ double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2
 }
 
 
+double CalculateEnergy(const MatrixXd & Hcore, double nucrep,
+                       const IrrepSpinMatrixD & Dmat,
+                       const IrrepSpinMatrixD & Fmat,
+                       OutputStream & out)
+{
+    double energy = 0.0;
+    double oneelectron = 0.0;
+    double twoelectron = 0.0;
+
+    for(auto ir : Dmat.GetIrreps())
+    for(auto s : Dmat.GetSpins(ir))
+    {
+        const MatrixXd & d = *(convert_to_eigen(Dmat.Get(ir, s)));
+        const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
+
+        for(long i = 0; i < d.rows(); i++)
+        for(long j = 0; j < d.cols(); j++)
+        {
+            oneelectron += d(i,j) * Hcore(i,j);
+            twoelectron += 0.5 * d(i,j) * f(i,j);
+        }
+    }
+
+    twoelectron -= 0.5*oneelectron;
+    energy = oneelectron + twoelectron;
+
+    out.Output("            One electron: %16.8e\n", oneelectron);
+    out.Output("            Two electron: %16.8e\n", twoelectron);
+    out.Output("        Total Electronic: %16.8e\n", energy);
+    out.Output("       Nuclear Repulsion: %16.8e\n", nucrep);
+
+    energy += nucrep;
+    out.Output("            Total energy: %16.8e\n", energy);
+
+    return energy;
+}
 
 }//End namespace

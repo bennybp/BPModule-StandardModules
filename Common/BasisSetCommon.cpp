@@ -1,7 +1,4 @@
-#include <pulsar/output/OutputStream.hpp>
-#include <pulsar/system/BasisSet.hpp>
-#include <pulsar/datastore/CacheData.hpp>
-
+#include "Common/BasisSetCommon.hpp"
 
 using namespace pulsar::system;
 using namespace pulsar::datastore;

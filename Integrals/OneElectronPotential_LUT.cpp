@@ -1,4 +1,4 @@
-#include "OneElectronPotential_LUT.hpp"
+#include "Integrals/OneElectronPotential_LUT.hpp"
 
 
 namespace lut {

@@ -1,8 +1,7 @@
 #ifndef PULSAR_GUARD_SCF__COREGUESS_HPP_
 #define PULSAR_GUARD_SCF__COREGUESS_HPP_
 
-#include <vector>
-#include <pulsar/modulebase/All.hpp>
+#include <pulsar/modulebase/EnergyMethod.hpp>
 
 namespace pulsarmethods {
 

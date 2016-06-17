@@ -46,6 +46,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 
 # Modules are in subdirectories
+add_subdirectory(Common)
 add_subdirectory(SystemFragmenters)
 add_subdirectory(Methods)
 add_subdirectory(Integrals)

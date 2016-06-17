@@ -3,8 +3,8 @@
 #include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/constants.h>
 
-#include "../Common.hpp"
-#include "CoreBuild.hpp"
+#include "Common/BasisSetCommon.hpp"
+#include "Integrals/CoreBuild.hpp"
 
 
 // Get a value of S_IJ
@@ -71,31 +71,11 @@ void CoreBuild::Initialize_(unsigned int deriv,
                             const BasisSet & bs1,
                             const BasisSet & bs2)
 {
-    ///////////////////////////////// 
-    // load all the required modules
-    ///////////////////////////////// 
-
-    /////////////////////// 
-    // Kinetic Energy
-    auto mod_ao_kinetic = CreateChildFromOption<OneElectronIntegral>("KEY_AO_KINETIC");
-    mod_ao_kinetic->Initialize(deriv, wfn, bs1, bs2);
-    modules_.emplace("Kinetic Energy", std::move(mod_ao_kinetic));
-
-    /////////////////////// 
-    // Nuclear Attraction
-    auto mod_ao_nucatt = CreateChildFromOption<OneElectronIntegral>("KEY_AO_NUCATT");
-    mod_ao_nucatt->Initialize(deriv, wfn, bs1, bs2);
-    modules_.emplace("Electron-Nuclear Attraction", std::move(mod_ao_nucatt));
-
-    // do the additional terms
-    if(Options().Has("KEY_AO_ADDITIONAL"))
+    const auto add = Options().Get<std::vector<std::string>>("KEY_AO_CORE_TERMS");
+    for(const auto & a : add)
     {
-        const auto add = Options().Get<std::vector<std::string>>("KEY_AO_ADDITIONAL");
-        for(const auto & a : add)
-        {
-            auto mod_add = CreateChild<OneElectronIntegral>(a);
-            mod_add->Initialize(deriv, wfn, bs1, bs2);
-            modules_.emplace(a, std::move(mod_add));
-        }
+        auto mod_add = CreateChild<OneElectronIntegral>(a);
+        mod_add->Initialize(deriv, wfn, bs1, bs2);
+        modules_.emplace(a, std::move(mod_add));
     }
 }

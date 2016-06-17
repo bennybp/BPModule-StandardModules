@@ -1,18 +1,15 @@
-#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOOrdering.hpp>
-#include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 #include <pulsar/constants.h>
 
-#include "../Common.hpp"
-#include "KineticEnergy.hpp"
+#include "Common/BasisSetCommon.hpp"
+#include "Integrals/KineticEnergy.hpp"
 
 
 // Get a value of S_IJ
 #define S_IJ(i,j) (s_ij[((i)*(nam2) + j)])
 #define T_IJ(i,j) (t_ij[((i)*(nam2) + j)])
 
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;

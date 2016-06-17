@@ -1,9 +1,8 @@
-#include "OneElectronProperty.hpp"
-
 #include <pulsar/system/BasisSet.hpp>
 #include <pulsar/system/AOIterator.hpp>
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
 
+#include "Integrals/OneElectronProperty.hpp"
 
 
 using namespace pulsar::modulemanager;

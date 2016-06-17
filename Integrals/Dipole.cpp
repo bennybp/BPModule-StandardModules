@@ -1,12 +1,11 @@
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 
-#include "../Common.hpp"
-#include "OSOverlap.hpp"
-#include "Dipole.hpp"
+#include "Common/BasisSetCommon.hpp"
+#include "Integrals/OSOverlap.hpp"
+#include "Integrals/Dipole.hpp"
 
 
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;

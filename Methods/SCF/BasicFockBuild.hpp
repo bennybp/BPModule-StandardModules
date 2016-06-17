@@ -1,10 +1,11 @@
 #ifndef PULSAR_GUARD_SCF__BASICFOCKBUILD_HPP_
 #define PULSAR_GUARD_SCF__BASICFOCKBUILD_HPP_
 
-#include "SCF_Common.hpp"
+#include "Methods/SCF/SCFCommon.hpp"
+
+#include <pulsar/modulebase/FockBuilder.hpp>
 
 #include <vector>
-#include <pulsar/modulebase/FockBuilder.hpp>
 #include <Eigen/Dense>
 
 namespace pulsarmethods {

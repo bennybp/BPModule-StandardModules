@@ -1,7 +1,8 @@
 #include <pulsar/output/Output.hpp>
 #include <pulsar/modulemanager/ModuleManager.hpp>
 #include <pulsar/math/PointManipulation.hpp>
-#include "NuclearDipole.hpp"
+
+#include "Integrals/NuclearDipole.hpp"
 
 
 using namespace pulsar::modulemanager;

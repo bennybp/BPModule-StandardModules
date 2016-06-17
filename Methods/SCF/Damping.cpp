@@ -1,5 +1,6 @@
+#include <pulsar/modulebase/All.hpp>
 #include "Methods/SCF/Damping.hpp"
-#include "Methods/SCF/SCF_Common.hpp"
+#include "Methods/SCF/SCFCommon.hpp"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -36,43 +37,6 @@ void Damping::Initialize_(const Wavefunction & wfn)
     Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
 
     bs.Print(out);
-}
-
-
-double Damping::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
-                                 const IrrepSpinMatrixD & Fmat)
-{
-    // calculate the energy
-    double energy = 0.0;
-    double oneelectron = 0.0;
-    double twoelectron = 0.0;
-
-    for(auto ir : Dmat.GetIrreps())
-    for(auto s : Dmat.GetSpins(ir))
-    {
-        const MatrixXd & d = *(convert_to_eigen(Dmat.Get(ir, s)));
-        const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
-
-        for(long i = 0; i < d.rows(); i++)
-        for(long j = 0; j < d.cols(); j++)
-        {
-            oneelectron += d(i,j) * Hcore_(i,j);
-            twoelectron += 0.5 * d(i,j) * f(i,j);
-        }
-    }
-
-    twoelectron -= 0.5*oneelectron;
-    energy = oneelectron + twoelectron;
-
-    out.Output("            One electron: %16.8e\n", oneelectron);
-    out.Output("            Two electron: %16.8e\n", twoelectron);
-    out.Output("        Total Electronic: %16.8e\n", energy);
-    out.Output("       Nuclear Repulsion: %16.8e\n", nucrep_);
-
-    energy += nucrep_;
-    out.Output("            Total energy: %16.8e\n", energy);
-
-    return energy;
 }
 
 
@@ -195,7 +159,7 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
             throw GeneralException("Returned wfn doesn't have opdm");
 
         const IrrepSpinMatrixD dens = *newwfn.opdm;
-        current_energy = CalculateEnergy_(dens, Fmat);
+        current_energy = CalculateEnergy(Hcore_, nucrep_, dens, Fmat, out);
 
         // store the energy for next time
         energy_diff = current_energy - last_energy;

@@ -1,18 +1,14 @@
-#include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/AOOrdering.hpp>
-#include <pulsar/system/NShellFunction.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 #include <pulsar/math/Factorial.hpp>
-#include <pulsar/math/Cast.hpp>
 #include <pulsar/constants.h>
 
-#include "../Common.hpp"
-#include "../Boys.hpp"
-#include "OneElectronPotential.hpp"
-#include "OneElectronPotential_LUT.hpp"
+#include "Common/BasisSetCommon.hpp"
+#include "Integrals/Boys.hpp"
+#include "Integrals/OneElectronPotential.hpp"
+#include "Integrals/OneElectronPotential_LUT.hpp"
 
 
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;

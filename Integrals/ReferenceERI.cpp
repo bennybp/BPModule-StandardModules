@@ -2,8 +2,8 @@
 #include <pulsar/system/AOOrdering.hpp>
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 
-#include "../Common.hpp"
-#include "ReferenceERI.hpp"
+#include "Common/BasisSetCommon.hpp"
+#include "Integrals/ReferenceERI.hpp"
 
 using namespace pulsar::output;
 using namespace pulsar::exception;

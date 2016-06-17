@@ -1,6 +1,6 @@
 #include <cmath>
 
-#define PI     3.14159265358979324
+#include <pulsar/constants.h>
 
 // Get a value of S_IJ
 #define S_IJ(i,j) (s_ij[((i)*(nam2) + j)])

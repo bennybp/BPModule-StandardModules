@@ -1,10 +1,12 @@
 #include <pulsar/output/OutputStream.hpp>
 #include <pulsar/system/BasisSet.hpp>
 #include <pulsar/system/AOIterator.hpp>
+#include <pulsar/modulebase/All.hpp>
 #include <pulsar/math/Cast.hpp>
+
 #include <Eigen/Dense>
 #include "Methods/SCF/CoreGuess.hpp"
-#include "Methods/SCF/SCF_Common.hpp"
+#include "Methods/SCF/SCFCommon.hpp"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;

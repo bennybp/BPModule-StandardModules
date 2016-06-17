@@ -14,8 +14,9 @@ add_subdirectory(SCF)
 
 add_library(Methods MODULE ${BPMETHODS_SRC})
 target_compile_options(Methods PRIVATE ${PULSAR_CXX_STRICT_FLAGS})
-target_link_libraries(Methods pulsar)
+target_link_libraries(Methods pulsar Common)
 target_include_directories(Methods SYSTEM PRIVATE ${EIGEN3_INCLUDE_DIR})
+set_target_properties(Methods PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/Common")
 
 
 install(TARGETS Methods

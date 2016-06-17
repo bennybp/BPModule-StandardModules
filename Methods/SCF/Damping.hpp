@@ -20,9 +20,6 @@ class Damping : public pulsar::modulebase::EnergyMethod
         Eigen::MatrixXd Hcore_;
 
         void Initialize_(const pulsar::datastore::Wavefunction & wfn);
-
-        double CalculateEnergy_(const pulsar::math::IrrepSpinMatrixD & Dmat,
-                                const pulsar::math::IrrepSpinMatrixD & Fmat);
 };
 
 }

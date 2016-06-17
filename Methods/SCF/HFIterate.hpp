@@ -1,9 +1,8 @@
 #ifndef PULSAR_GUARD_SCF__HFITERATE_HPP_
 #define PULSAR_GUARD_SCF__HFITERATE_HPP_
 
-#include "SCF_Common.hpp"
+#include "Methods/SCF/SCFCommon.hpp"
 
-#include <vector>
 #include <pulsar/modulebase/SCFIterator.hpp>
 #include <Eigen/Dense>
 
