@@ -161,6 +161,8 @@ minfo = {
                             "Key of the ao overlap module to use"),
                         "BASIS_SET"       :  (OptionType.String, "Primary", False, None,
                             'Tag representing the basis set in the system'),
+                        "KEY_AO_CACHER": (OptionType.String, None, True, None,
+                            "Key of the one-electron integral cacher"),
                     }
   },
   "BasicFockBuild" :
@@ -177,6 +179,8 @@ minfo = {
                             "Key of the ao overlap module to use"),
                         "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
                             "Key of the core builder module to use"),
+                        "KEY_AO_CACHER": (OptionType.String, None, True, None,
+                            "Key of the one-electron integral cacher"),
                         "KEY_AO_ERI": (OptionType.String, None, True, None,
                             "Key of the ERI module to use"),
                     }
@@ -205,6 +209,8 @@ minfo = {
                             "Key of the core builder module to use"),
                         "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
                             "Key of the nuclear repulsion module to use"),
+                        "KEY_AO_CACHER": (OptionType.String, None, True, None,
+                            "Key of the one-electron integral cacher"),
                         "DAMPING_FACTOR": (OptionType.Float, 0.0, False, RangeCheck(0.0, 1.0, True, False),
                             "Amount of old fock matrix to use in constructing new fock matrix"),
                     }
@@ -231,6 +237,8 @@ minfo = {
                             "Maximum value for the change in density"),
                         "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
                             "Key of the core builder module to use"),
+                        "KEY_AO_CACHER": (OptionType.String, None, True, None,
+                            "Key of the one-electron integral cacher"),
                         "KEY_NUC_REPULSION": (OptionType.String, None, True, None,
                             "Key of the nuclear repulsion module to use"),
                         "KEY_AO_OVERLAP": (OptionType.String, None, True, None,
@@ -253,6 +261,8 @@ minfo = {
                             "Key of the ao overlap module to use"),
                         "KEY_AO_COREBUILD": (OptionType.String, None, True, None,
                             "Key of the core builder module to use"),
+                        "KEY_AO_CACHER": (OptionType.String, None, True, None,
+                            "Key of the one-electron integral cacher"),
                     }
   },
 }

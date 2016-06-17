@@ -66,7 +66,7 @@ minfo = {
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
-                        "KEY_AO_CORE_TERMS":   ( OptionType.ListString,  None, False, None,  "One-electron integrals to use in the core")
+                        "KEY_AO_CORE_TERMS":   ( OptionType.ListString,  None, True, None,  "One-electron integrals to use in the core")
                     }
   },
   "OneElectronProperty" :

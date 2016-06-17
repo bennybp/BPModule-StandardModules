@@ -26,25 +26,18 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
     std::string bstag = Options().Get<std::string>("BASIS_SET");
     const BasisSet bs = sys.GetBasisSet(bstag);
 
+    /////////////////////////////////////
+    // The one-electron integral cacher
+    /////////////////////////////////////
+    auto mod_ao_cache = CreateChildFromOption<OneElectronCacher>("KEY_AO_CACHER");
 
-    ///////////////////////
+    /////////////////////// 
     // Overlap
-    ///////////////////////
-    auto mod_ao_overlap = CreateChildFromOption<OneElectronIntegral>("KEY_AO_OVERLAP");
-    mod_ao_overlap->Initialize(0, wfn, bs, bs);
-    MatrixXd overlap_mat = FillOneElectronMatrix(mod_ao_overlap, bs);
-
-    // diagonalize the overlap and form S^(-1/2)
-    SelfAdjointEigenSolver<MatrixXd> esolve(overlap_mat);
-    MatrixXd s_evec = esolve.eigenvectors();
-    VectorXd s_eval = esolve.eigenvalues();
-
-    // not sure an easier way to do this
-    for(int i = 0; i < s_eval.size(); i++)
-        s_eval(i) = 1.0/sqrt(s_eval(i));
-
-    // the S^(-1/2) matrix
-    S12_ = s_evec * s_eval.asDiagonal() * s_evec.transpose();
+    /////////////////////// 
+    const std::string ao_overlap_key = Options().Get<std::string>("KEY_AO_OVERLAP");
+    auto overlapimpl = mod_ao_cache->Calculate(ao_overlap_key, 0, wfn, bs, bs);
+    std::shared_ptr<const MatrixXd> overlap_mat = convert_to_eigen(overlapimpl.at(0));  // .at(0) = first (and only) component
+    S12_ = FormS12(*overlap_mat);
 
     initialized_ = true;
 }

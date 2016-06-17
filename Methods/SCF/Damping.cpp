@@ -30,11 +30,17 @@ void Damping::Initialize_(const Wavefunction & wfn)
     mod_nuc_rep->Initialize(0, *wfn.system);
     mod_nuc_rep->Calculate(&nucrep_, 1);
 
+    /////////////////////////////////////
+    // The one-electron integral cacher
+    /////////////////////////////////////
+    auto mod_ao_cache = CreateChildFromOption<OneElectronCacher>("KEY_AO_CACHER");
+
     ////////////////////////////
     // One-electron hamiltonian
-    auto mod_ao_core = CreateChildFromOption<OneElectronIntegral>("KEY_AO_COREBUILD");
-    mod_ao_core->Initialize(0, wfn, bs, bs);
-    Hcore_ = FillOneElectronMatrix(mod_ao_core, bs);
+    ////////////////////////////
+    const std::string ao_build_key = Options().Get<std::string>("KEY_AO_COREBUILD");
+    auto Hcoreimpl = mod_ao_cache->Calculate(ao_build_key, 0, wfn, bs, bs);
+    Hcore_ = convert_to_eigen(Hcoreimpl.at(0));  // .at(0) = first (and only) component
 
     bs.Print(out);
 }
@@ -159,7 +165,7 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
             throw GeneralException("Returned wfn doesn't have opdm");
 
         const IrrepSpinMatrixD dens = *newwfn.opdm;
-        current_energy = CalculateEnergy(Hcore_, nucrep_, dens, Fmat, out);
+        current_energy = CalculateEnergy(*Hcore_, nucrep_, dens, Fmat, out);
 
         // store the energy for next time
         energy_diff = current_energy - last_energy;

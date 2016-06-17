@@ -267,8 +267,6 @@ uint64_t OneElectronPotential::Calculate_(uint64_t shell1, uint64_t shell2,
 
     Grid grid(std::make_shared<GridUniverse>(std::move(gu)), true);
 
-    out.Debug("Calculating one-electron potential with grid %? (%? points)\n", gridopt, grid.Size());
-
     // will check sizes of buffer, etc
     return CalculateWithGrid_(shell1, shell2, grid, outbuffer, bufsize);
 }

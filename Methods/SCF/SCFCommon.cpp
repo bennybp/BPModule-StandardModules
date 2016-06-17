@@ -1,6 +1,7 @@
 #include <pulsar/system/AOIterator.hpp>
 #include "Methods/SCF/SCFCommon.hpp"
 
+using Eigen::SelfAdjointEigenSolver;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
@@ -14,56 +15,6 @@ using namespace pulsar::output;
 
 
 namespace pulsarmethods{
-
-
-MatrixXd
-FillOneElectronMatrix(ModulePtr<OneElectronIntegral> & mod,
-                      const BasisSet & bs)
-{
-    size_t nao = bs.NFunctions();
-    size_t nshell = bs.NShell();
-    size_t maxnfunc = bs.MaxNFunctions();
-    const size_t maxnfunc2 = maxnfunc * maxnfunc;
-
-    // matrix we are returning
-    MatrixXd mat(nao, nao);
-
-    // buffer
-    std::vector<double> b(maxnfunc2);
-
-    for(size_t n1 = 0; n1 < nshell; n1++)
-    {
-        const auto & sh1 = bs.Shell(n1);
-        const size_t rowstart = bs.ShellStart(n1);
-
-        for(size_t n2 = 0; n2 <= n1; n2++)
-        {
-            const auto & sh2  = bs.Shell(n2);
-            const size_t colstart = bs.ShellStart(n2);
-
-            // calculate
-            size_t ncalc = mod->Calculate(n1, n2, b.data(), maxnfunc2);
-
-            // iterate and fill in the matrix
-            AOIterator<2> aoit({sh1, sh2}, false);
-
-            // make sure the right number of integrals was returned
-            if(ncalc != aoit.NFunctions())
-                throw GeneralException("Bad number of integrals returned",
-                                       "ncalc", ncalc, "expected", aoit.NFunctions());
-
-
-            do {
-                const size_t i = rowstart+aoit.ShellFunctionIdx<0>();
-                const size_t j = colstart+aoit.ShellFunctionIdx<1>();
-
-                mat(i,j) = mat(j, i) = b[aoit.TotalIdx()];
-            } while(aoit.Next());
-        }
-    }
-
-    return mat;
-}
 
 
 std::vector<double>
@@ -203,13 +154,19 @@ double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2
     for(Irrep ir : m1.GetIrreps())
     for(int spin : m1.GetSpins(ir))
     {
-        const auto & mat1 = m1.Get(ir, spin);
-        const auto & mat2 = m2.Get(ir, spin);
 
-        for(size_t i = 0; i < mat1->size(0); i++)
-        for(size_t j = 0; j < mat1->size(1); j++)
+        const MatrixXd & mat1 = *(convert_to_eigen(m1.Get(ir, spin)));
+        const MatrixXd & mat2 = *(convert_to_eigen(m1.Get(ir, spin)));
+
+        if(mat1.rows() != mat2.rows())
+            throw GeneralException("Density matrices have different number of rows");
+        if(mat1.cols() != mat2.cols())
+            throw GeneralException("Density matrices have different number of columns");
+
+        for(long i = 0; i < mat1.rows(); i++)
+        for(long j = 0; j < mat1.cols(); j++)
         {
-            const double diff = mat1->get_value({i,j}) - mat2->get_value({i,j});
+            const double diff = mat1(i,j) - mat2(i,j);
             rms += diff*diff;
         }
     }
@@ -253,6 +210,21 @@ double CalculateEnergy(const MatrixXd & Hcore, double nucrep,
     out.Output("            Total energy: %16.8e\n", energy);
 
     return energy;
+}
+
+Eigen::MatrixXd FormS12(const Eigen::MatrixXd & S)
+{
+    // diagonalize the overlap
+    SelfAdjointEigenSolver<MatrixXd> esolve(S);
+    MatrixXd s_evec = esolve.eigenvectors();
+    VectorXd s_eval = esolve.eigenvalues();
+
+    // not sure an easier way to do this
+    for(int i = 0; i < s_eval.size(); i++)
+        s_eval(i) = 1.0/sqrt(s_eval(i));
+
+    // the S^(-1/2) matrix
+    return (s_evec * s_eval.asDiagonal() * s_evec.transpose());
 }
 
 }//End namespace

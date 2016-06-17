@@ -14,10 +14,6 @@
 
 namespace pulsarmethods {
 
-Eigen::MatrixXd
-FillOneElectronMatrix(pulsar::modulemanager::ModulePtr<pulsar::modulebase::OneElectronIntegral> & mod,
-                      const pulsar::system::BasisSet & bs);
-
 std::vector<double>
 FillTwoElectronVector(pulsar::modulemanager::ModulePtr<pulsar::modulebase::TwoElectronIntegral> & mod,
                       const pulsar::system::BasisSet & bs);
@@ -34,6 +30,8 @@ double CalculateEnergy(const Eigen::MatrixXd & Hcore, double nucrep,
                        const pulsar::math::IrrepSpinMatrixD & Dmat,
                        const pulsar::math::IrrepSpinMatrixD & Fmat,
                        pulsar::output::OutputStream & out);
+
+Eigen::MatrixXd FormS12(const Eigen::MatrixXd & S);
 
 } // close namespace pulsarmethods
 

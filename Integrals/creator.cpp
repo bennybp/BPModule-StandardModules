@@ -24,7 +24,7 @@ ModuleCreationFuncs InsertSupermodule(void)
     cf.AddCppCreator<OneElectronPotential>("OneElectronPotential");
     cf.AddCppCreator<CoreBuild>("CoreBuild");
     cf.AddCppCreator<OneElectronProperty>("OneElectronProperty");
-    //cf.AddCppCreator<EigenCacher>("EigenCacher");
+    cf.AddCppCreator<EigenCacher>("EigenCacher");
     cf.AddCppCreator<NuclearRepulsion>("NuclearRepulsion");
     cf.AddCppCreator<NuclearDipole>("NuclearDipole");
     return cf;

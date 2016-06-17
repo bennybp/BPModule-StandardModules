@@ -17,8 +17,8 @@ class DIIS : public pulsar::modulebase::EnergyMethod
     private:
         bool initialized_;
         double nucrep_;
-        Eigen::MatrixXd Hcore_;
-        Eigen::MatrixXd S_;
+        std::shared_ptr<const Eigen::MatrixXd> Hcore_;
+        std::shared_ptr<const Eigen::MatrixXd> S_;
 
         void Initialize_(const pulsar::datastore::Wavefunction & wfn);
 

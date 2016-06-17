@@ -6,7 +6,7 @@ set(INTEGRALS_FILES creator.cpp
                     OneElectronPotential.cpp
                     OneElectronPotential_LUT.cpp
                     OneElectronProperty.cpp
-                    #EigenCacher.cpp
+                    EigenCacher.cpp
                     CoreBuild.cpp
                     Boys.cpp
                     ReferenceERI.cpp

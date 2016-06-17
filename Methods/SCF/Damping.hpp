@@ -17,7 +17,7 @@ class Damping : public pulsar::modulebase::EnergyMethod
     private:
         bool initialized_;
         double nucrep_;
-        Eigen::MatrixXd Hcore_;
+        std::shared_ptr<const Eigen::MatrixXd> Hcore_;
 
         void Initialize_(const pulsar::datastore::Wavefunction & wfn);
 };
