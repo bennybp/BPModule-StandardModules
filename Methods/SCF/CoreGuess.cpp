@@ -17,7 +17,6 @@ using namespace pulsar::system;
 using namespace pulsar::math;
 using namespace pulsar::output;
 using namespace pulsar::datastore;
-using namespace pulsar::tensor;
 
 
 namespace pulsarmethods{

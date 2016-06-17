@@ -6,7 +6,7 @@
 #include <pulsar/system/BasisSet.hpp>
 #include <pulsar/math/BlockByIrrepSpin.hpp>
 #include <pulsar/datastore/Wavefunction.hpp>
-#include <pulsar/tensor/TensorImpl.hpp>
+#include <pulsar/math/TensorImpl.hpp>
 
 #include <Eigen/Dense>
 
@@ -18,7 +18,7 @@
 namespace pulsarmethods {
 
 
-class EigenMatrixImpl : public pulsar::tensor::TensorImpl<2, double>
+class EigenMatrixImpl : public pulsar::math::TensorImpl<2, double>
 {
     public:
         EigenMatrixImpl(const std::shared_ptr<Eigen::MatrixXd> & mat)
@@ -57,7 +57,7 @@ class EigenMatrixImpl : public pulsar::tensor::TensorImpl<2, double>
 };
 
 
-class EigenVectorImpl : public pulsar::tensor::TensorImpl<1, double>
+class EigenVectorImpl : public pulsar::math::TensorImpl<1, double>
 {
     public:
         EigenVectorImpl(const std::shared_ptr<Eigen::VectorXd> & mat)
@@ -97,9 +97,9 @@ class EigenVectorImpl : public pulsar::tensor::TensorImpl<1, double>
 
 inline
 std::shared_ptr<const Eigen::MatrixXd>
-convert_to_eigen(const std::shared_ptr<const pulsar::tensor::TensorImpl<2, double>> & ten)
+convert_to_eigen(const std::shared_ptr<const pulsar::math::TensorImpl<2, double>> & ten)
 {
-    // does the tensorimpl contain an eigen matrix?
+    // does the TensorImpl contain an eigen matrix?
     auto test = std::dynamic_pointer_cast<const EigenMatrixImpl>(ten);
     if(test)
         return test->get_matrix();
@@ -116,12 +116,15 @@ convert_to_eigen(const std::shared_ptr<const pulsar::tensor::TensorImpl<2, doubl
 
 inline
 std::shared_ptr<const Eigen::VectorXd>
-convert_to_eigen(const std::shared_ptr<const pulsar::tensor::TensorImpl<1, double>> & ten)
+convert_to_eigen(const std::shared_ptr<const pulsar::math::TensorImpl<1, double>> & ten)
 {
-    // does the tensorimpl contain an eigen matrix?
+    // does the TensorImpl contain an eigen matrix?
     auto test = std::dynamic_pointer_cast<const EigenVectorImpl>(ten);
     if(test)
+    {
+        std::cout << "Here: matrix is an eigen vector\n";
         return test->get_matrix();
+    }
 
     // otherwise, convert elementwize
     auto ret = std::make_shared<Eigen::VectorXd>();

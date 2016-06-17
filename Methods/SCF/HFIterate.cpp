@@ -11,7 +11,6 @@ using namespace pulsar::math;
 using namespace pulsar::exception;
 using namespace pulsar::output;
 using namespace pulsar::modulebase;
-using namespace pulsar::tensor;
 
 
 namespace pulsarmethods {

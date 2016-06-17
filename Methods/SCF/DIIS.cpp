@@ -96,7 +96,6 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
     Initialize_(wfn); // will only use the system from the wfn
 
     std::string bstag = Options().Get<std::string>("BASIS_SET");
-
     const BasisSet bs = wfn.system->GetBasisSet(bstag);
   
     //////////////////////////////////////////////////////

@@ -1,6 +1,9 @@
 #include "Methods/SCF/Damping.hpp"
 #include "Methods/SCF/SCF_Common.hpp"
 
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+
 using namespace pulsar::datastore;
 using namespace pulsar::modulebase;
 using namespace pulsar::system;
@@ -47,11 +50,11 @@ double Damping::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
     for(auto ir : Dmat.GetIrreps())
     for(auto s : Dmat.GetSpins(ir))
     {
-        const SimpleMatrixD & d = Dmat.Get(ir, s);
-        const SimpleMatrixD & f = Fmat.Get(ir, s);
+        const MatrixXd & d = *(convert_to_eigen(Dmat.Get(ir, s)));
+        const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
 
-        for(size_t i = 0; i < d.NRows(); i++)
-        for(size_t j = 0; j < d.NCols(); j++)
+        for(long i = 0; i < d.rows(); i++)
+        for(long j = 0; j < d.cols(); j++)
         {
             oneelectron += d(i,j) * Hcore_(i,j);
             twoelectron += 0.5 * d(i,j) * f(i,j);
@@ -73,7 +76,6 @@ double Damping::CalculateEnergy_(const IrrepSpinMatrixD & Dmat,
 }
 
 
-
 Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
 {
     if(order != 0)
@@ -84,6 +86,8 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
 
     Initialize_(wfn); // will only use the system from the wfn
 
+    std::string bstag = Options().Get<std::string>("BASIS_SET");
+    const BasisSet bs = wfn.system->GetBasisSet(bstag);
   
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 
@@ -138,6 +142,7 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
     // Load and set up the iterator  and fockbuild modules
     auto mod_iter = CreateChildFromOption<SCFIterator>("KEY_SCF_ITERATOR");
     auto mod_fock = CreateChildFromOption<FockBuilder>("KEY_FOCK_BUILDER");
+    mod_fock->Initialize(order, wfn, bs); 
 
 
     // Storing the results of the previous iterations
@@ -161,7 +166,7 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
         iter++; 
 
         // The Fock matrix
-        BlockEigenMatrix Fmat = FillFockMatrix(mod_fock, bs);
+        IrrepSpinMatrixD Fmat = mod_fock->Calculate(lastwfn);
 
         // apply damping if we are past the first iteration
         if(iter > 1)
@@ -169,15 +174,17 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
             for(auto ir : Fmat.GetIrreps())
             for(auto s : Fmat.GetSpins(ir))
             {
-                auto & m = Fmat.Get(ir, s);
-                const auto & lastm = lastfmat.Get(ir, s);
+                // making a copy
+                MatrixXd m = *(convert_to_eigen(Fmat.Get(ir, s)));
+                const MatrixXd & lastm = *(convert_to_eigen(lastfmat.Get(ir, s)));
 
-                for(size_t i = 0; i < m.rows(); i++)
-                for(size_t j = 0; j < m.cols(); j++)
+                for(long i = 0; i < m.rows(); i++)
+                for(long j = 0; j < m.cols(); j++)
                     m(i,j) = damp*lastm(i,j) + (1.0-damp)*m(i,j);
 
-            }
+                Fmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(m)));
 
+            }
         } 
 
         // Iterate, making a new wavefunction
