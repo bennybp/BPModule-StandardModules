@@ -5,7 +5,7 @@
 #include "Integrals/OneElectronPotential.hpp"
 #include "Integrals/OneElectronProperty.hpp"
 #include "Integrals/ReferenceERI.hpp"
-#include "Integrals/EigenCacher.hpp"
+#include "Integrals/OneElectron_Eigen.hpp"
 #include "Integrals/NuclearRepulsion.hpp"
 #include "Integrals/NuclearDipole.hpp"
 
@@ -24,7 +24,7 @@ ModuleCreationFuncs InsertSupermodule(void)
     cf.AddCppCreator<OneElectronPotential>("OneElectronPotential");
     cf.AddCppCreator<CoreBuild>("CoreBuild");
     cf.AddCppCreator<OneElectronProperty>("OneElectronProperty");
-    cf.AddCppCreator<EigenCacher>("EigenCacher");
+    cf.AddCppCreator<OneElectron_Eigen>("OneElectron_Eigen");
     cf.AddCppCreator<NuclearRepulsion>("NuclearRepulsion");
     cf.AddCppCreator<NuclearDipole>("NuclearDipole");
     return cf;

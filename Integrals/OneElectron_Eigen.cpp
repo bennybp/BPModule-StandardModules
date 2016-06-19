@@ -1,7 +1,7 @@
 #include <pulsar/system/AOIterator.hpp>
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
 #include "Common/EigenCommon.hpp"
-#include "Integrals/EigenCacher.hpp"
+#include "Integrals/OneElectron_Eigen.hpp"
 
 using Eigen::MatrixXd;
 
@@ -12,33 +12,40 @@ using namespace pulsar::datastore;
 using namespace bphash;
 
 
-EigenCacher::ReturnType
-EigenCacher::Calculate_(const std::string & key,
-                        unsigned int deriv,
-                        const Wavefunction & wfn,
-                        const BasisSet & bs1,
-                        const BasisSet & bs2)
+OneElectron_Eigen::ReturnType
+OneElectron_Eigen::Calculate_(const std::string & key,
+                              unsigned int deriv,
+                              const Wavefunction & wfn,
+                              const BasisSet & bs1,
+                              const BasisSet & bs2)
 {
-    // Need the name and version of a module for the cache lookup
-    auto minfo = MManager().ModuleKeyInfo(key);
+    const bool usecache = Options().Get<bool>("CACHE_RESULTS");
 
-    // Create a hash for the lookup
-    auto hash = MakeHash(HashType::Hash128,
-                         minfo.name,
-                         minfo.version,
-                         deriv, wfn, bs1, bs2);
+    std::string hashstr;
 
-    std::string hashstr = hash_to_string(hash);
-    out.Debug("Going to lookup one-electron integrals with hash %?\n", hashstr);
-
-    if(Cache().Count(hashstr))
+    if(usecache)
     {
-        out.Debug("Integrals were found in the cache. Returning\n");
-        return Cache().Get<ReturnType>(hashstr);
+        // Need the name and version of a module for the cache lookup
+        auto minfo = MManager().ModuleKeyInfo(key);
+
+        // Create a hash for the lookup
+        auto hash = MakeHash(HashType::Hash128,
+                             minfo.name,
+                             minfo.version,
+                             deriv, wfn, bs1, bs2);
+
+        hashstr = hash_to_string(hash);
+        out.Debug("Going to lookup one-electron integrals with hash %?\n", hashstr);
+
+        if(Cache().Count(hashstr))
+        {
+            out.Debug("Integrals were found in the cache. Returning\n");
+            return Cache().Get<ReturnType>(hashstr);
+        }
     }
 
 
-    out.Debug("Integrals not found. Calculating\n");
+    out.Debug("Integrals not found or cache is not being used. Calculating\n");
 
     const size_t nshell1 = bs1.NShell();
     const size_t nshell2 = bs2.NShell();
@@ -96,7 +103,8 @@ EigenCacher::Calculate_(const std::string & key,
         ret.push_back(std::make_shared<EigenMatrixImpl>(std::move(mats[i])));
 
     // Put in cache
-    Cache().Set(hashstr, ret); // note - ret is a vector of shared_ptr, so this is ok
+    if(usecache)
+        Cache().Set(hashstr, ret); // note - ret is a vector of shared_ptr, so this is ok
  
     return ret;
 }

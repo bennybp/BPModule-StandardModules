@@ -29,7 +29,7 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
     /////////////////////////////////////
     // The one-electron integral cacher
     /////////////////////////////////////
-    auto mod_ao_cache = CreateChildFromOption<OneElectronCacher>("KEY_AO_CACHER");
+    auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
 
     /////////////////////// 
     // Overlap

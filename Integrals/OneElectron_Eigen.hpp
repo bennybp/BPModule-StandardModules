@@ -1,13 +1,12 @@
-#ifndef _GUARD_EIGENCACHER_HPP_
-#define _GUARD_EIGENCACHER_HPP_
+#ifndef _GUARD_ONEELECTRON_EIGEN_HPP_
+#define _GUARD_ONEELECTRON_EIGEN_HPP_
 
-#include <pulsar/modulebase/OneElectronCacher.hpp>
-#include <pulsar/system/BasisSet.hpp>
+#include <pulsar/modulebase/OneElectronMatrix.hpp>
 
-class EigenCacher : public pulsar::modulebase::OneElectronCacher
+class OneElectron_Eigen : public pulsar::modulebase::OneElectronMatrix
 {
     public:
-        using pulsar::modulebase::OneElectronCacher::OneElectronCacher;
+        using pulsar::modulebase::OneElectronMatrix::OneElectronMatrix;
 
         virtual ReturnType Calculate_(const std::string & key,
                                       unsigned int deriv,

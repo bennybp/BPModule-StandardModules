@@ -82,16 +82,17 @@ minfo = {
                         "KEY_ONEEL_MOD":   ( OptionType.String,  None, True, None,  "Key of which one electron integral to use"),
                     }
   },
-  "EigenCacher" :
+  "OneElectron_Eigen" :
   {
     "type"        : "c_module",
-    "base"        : "OneElectronCacher",
+    "base"        : "OneElectronMatrix",
     "modpath"     : "Integrals.so",
     "version"     : "0.1a",
     "description" : "Caching of one-electron integrals in an Eigen3 matrix",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
+                        "CACHE_RESULTS":   ( OptionType.Bool,  True, False, None,  "Cache the results between instantiations"),
                     }
   },
 

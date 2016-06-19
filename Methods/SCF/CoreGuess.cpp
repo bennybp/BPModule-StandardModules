@@ -54,7 +54,7 @@ CoreGuess::DerivReturnType CoreGuess::Deriv_(size_t order, const Wavefunction & 
     /////////////////////////////////////
     // The one-electron integral cacher
     /////////////////////////////////////
-    auto mod_ao_cache = CreateChildFromOption<OneElectronCacher>("KEY_AO_CACHER");
+    auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
 
     /////////////////////// 
     // Overlap
