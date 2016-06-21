@@ -35,14 +35,6 @@ void BasicFockBuild::Initialize_(unsigned int deriv, const Wavefunction & wfn,
     /////////////////////////////////////
     auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
 
-    ///////////////////////
-    // Overlap
-    ///////////////////////
-    const std::string ao_overlap_key = Options().Get<std::string>("KEY_AO_OVERLAP");
-    auto overlapimpl = mod_ao_cache->Calculate(ao_overlap_key, 0, wfn, bs, bs);
-    std::shared_ptr<const MatrixXd> overlap_mat = convert_to_eigen(overlapimpl.at(0));  // .at(0) = first (and only) component
-    S12_ = FormS12(*overlap_mat);
-
     ////////////////////////////
     // One-electron hamiltonian
     ///////////////////////

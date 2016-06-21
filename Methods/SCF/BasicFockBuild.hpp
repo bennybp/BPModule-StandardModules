@@ -24,7 +24,6 @@ class BasicFockBuild : public pulsar::modulebase::FockBuilder
 
     private:
         std::vector<double> eri_;
-        Eigen::MatrixXd S12_;
 
         std::shared_ptr<const Eigen::MatrixXd> Hcore_;
 };
