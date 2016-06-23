@@ -14,39 +14,39 @@ using namespace pulsar::exception;
 
 namespace pulsarmethods {
 
-void Damping::Initialize_(const Wavefunction & wfn)
+void Damping::initialize_(const Wavefunction & wfn)
 {
     // get the basis set
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
+    std::string bstag = options().get<std::string>("BASIS_SET");
 
-    const BasisSet bs = wfn.system->GetBasisSet(bstag);
+    const BasisSet bs = wfn.system->get_basis_set(bstag);
 
     ///////////////////////////////////////////
     // Load the one electron integral matrices
     // (and nuclear repulsion)
     ///////////////////////////////////////////
     // Nuclear repulsion
-    auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
-    mod_nuc_rep->Initialize(0, *wfn.system);
-    mod_nuc_rep->Calculate(&nucrep_, 1);
+    auto mod_nuc_rep = create_child_from_option<SystemIntegral>("KEY_NUC_REPULSION");
+    mod_nuc_rep->initialize(0, *wfn.system);
+    mod_nuc_rep->calculate(&nucrep_, 1);
 
     /////////////////////////////////////
     // The one-electron integral cacher
     /////////////////////////////////////
-    auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
+    auto mod_ao_cache = create_child_from_option<OneElectronMatrix>("KEY_ONEEL_MAT");
 
     ////////////////////////////
     // One-electron hamiltonian
     ////////////////////////////
-    const std::string ao_build_key = Options().Get<std::string>("KEY_AO_COREBUILD");
-    auto Hcoreimpl = mod_ao_cache->Calculate(ao_build_key, 0, wfn, bs, bs);
+    const std::string ao_build_key = options().get<std::string>("KEY_AO_COREBUILD");
+    auto Hcoreimpl = mod_ao_cache->calculate(ao_build_key, 0, wfn, bs, bs);
     Hcore_ = convert_to_eigen(Hcoreimpl.at(0));  // .at(0) = first (and only) component
 
-    bs.Print(out);
+    bs.print(out);
 }
 
 
-Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
+Damping::DerivReturnType Damping::deriv_(size_t order, const Wavefunction & wfn)
 {
     if(order != 0)
         throw NotYetImplementedException("Test with deriv != 0");
@@ -54,10 +54,10 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
     if(!wfn.system)
         throw GeneralException("System is not set!");
 
-    Initialize_(wfn); // will only use the system from the wfn
+    initialize_(wfn); // will only use the system from the wfn
 
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
-    const BasisSet bs = wfn.system->GetBasisSet(bstag);
+    std::string bstag = options().get<std::string>("BASIS_SET");
+    const BasisSet bs = wfn.system->get_basis_set(bstag);
   
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 
@@ -71,21 +71,21 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
     //////////////////////////
     if(!wfn.cmat) // c-matrix hasn't been set in the passed wfn
     {
-        out.Debug("Don't have C-matrices set. Will call initial guess module\n");
+        out.debug("Don't have C-matrices set. Will call initial guess module\n");
 
-        if(!Options().Has("KEY_INITIAL_GUESS"))
+        if(!options().has("KEY_INITIAL_GUESS"))
             throw GeneralException("Missing initial guess module when I don't have a C-matrix");
 
         // load and run the initial guess module
-        auto mod_iguess = CreateChildFromOption<EnergyMethod>("KEY_INITIAL_GUESS");
-        auto iguess_ret = mod_iguess->Energy(wfn);
+        auto mod_iguess = create_child_from_option<EnergyMethod>("KEY_INITIAL_GUESS");
+        auto iguess_ret = mod_iguess->energy(wfn);
 
         initial_wfn = iguess_ret.first;
         initial_energy = iguess_ret.second;
     }
     else
     {
-        out.Debug("Using given wavefunction as a starting point");
+        out.debug("Using given wavefunction as a starting point");
  
         // c-matrices have been set. Make sure we have occupations, etc, as well
         if(!wfn.occupations)
@@ -100,19 +100,19 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
     ///////////////////////////////
     // Obtain the options for SCF
     ///////////////////////////////
-    double etol = Options().Get<double>("E_TOLERANCE");
-    size_t maxniter = Options().Get<size_t>("MAX_ITER");
-    double dtol = Options().Get<double>("DENS_TOLERANCE");
-    double damp = Options().Get<double>("DAMPING_FACTOR");
+    double etol = options().get<double>("E_TOLERANCE");
+    size_t maxniter = options().get<size_t>("MAX_ITER");
+    double dtol = options().get<double>("DENS_TOLERANCE");
+    double damp = options().get<double>("DAMPING_FACTOR");
 
 
     //////////////////////////////////////////////////////////////////
     // Actual SCF Procedure
     //////////////////////////////////////////////////////////////////
     // Load and set up the iterator  and fockbuild modules
-    auto mod_iter = CreateChildFromOption<SCFIterator>("KEY_SCF_ITERATOR");
-    auto mod_fock = CreateChildFromOption<FockBuilder>("KEY_FOCK_BUILDER");
-    mod_fock->Initialize(order, wfn, bs); 
+    auto mod_iter = create_child_from_option<SCFIterator>("KEY_SCF_ITERATOR");
+    auto mod_fock = create_child_from_option<FockBuilder>("KEY_FOCK_BUILDER");
+    mod_fock->initialize(order, wfn, bs); 
 
 
     // Storing the results of the previous iterations
@@ -136,36 +136,36 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
         iter++; 
 
         // The Fock matrix
-        IrrepSpinMatrixD Fmat = mod_fock->Calculate(lastwfn);
+        IrrepSpinMatrixD Fmat = mod_fock->calculate(lastwfn);
 
         // apply damping if we are past the first iteration
         if(iter > 1)
         {
-            for(auto ir : Fmat.GetIrreps())
-            for(auto s : Fmat.GetSpins(ir))
+            for(auto ir : Fmat.get_irreps())
+            for(auto s : Fmat.get_spins(ir))
             {
                 // making a copy
-                MatrixXd m = *(convert_to_eigen(Fmat.Get(ir, s)));
-                const MatrixXd & lastm = *(convert_to_eigen(lastfmat.Get(ir, s)));
+                MatrixXd m = *(convert_to_eigen(Fmat.get(ir, s)));
+                const MatrixXd & lastm = *(convert_to_eigen(lastfmat.get(ir, s)));
 
                 for(long i = 0; i < m.rows(); i++)
                 for(long j = 0; j < m.cols(); j++)
                     m(i,j) = damp*lastm(i,j) + (1.0-damp)*m(i,j);
 
-                Fmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(m)));
+                Fmat.set(ir, s, std::make_shared<EigenMatrixImpl>(std::move(m)));
 
             }
         } 
 
         // Iterate, making a new wavefunction
-        Wavefunction newwfn = mod_iter->Next(lastwfn, Fmat);
+        Wavefunction newwfn = mod_iter->next(lastwfn, Fmat);
 
         // Form the new density and calculate the energy
         if(!newwfn.opdm)
             throw GeneralException("Returned wfn doesn't have opdm");
 
         const IrrepSpinMatrixD dens = *newwfn.opdm;
-        current_energy = CalculateEnergy(*Hcore_, nucrep_, dens, Fmat, out);
+        current_energy = Calculateenergy(*Hcore_, nucrep_, dens, Fmat, out);
 
         // store the energy for next time
         energy_diff = current_energy - last_energy;
@@ -182,7 +182,7 @@ Damping::DerivReturnType Damping::Deriv_(size_t order, const Wavefunction & wfn)
         lastfmat = std::move(Fmat);
 
 
-        out.Output("%5?  %16.8e  %16.8e  %16.8e\n",
+        out.output("%5?  %16.8e  %16.8e  %16.8e\n",
                     iter, current_energy, energy_diff, dens_diff);
 
     } while(fabs(energy_diff) > etol ||

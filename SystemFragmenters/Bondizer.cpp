@@ -14,21 +14,21 @@ void Recurse(size_t depth,System& NewFrag,const Atom& CurrAtom,
              size_t MaxBonds,const Conn_t& Conns){
     if(MaxBonds==depth)return;
     for(const Atom& AnAtom: Conns.at(CurrAtom)){
-        if(NewFrag.Contains(AnAtom))continue;//Already knew about it
-        NewFrag.Insert(AnAtom);
+        if(NewFrag.count(AnAtom))continue;//Already knew about it
+        NewFrag.insert(AnAtom);
         Recurse(depth+1,NewFrag,AnAtom,MaxBonds,Conns);
     }//End loop over attached atoms
 }//End recurse
 
-NMerSetType Bondizer::Fragmentize_(const System & mol){
-    Conn_t Conns=GetConns(mol);
-    size_t MaxBonds=Options().Get<size_t>("NBONDS");
+NMerSetType Bondizer::fragmentize_(const System & mol){
+    Conn_t Conns=get_connectivity(mol);
+    size_t MaxBonds=options().get<size_t>("NBONDS");
     NMerSetType Frags;
     for(const Atom& AnAtom: mol){
-        System NewFrag(mol.GetUniverse(),false);
-        NewFrag.Insert(AnAtom);
+        System NewFrag(mol.get_universe(),false);
+        NewFrag.insert(AnAtom);
         Recurse(1,NewFrag,AnAtom,MaxBonds,Conns);
-        NewFrag.SetMultiplicity(mol.GetMultiplicity());
+        NewFrag.set_multiplicity(mol.get_multiplicity());
         bool good=true;
         for(const auto& OldFrags: Frags)//Check if unique
             if(OldFrags.second.NMer==NewFrag){
@@ -41,5 +41,5 @@ NMerSetType Bondizer::Fragmentize_(const System & mol){
         Temp.NMer=NewFrag;
         Frags.emplace(Temp.SN,Temp);
     }
-    return MakeNMers(Frags);
+    return make_nmers(Frags);
 }

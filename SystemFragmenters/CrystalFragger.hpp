@@ -43,7 +43,7 @@ public:
     ///Import the constructor from the base class
     using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
     
-    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
+    virtual NMerSetType fragmentize_(const pulsar::system::System & mol);
 };
 
 #endif /* PULSAR_GHUARD_CRYSTALFRAGGER_HPP */

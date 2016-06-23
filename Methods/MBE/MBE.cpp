@@ -27,12 +27,12 @@ using Map_t=std::unordered_map<Atom,size_t>;
 
 namespace pulsarmethods{
     
-    Return_t MBE::Deriv_(size_t Order,const Wfn_t& Wfn)
+    Return_t MBE::deriv_(size_t Order,const Wfn_t& Wfn)
     {
-        vector<string> Keys(1,Options().Get<string>("METHOD"));
+        vector<string> Keys(1,options().get<string>("METHOD"));
         const System& Mol=*Wfn.system;
         NMerSetType NMers=
-                CreateChildFromOption<SFer>("FRAGMENTIZER")->Fragmentize(Mol);
+                create_child_from_option<SFer>("FRAGMENTIZER")->fragmentize(Mol);
         vector<double> Cs;
         vector<Wfn_t> Wfns;
         for(const typename NMerSetType::value_type& NMerI : NMers){
@@ -41,13 +41,13 @@ namespace pulsarmethods{
             Wfns.back().system=std::make_shared<System>(NMerI.second.NMer);
         }
         vector<Return_t> Results=
-                RunSeriesOfMethods(MManager(),ID(),Keys,Wfns,Cs,Order);
+                RunSeriesOfMethods(module_manager(),id(),Keys,Wfns,Cs,Order);
         Map_t SprMap;
         vector<double> Result(std::pow(3*Mol.size(),Order));
         for(const Atom& AtomI: Mol)SprMap.insert({AtomI,SprMap.size()});
         const size_t Offset=SprMap.size();
         for(const Atom& AtomI: Mol)
-            SprMap.insert({MakeGhost(AtomI),SprMap.size()-Offset});
+            SprMap.insert({make_ghost_atom(AtomI),SprMap.size()-Offset});
         
         for(size_t i: Range<0>(Results.size())){
             Map_t SubMap;

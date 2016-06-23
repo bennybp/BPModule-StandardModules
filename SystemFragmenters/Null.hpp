@@ -32,7 +32,7 @@ class NullFragmenter: public pulsar::modulebase::SystemFragmenter{
     using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
 
     ///Returns a SystemMap with the input system
-    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
+    virtual NMerSetType fragmentize_(const pulsar::system::System & mol);
 };
 
 

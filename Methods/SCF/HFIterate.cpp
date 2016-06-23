@@ -16,26 +16,26 @@ using namespace pulsar::modulebase;
 namespace pulsarmethods {
 
 
-void HFIterate::Initialize_(const Wavefunction & wfn)
+void HFIterate::initialize_(const Wavefunction & wfn)
 {
     if(!wfn.system)
         throw GeneralException("System is not set!");
 
     // get the basis set
     const System & sys = *(wfn.system);
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
-    const BasisSet bs = sys.GetBasisSet(bstag);
+    std::string bstag = options().get<std::string>("BASIS_SET");
+    const BasisSet bs = sys.get_basis_set(bstag);
 
     /////////////////////////////////////
     // The one-electron integral cacher
     /////////////////////////////////////
-    auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
+    auto mod_ao_cache = create_child_from_option<OneElectronMatrix>("KEY_ONEEL_MAT");
 
     /////////////////////// 
     // Overlap
     /////////////////////// 
-    const std::string ao_overlap_key = Options().Get<std::string>("KEY_AO_OVERLAP");
-    auto overlapimpl = mod_ao_cache->Calculate(ao_overlap_key, 0, wfn, bs, bs);
+    const std::string ao_overlap_key = options().get<std::string>("KEY_AO_OVERLAP");
+    auto overlapimpl = mod_ao_cache->calculate(ao_overlap_key, 0, wfn, bs, bs);
     std::shared_ptr<const MatrixXd> overlap_mat = convert_to_eigen(overlapimpl.at(0));  // .at(0) = first (and only) component
     S12_ = FormS12(*overlap_mat);
 
@@ -43,20 +43,20 @@ void HFIterate::Initialize_(const Wavefunction & wfn)
 }
 
 
-Wavefunction HFIterate::Next_(const Wavefunction & wfn, const IrrepSpinMatrixD & fmat)
+Wavefunction HFIterate::next_(const Wavefunction & wfn, const IrrepSpinMatrixD & fmat)
 {
     if(!initialized_)
-        Initialize_(wfn);
+        initialize_(wfn);
 
     // The density and C matrix we are returning
     IrrepSpinMatrixD Cmat;
     IrrepSpinVectorD epsilon;
 
     // Diagonalize, etc
-    for(auto ir : fmat.GetIrreps())
-    for(auto s : fmat.GetSpins(ir))
+    for(auto ir : fmat.get_irreps())
+    for(auto s : fmat.get_spins(ir))
     {
-        std::shared_ptr<const MatrixXd> fptr = convert_to_eigen(fmat.Get(ir, s));
+        std::shared_ptr<const MatrixXd> fptr = convert_to_eigen(fmat.get(ir, s));
         const MatrixXd & f = *fptr;
 
         MatrixXd Fprime = S12_.transpose() * f * S12_;
@@ -66,8 +66,8 @@ Wavefunction HFIterate::Next_(const Wavefunction & wfn, const IrrepSpinMatrixD &
         VectorXd e = fsolve.eigenvalues();
         c = S12_*c;
 
-        Cmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(c)));
-        epsilon.Take(ir, s, std::make_shared<EigenVectorImpl>(std::move(e)));
+        Cmat.set(ir, s, std::make_shared<EigenMatrixImpl>(std::move(c)));
+        epsilon.set(ir, s, std::make_shared<EigenVectorImpl>(std::move(e)));
     }
 
     // build the density

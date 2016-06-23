@@ -42,19 +42,19 @@ static BasisShellInfo NormalizeShell_(const BasisShellInfo & shell, const CoordT
 
 
     // common to all general contractions
-    const size_t nprim = shell.NPrim();
-    const double * const alpha = shell.AlphaPtr();
+    const size_t nprim = shell.n_primitives();
+    const double * const alpha = shell.alpha_ptr();
 
     BasisShellInfo newshell(shell);
 
-    for(size_t n = 0; n < shell.NGeneral(); n++)
+    for(size_t n = 0; n < shell.n_general_contractions(); n++)
     {
-        const int iam = shell.GeneralAM(n);
+        const int iam = shell.general_am(n);
         const double am = static_cast<double>(iam);
         const double m = am + 1.5;
         const double m2 = 0.5 * m;
 
-        std::vector<double> coefs = shell.GetCoefs(n);
+        std::vector<double> coefs = shell.get_coefs(n);
 
         double sum = 0.0;
 
@@ -75,7 +75,7 @@ static BasisShellInfo NormalizeShell_(const BasisShellInfo & shell, const CoordT
 
         // apply the rest of the normalization and store
         for (size_t i = 0; i < nprim; ++i)
-            newshell.SetCoef(n, i, coefs[i] * norm * pow(alpha[i], m2));
+            newshell.set_coef(n, i, coefs[i] * norm * pow(alpha[i], m2));
     }
 
     return newshell;
@@ -88,21 +88,21 @@ std::shared_ptr<BasisSet> NormalizeBasis(CacheData & cache,
 {
     using bphash::hash_to_string;
 
-    std::string cachekey = std::string("bs:") + hash_to_string(bs.MyHash());
-    if(cache.Count(cachekey)) // options are unimportant
+    std::string cachekey = std::string("bs:") + hash_to_string(bs.my_hash());
+    if(cache.count(cachekey)) // options are unimportant
     {
-        auto ret = cache.Get<std::shared_ptr<BasisSet>>(cachekey);
+        auto ret = cache.get<std::shared_ptr<BasisSet>>(cachekey);
 
-        out.Debug("Found normalized basis in cache: %? -> %?\n",
-                  hash_to_string(bs.MyHash()), hash_to_string(ret->MyHash()));
+        out.debug("Found normalized basis in cache: %? -> %?\n",
+                  hash_to_string(bs.my_hash()), hash_to_string(ret->my_hash()));
 
         return ret;
     }
 
-    auto newbs = std::make_shared<BasisSet>(bs.Transform(NormalizeShell_));
+    auto newbs = std::make_shared<BasisSet>(bs.transform(NormalizeShell_));
 
     // add to the cache
-    cache.Set(cachekey, newbs);
+    cache.set(cachekey, newbs);
 
     return newbs;
 }

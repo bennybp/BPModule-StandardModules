@@ -89,14 +89,14 @@ static void Valeev_F(double *F, int n, double x)
         et = exp(-x);
         t2 = 2 * x;
         m2 = 2 * n;
-        num = DoubleFactorialD(m2-1);
+        num = double_factorial_d(m2-1);
         i = 0;
         sum = 1.0 / (m2 + 1);
         do
         {
             i++;
             num = num * t2;
-            term1 = num / DoubleFactorialD(m2 + 2 * i + 1);
+            term1 = num / double_factorial_d(m2 + 2 * i + 1);
             sum += term1;
         }
         while (fabsl(term1) > EPS && i < MAXFAC);
@@ -175,7 +175,7 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             j = k - i;
             if (j > l2)
                 continue;
-            tmp = BinomialCoefficient(l1,i) * BinomialCoefficient(l2,j);
+            tmp = binomial_coefficient(l1,i) * binomial_coefficient(l2,j);
             if (l1 - i > 0)
                 tmp *= pow(PAx, l1 - i);
             if (l2 - j > 0)
@@ -189,7 +189,7 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             j = k - i;
             if (j > m2)
                 continue;
-            tmp = BinomialCoefficient(m1,i) * BinomialCoefficient(m2,j);
+            tmp = binomial_coefficient(m1,i) * binomial_coefficient(m2,j);
             if (m1 - i > 0)
                 tmp *= pow(PAy, m1 - i);
             if (m2 - j > 0)
@@ -203,7 +203,7 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             j = k - i;
             if (j > n2)
                 continue;
-            tmp = BinomialCoefficient(n1,i) * BinomialCoefficient(n2,j);
+            tmp = binomial_coefficient(n1,i) * binomial_coefficient(n2,j);
             if (n1 - i > 0)
                 tmp *= pow(PAz, n1 - i);
             if (n2 - j > 0)
@@ -217,7 +217,7 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             j = k - i;
             if (j > l4)
                 continue;
-            tmp = BinomialCoefficient(l3,i) * BinomialCoefficient(l4,j);
+            tmp = binomial_coefficient(l3,i) * binomial_coefficient(l4,j);
             if (l3 - i > 0)
                 tmp *= pow(QCx, l3 - i);
             if (l4 - j > 0)
@@ -231,7 +231,7 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             j = k - i;
             if (j > m4)
                 continue;
-            tmp = BinomialCoefficient(m3,i) * BinomialCoefficient(m4,j);
+            tmp = binomial_coefficient(m3,i) * binomial_coefficient(m4,j);
             if (m3 - i > 0)
                 tmp *= pow(QCy, m3 - i);
             if (m4 - j > 0)
@@ -245,7 +245,7 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             j = k - i;
             if (j > n4)
                 continue;
-            tmp = BinomialCoefficient(n3,i) * BinomialCoefficient(n4,j);
+            tmp = binomial_coefficient(n3,i) * binomial_coefficient(n4,j);
             if (n3 - i > 0)
                 tmp *= pow(QCz, n3 - i);
             if (n4 - j > 0)
@@ -261,9 +261,9 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
             for (u1 = 0; u1 <= u1max; u1++)
                 for (u2 = 0; u2 <= u2max; u2++)
                 {
-                    Gx = pow(-1, lp) * flp[lp] * flq[lq] * FactorialD(lp) * FactorialD(lq)
-                         * pow(gammap, u1 - lp) * pow(gammaq, u2 - lq) * FactorialD(lp + lq - 2 * u1 - 2 * u2) * pow(gammapq, lp + lq - 2 * u1 - 2 * u2)
-                         / (FactorialD(u1) * FactorialD(u2) * FactorialD(lp - 2 * u1) * FactorialD(lq - 2 * u2));
+                    Gx = pow(-1, lp) * flp[lp] * flq[lq] * factorial_d(lp) * factorial_d(lq)
+                         * pow(gammap, u1 - lp) * pow(gammaq, u2 - lq) * factorial_d(lp + lq - 2 * u1 - 2 * u2) * pow(gammapq, lp + lq - 2 * u1 - 2 * u2)
+                         / (factorial_d(u1) * factorial_d(u2) * factorial_d(lp - 2 * u1) * factorial_d(lq - 2 * u2));
                     for (mp = 0; mp <= m1 + m2; mp++)
                         for (mq = 0; mq <= m3 + m4; mq++)
                         {
@@ -272,11 +272,11 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                             for (v1 = 0; v1 <= v1max; v1++)
                                 for (v2 = 0; v2 <= v2max; v2++)
                                 {
-                                    Gy = pow(-1, mp) * fmp[mp] * fmq[mq] * FactorialD(mp) * FactorialD(mq)
-                                         * pow(gammap, v1 - mp) * pow(gammaq, v2 - mq) * FactorialD(mp + mq - 2 * v1 - 2 * v2) * pow(gammapq,
+                                    Gy = pow(-1, mp) * fmp[mp] * fmq[mq] * factorial_d(mp) * factorial_d(mq)
+                                         * pow(gammap, v1 - mp) * pow(gammaq, v2 - mq) * factorial_d(mp + mq - 2 * v1 - 2 * v2) * pow(gammapq,
                                                          mp + mq - 2 * v1 - 2 * v2)
-                                         / (FactorialD(v1) * FactorialD(v2) * FactorialD(mp - 2 * v1)
-                                            * FactorialD(mq - 2 * v2));
+                                         / (factorial_d(v1) * factorial_d(v2) * factorial_d(mp - 2 * v1)
+                                            * factorial_d(mq - 2 * v2));
                                     for (np = 0; np <= n1 + n2; np++)
                                         for (nq = 0; nq <= n3 + n4; nq++)
                                         {
@@ -285,12 +285,12 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                                             for (w1 = 0; w1 <= w1max; w1++)
                                                 for (w2 = 0; w2 <= w2max; w2++)
                                                 {
-                                                    Gz = pow(-1, np) * fnp[np] * fnq[nq] * FactorialD(np)
-                                                         * FactorialD(nq) * pow(gammap, w1 - np) * pow(gammaq,
+                                                    Gz = pow(-1, np) * fnp[np] * fnq[nq] * factorial_d(np)
+                                                         * factorial_d(nq) * pow(gammap, w1 - np) * pow(gammaq,
                                                                  w2 - nq)
-                                                         * FactorialD(np + nq - 2 * w1 - 2 * w2)
+                                                         * factorial_d(np + nq - 2 * w1 - 2 * w2)
                                                          * pow(gammapq, np + nq - 2 * w1 - 2 * w2)
-                                                         / (FactorialD(w1) * FactorialD(w2) * FactorialD(np - 2 * w1) * FactorialD(nq - 2 * w2));
+                                                         / (factorial_d(w1) * factorial_d(w2) * factorial_d(np - 2 * w1) * factorial_d(nq - 2 * w2));
                                                     txmax = (lp + lq - 2 * u1 - 2 * u2) / 2;
                                                     tymax = (mp + mq - 2 * v1 - 2 * v2) / 2;
                                                     tzmax = (np + nq - 2 * w1 - 2 * w2) / 2;
@@ -317,8 +317,8 @@ double ValeevRef_eri(int l1, int m1, int n1, double alpha1, const double* A,
                                                                                  u1 + u2 + tx + v1 + v2 + ty + w1
                                                                                  + w2 + tz) * pow(gammapq, tx)
                                                                              * pow(gammapq, ty) * pow(gammapq, tz)
-                                                                             * FactorialD(lp + lq - 2 * u1 - 2 * u2 - 2 * tx) * FactorialD(tx) * FactorialD(mp + mq - 2 * v1 - 2 * v2 - 2 * ty) * FactorialD(ty)
-                                                                             * FactorialD(np + nq - 2 * w1 - 2 * w2 - 2 * tz) * FactorialD(tz));
+                                                                             * factorial_d(lp + lq - 2 * u1 - 2 * u2 - 2 * tx) * factorial_d(tx) * factorial_d(mp + mq - 2 * v1 - 2 * v2 - 2 * ty) * factorial_d(ty)
+                                                                             * factorial_d(np + nq - 2 * w1 - 2 * w2 - 2 * tz) * factorial_d(tz));
                                                             }
                                                 }
                                         }

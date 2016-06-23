@@ -116,7 +116,7 @@ class Ghoster: public pulsar::modulebase::SystemFragmenter{
         using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
         
         ///Actually fragments the molecule
-        virtual NMerSetType Fragmentize_(const pulsar::system::System& mol);
+        virtual NMerSetType fragmentize_(const pulsar::system::System& mol);
 };
 
 ///Makes a ghoster consistent with a typical CP correction
@@ -126,7 +126,7 @@ public:
         using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
         
         ///Actually fragments the molecule
-        virtual NMerSetType Fragmentize_(const pulsar::system::System& mol);
+        virtual NMerSetType fragmentize_(const pulsar::system::System& mol);
 };
 
 ///Makes a ghoster consistent with a typical VMFC(n) correction
@@ -136,7 +136,7 @@ public:
         using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
         
         ///Actually fragments the molecule
-        virtual NMerSetType Fragmentize_(const pulsar::system::System& mol);
+        virtual NMerSetType fragmentize_(const pulsar::system::System& mol);
 };
 
 

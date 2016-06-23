@@ -12,15 +12,15 @@ using pulsar::modulemanager::ModuleCreationFuncs;
 
 extern "C" {
 
-ModuleCreationFuncs InsertSupermodule(void){
+ModuleCreationFuncs insert_supermodule(void){
     ModuleCreationFuncs cf;
-    cf.AddCppCreator<pulsarmethods::MBE>("MBE");
-    cf.AddCppCreator<pulsarmethods::MIM>("MIM");
-    cf.AddCppCreator<pulsarmethods::Damping>("Damping");
-    cf.AddCppCreator<pulsarmethods::DIIS>("DIIS");
-    cf.AddCppCreator<pulsarmethods::HFIterate>("HFIterate");
-    cf.AddCppCreator<pulsarmethods::CoreGuess>("CoreGuess");
-    cf.AddCppCreator<pulsarmethods::BasicFockBuild>("BasicFockBuild");
+    cf.add_cpp_creator<pulsarmethods::MBE>("MBE");
+    cf.add_cpp_creator<pulsarmethods::MIM>("MIM");
+    cf.add_cpp_creator<pulsarmethods::Damping>("Damping");
+    cf.add_cpp_creator<pulsarmethods::DIIS>("DIIS");
+    cf.add_cpp_creator<pulsarmethods::HFIterate>("HFIterate");
+    cf.add_cpp_creator<pulsarmethods::CoreGuess>("CoreGuess");
+    cf.add_cpp_creator<pulsarmethods::BasicFockBuild>("BasicFockBuild");
     return cf;
 }
 

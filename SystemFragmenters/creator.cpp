@@ -9,17 +9,17 @@ using pulsar::modulemanager::ModuleCreationFuncs;
 
 extern "C" {
 
-ModuleCreationFuncs InsertSupermodule(void)
+ModuleCreationFuncs insert_supermodule(void)
 {
     ModuleCreationFuncs cf;
-    cf.AddCppCreator<Atomizer>("Atomizer");
-    cf.AddCppCreator<Bondizer>("Bondizer");
-    cf.AddCppCreator<CrystalFragger>("CrystalFragger");
-    cf.AddCppCreator<Ghoster>("Ghoster");
-    cf.AddCppCreator<CPGhoster>("CPGhoster");
-    cf.AddCppCreator<VMFCGhoster>("VMFCGhoster");
-    cf.AddCppCreator<NullFragmenter>("NullFragmenter");
-    cf.AddCppCreator<UserDefined>("UserDefined");
+    cf.add_cpp_creator<Atomizer>("Atomizer");
+    cf.add_cpp_creator<Bondizer>("Bondizer");
+    cf.add_cpp_creator<CrystalFragger>("CrystalFragger");
+    cf.add_cpp_creator<Ghoster>("Ghoster");
+    cf.add_cpp_creator<CPGhoster>("CPGhoster");
+    cf.add_cpp_creator<VMFCGhoster>("VMFCGhoster");
+    cf.add_cpp_creator<NullFragmenter>("NullFragmenter");
+    cf.add_cpp_creator<UserDefined>("UserDefined");
     return cf;
 }
 

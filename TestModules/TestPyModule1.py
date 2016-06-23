@@ -5,68 +5,68 @@ class TestPyModule1(psr.modulebase.Test_Base):
     super(TestPyModule1, self).__init__(myid)
 
 
-  def RunTest_(self):
-    psr.output.GlobalOutput("+++ In TestPyModule1: RunTest. Info: ({}) {} {} v{}\n".format(self.ID(), self.Key(), self.Name(), self.Version()))
+  def run_test_(self):
+    self.out.output("+++ In TestPyModule1: run_test. Info: ({}) {} {} v{}\n".format(self.id(), self.key(), self.name(), self.version()))
 
-    psr.output.GlobalOutput("   Cache entries: {}\n".format(self.Cache().Size()))
+    self.out.output("   Cache entries: {}\n".format(self.cache().size()))
 
-    for it in self.Cache().GetKeys():
-        psr.output.GlobalOutput("                  > {}\n".format(it))
+    for it in self.cache().get_keys():
+        self.out.output("                  > {}\n".format(it))
 
-    psr.output.GlobalOutput("   double_opt_def:    {}\n".format(self.Options().Get("double_opt_def")))
-    psr.output.GlobalOutput("      int_opt_def:    {}\n".format(self.Options().Get("int_opt_def")))
-    psr.output.GlobalOutput("     bool_opt_def:    {}\n".format(self.Options().Get("bool_opt_def")))
-    psr.output.GlobalOutput("      str_opt_def:    {}\n".format(self.Options().Get("str_opt_def")))
-    psr.output.GlobalOutput("\n")
-    if self.Options().Has("double_opt"):
-        psr.output.GlobalOutput("       double_opt:    {}\n".format(self.Options().Get("double_opt")))
-    if self.Options().Has("int_opt"):
-        psr.output.GlobalOutput("          int_opt:    {}\n".format(self.Options().Get("int_opt")))
-    if self.Options().Has("bool_opt"):
-        psr.output.GlobalOutput("         bool_opt:    {}\n".format(self.Options().Get("bool_opt")))
-    if self.Options().Has("str_opt"):
-        psr.output.GlobalOutput("          str_opt:    {}\n".format(self.Options().Get("str_opt")))
+    self.out.output("   double_opt_def:    {}\n".format(self.options().get("double_opt_def")))
+    self.out.output("      int_opt_def:    {}\n".format(self.options().get("int_opt_def")))
+    self.out.output("     bool_opt_def:    {}\n".format(self.options().get("bool_opt_def")))
+    self.out.output("      str_opt_def:    {}\n".format(self.options().get("str_opt_def")))
+    self.out.output("\n")
+    if self.options().has("double_opt"):
+        self.out.output("       double_opt:    {}\n".format(self.options().get("double_opt")))
+    if self.options().has("int_opt"):
+        self.out.output("          int_opt:    {}\n".format(self.options().get("int_opt")))
+    if self.options().has("bool_opt"):
+        self.out.output("         bool_opt:    {}\n".format(self.options().get("bool_opt")))
+    if self.options().has("str_opt"):
+        self.out.output("          str_opt:    {}\n".format(self.options().get("str_opt")))
 
 
     # cache something
-    self.Cache().Set( "Element 1", "Something in the python cache")
-    self.Cache().Set( "Element 2", 42)
-    self.Cache().Set( "Element 3", 42.0)
-    self.Cache().Set( "Element 4", [ 1, 2, 3, 4 ])
+    self.cache().set( "Element 1", "Something in the python cache")
+    self.cache().set( "Element 2", 42)
+    self.cache().set( "Element 3", 42.0)
+    self.cache().set( "Element 4", [ 1, 2, 3, 4 ])
 
-  def CallRunTest_(self, other):
-    psr.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(other))
+  def call_run_test_(self, other):
+    self.out.output("+++ In TestPyModule1: call_run_test with {}\n".format(other))
 
-    tb = self.CreateChild(other)
-    psr.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
-    tb.RunTest()
-    psr.output.GlobalOutput("  + Finished with scoped module {}. Deleting automatically\n".format(tb.ID()))
+    tb = self.create_child(other)
+    self.out.output("  + Obtained scoped module ID {}\n".format(tb.id()))
+    tb.run_test()
+    self.out.output("  + Finished with scoped module {}. Deleting automatically\n".format(tb.id()))
 
-    psr.output.GlobalOutput("+++Done\n")
+    self.out.output("+++Done\n")
 
 
-  def CallRunTest2_(self, other1, other2):
-    psr.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {} {}\n".format(other1, other2))
+  def call_run_test2_(self, other1, other2):
+    self.out.output("+++ In TestPyModule1: call_run_test with {} {}\n".format(other1, other2))
 
-    tb = self.CreateChild(other1)
-    psr.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
-    tb.CallRunTest(other2)
-    psr.output.GlobalOutput("  + Finished with scoped module {}. Deleting automatically\n".format(tb.ID()))
+    tb = self.create_child(other1)
+    self.out.output("  + Obtained scoped module ID {}\n".format(tb.id()))
+    tb.call_run_test(other2)
+    self.out.output("  + Finished with scoped module {}. Deleting automatically\n".format(tb.id()))
 
-    psr.output.GlobalOutput("+++Done\n")
+    self.out.output("+++Done\n")
 
-  def TestThrow_(self):
+  def test_throw_(self):
     psr.output.GlobalWarning("+++ In TestPyModule1: Throwing an exception!\n")
     raise psr.exception.GeneralException("Here in py", "Key", "Some Data")
     #self.Throw("This is a test exception from python")
 
 
-  def CallThrow_(self, other):
-    psr.output.GlobalOutput("+++ In TestPyModule1: CallRunTest with {}\n".format(other))
+  def call_throw_(self, other):
+    self.out.output("+++ In TestPyModule1: call_run_test with {}\n".format(other))
 
-    tb = self.CreateChild(other)
-    psr.output.GlobalOutput("  + Obtained scoped module ID {}\n".format(tb.ID()))
-    tb.TestThrow()
+    tb = self.create_child(other)
+    self.out.output("  + Obtained scoped module ID {}\n".format(tb.id()))
+    tb.test_throw()
 
     # shouldn't be run?
-    psr.output.GlobalOutput("+++Done\n")
+    self.out.output("+++Done\n")

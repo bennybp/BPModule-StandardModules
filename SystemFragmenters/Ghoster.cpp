@@ -53,20 +53,20 @@ inline SNType ActiveSN(const SNType& FullSN,const NMerSet_t& NMerI){
     return TempSN;
 }
 
-NMerSetType Ghoster::Fragmentize_(const System& mol){
+NMerSetType Ghoster::fragmentize_(const System& mol){
     NMerSetType OrigFrags=
-          CreateChildFromOption<SystemFragmenter>(FraggerKey)->Fragmentize(mol);
+          create_child_from_option<SystemFragmenter>(FraggerKey)->fragmentize(mol);
     
     //All fragments have same universe so just grab one
     AtomSetUniverse NewU,OldU;
-    NewU=OldU=*(OrigFrags.begin()->second.NMer.GetUniverse());
+    NewU=OldU=*(OrigFrags.begin()->second.NMer.get_universe());
     R2G_t R2G;
     for(const Atom& AtomI : OldU)
-        NewU.Insert(R2G.insert({AtomI,MakeGhost(AtomI)}).first->second);
+        NewU.insert(R2G.insert({AtomI,make_ghost_atom(AtomI)}).first->second);
     System NewSys(NewU,false);
     std::pair<size_t,size_t> Stats=NMerStats(OrigFrags);
     const size_t NFrags=Stats.first,MaxN=Stats.second;
-    TruncOrder_t TruncOrders=Options().Get<TruncOrder_t>(GhTruncKey);
+    TruncOrder_t TruncOrders=options().get<TruncOrder_t>(GhTruncKey);
     bool OnlyFull=true,VMFCn=true;
     
     for(const auto& TO: TruncOrders){
@@ -99,7 +99,7 @@ NMerSetType Ghoster::Fragmentize_(const System& mol){
             for(const string& SNI: *Ghosts){
                 CopyOfI.second.SN.insert(std::to_string(NFrags+std::atoi(SNI.c_str())));
                 for(const Atom& AtomI: OrigFrags.at({SNI}).NMer)
-                    CopyOfI.second.NMer.Insert(R2G.at(AtomI));
+                    CopyOfI.second.NMer.insert(R2G.at(AtomI));
             }
             if(VMFCn)CopyOfI.second.Weight=(Ghosts->size()%2==0?1.0:-1.0);
             NewFrags.insert({CopyOfI.second.SN,CopyOfI.second});
@@ -114,27 +114,27 @@ NMerSetType CommonGuts(const System& Mol,
                        const SystemFragmenter* SF,
                        pulsar::modulemanager::ModuleManager& MM){
     using Fragger_t=pulsar::modulemanager::ModulePtr<SystemFragmenter>;
-    const string GhostKey=SF->Options().Get<string>("GHOSTER_KEY");
-    Fragger_t Fragger=SF->CreateChild<SystemFragmenter>(GhostKey);
-    const string OrigKey=Fragger->Options().Get<string>(FraggerKey);
+    const string GhostKey=SF->options().get<string>("GHOSTER_KEY");
+    Fragger_t Fragger=SF->create_child<SystemFragmenter>(GhostKey);
+    const string OrigKey=Fragger->options().get<string>(FraggerKey);
     NMerSetType OrigFrags=
-            SF->CreateChild<SystemFragmenter>(OrigKey)->Fragmentize(Mol);
+            SF->create_child<SystemFragmenter>(OrigKey)->fragmentize(Mol);
     std::pair<size_t,size_t> Stats=NMerStats(OrigFrags);
-    const string NewKey=MM.GenerateUniqueKey();
-    MM.DuplicateKey(GhostKey,NewKey);
+    const string NewKey=MM.generate_unique_key();
+    MM.duplicate_key(GhostKey,NewKey);
     TruncOrder_t NewTruncs;
     const size_t Max=(UseSuper?Stats.first:Stats.second);
     for(size_t i=1;i<=Stats.second;++i)NewTruncs.insert({i,Max-i});
-    MM.ChangeOption(NewKey,GhTruncKey,NewTruncs);
-    return SF->CreateChild<SystemFragmenter>(NewKey)->Fragmentize(Mol);
+    MM.change_option(NewKey,GhTruncKey,NewTruncs);
+    return SF->create_child<SystemFragmenter>(NewKey)->fragmentize(Mol);
 }
 
 
-NMerSetType CPGhoster::Fragmentize_(const pulsar::system::System& Mol){
-    return CommonGuts(Mol,true,this,MManager());
+NMerSetType CPGhoster::fragmentize_(const pulsar::system::System& Mol){
+    return CommonGuts(Mol,true,this,module_manager());
 }
 
-NMerSetType VMFCGhoster::Fragmentize_(const pulsar::system::System& Mol){
-    return CommonGuts(Mol,false,this,MManager());
+NMerSetType VMFCGhoster::fragmentize_(const pulsar::system::System& Mol){
+    return CommonGuts(Mol,false,this,module_manager());
 }
 

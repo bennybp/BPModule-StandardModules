@@ -33,7 +33,7 @@ NMerSetType RenumberUC(const NMerSetType& UC,size_t StartFrom){
     return UCFrags;
 }
 
-vector<SNType> CrysMakeNMers(size_t N,
+vector<SNType> Crysmake_nmers(size_t N,
                       NMerSetType& Frags,
                       const NMerSetType& UCFrags, 
                       const NMerSetType& SCFrags,
@@ -76,7 +76,7 @@ NMerSetType GetUniqueNMers(NMerSetType& Frags,
     for(const NMerSet_t& NMerI: Frags){
         const System& NMerJ=NMerI.second.NMer;
         std::vector<double> Carts=
-            ToDoubleStar(NMerJ.Translate(-1.0*NMerJ.CenterOfMass()));       
+            ToDoubleStar(NMerJ.translate(-1.0*NMerJ.center_of_mass()));       
         SVDs.emplace(NMerI.first,SVD(Carts,Carts.size()/3,3L));
     }
     CombItr<vector<SNType>> NMers(FinalSNs,2);
@@ -84,11 +84,11 @@ NMerSetType GetUniqueNMers(NMerSetType& Frags,
         NMerInfo& NMerI=Frags.at((*NMers)[0]);
         NMerInfo& NMerJ=Frags.at((*NMers)[1]);
         ++NMers;
-        if(AreEqual(NMerI.Weight,0.0,1E-6)||AreEqual(NMerJ.Weight,0.0,1E-6))
+        if(are_equal(NMerI.Weight,0.0,1E-6)||are_equal(NMerJ.Weight,0.0,1E-6))
             continue;
         bool Equal=true;
         for(size_t i=0;i<3;++i){
-            if(AreEqual(get<1>(SVDs.at(NMerI.SN))[i],
+            if(are_equal(get<1>(SVDs.at(NMerI.SN))[i],
                         get<1>(SVDs.at(NMerJ.SN))[i],2.0))continue;
             Equal=false;
             break;
@@ -101,28 +101,28 @@ NMerSetType GetUniqueNMers(NMerSetType& Frags,
     NMerSetType GoodFrags;
     //RMR copy_if is for some reason trying to copy to a const version...
     for(const NMerSet_t FragI: Frags)
-        if(!AreEqual(FragI.second.Weight,0.0,1E-6))GoodFrags.insert(FragI);
+        if(!are_equal(FragI.second.Weight,0.0,1E-6))GoodFrags.insert(FragI);
     return GoodFrags;
 }
 
 
-NMerSetType CrystalFragger::Fragmentize_(const System & mol){
+NMerSetType CrystalFragger::fragmentize_(const System & mol){
     NMerSetType Frags;
-    const array<double,3>& Sides=mol.GetSpace().LatticeSides;
-    const vector<size_t> Ls=Options().Get<vector<size_t>>("LATTICE_SIZE");
-    const array<size_t,3> LatticeSides={Ls[0],Ls[1],Ls[2]};
-    System UC=mol.Translate(Sides);
-    System SC(MakeSuperCell(mol.AsUniverse(),LatticeSides,Sides),true);
-    UC=SC.Partition([&](const Atom& a){return UC.Contains(a);});
+    const array<double,3>& Sides=mol.get_space().lattice_sides;
+    const vector<size_t> Ls=options().get<vector<size_t>>("LATTICE_SIZE");
+    const array<size_t,3> lattice_sides={Ls[0],Ls[1],Ls[2]};
+    System UC=mol.translate(Sides);
+    System SC(MakeSuperCell(mol.as_universe(),lattice_sides,Sides),true);
+    UC=SC.partition([&](const Atom& a){return UC.count(a);});
     Fragger_t Fragger=
-            CreateChildFromOption<SystemFragmenter>("SYSTEM_FRAGMENTER_KEY");
+            create_child_from_option<SystemFragmenter>("SYSTEM_FRAGMENTER_KEY");
     SC-=UC;
-    NMerSetType SCFrags=Fragger->Fragmentize(SC),
-                UCFrags=Fragger->Fragmentize(UC);
+    NMerSetType SCFrags=Fragger->fragmentize(SC),
+                UCFrags=Fragger->fragmentize(UC);
     UCFrags=RenumberUC(UCFrags,SCFrags.size());
-    const size_t N=Options().Get<size_t>("TRUNCATION_ORDER");
+    const size_t N=options().get<size_t>("TRUNCATION_ORDER");
     double Dist=0.0;
-    vector<SNType> FinalSNs=CrysMakeNMers(N,Frags,UCFrags,SCFrags,Dist);
+    vector<SNType> FinalSNs=Crysmake_nmers(N,Frags,UCFrags,SCFrags,Dist);
     Frags=GetUniqueNMers(Frags,FinalSNs);
     vector<NMerSetType> Ints(N-1);
     vector<vector<SNType>> IntSNs(N-1);
@@ -132,7 +132,7 @@ NMerSetType CrystalFragger::Fragmentize_(const System & mol){
             size_t n=NMerJ->size()-1;
             if(Ints[n].count(*NMerJ)!=1){
                 NMerInfo NewNMer;
-                NewNMer.NMer=System(SC.GetUniverse(),false);
+                NewNMer.NMer=System(SC.get_universe(),false);
                 NewNMer.Weight=0.0;
                 NewNMer.SN=*NMerJ;
                 for(const std::string& Name: *NMerJ){

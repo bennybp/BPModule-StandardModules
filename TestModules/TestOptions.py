@@ -5,15 +5,15 @@ class TestOptions(psr.modulebase.Test_Base):
     super(TestOptions, self).__init__(self, myid)
 
 
-  def RunTest_(self):
+  def run_test_(self):
     psr.output.Output("+++ In TestOptions. This is not meant to be run\n")
 
-  def CallRunTest_(self, s):
+  def call_run_test_(self, s):
     psr.output.Output("+++ In TestOptions. This is not meant to be run\n")
 
   def Throw_(self):
     psr.output.Output("+++ In TestOptions. This is not meant to be run\n")
 
-  def CallThrow_(self, s):
+  def call_throw_(self, s):
     psr.output.Output("+++ In TestOptions. This is not meant to be run\n")
 

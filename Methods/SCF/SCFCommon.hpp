@@ -26,7 +26,7 @@ FormDensity(const pulsar::math::IrrepSpinMatrixD & Cmat, const pulsar::math::Irr
 double CalculateRMSDens(const pulsar::math::IrrepSpinMatrixD & m1,
                         const pulsar::math::IrrepSpinMatrixD & m2);
 
-double CalculateEnergy(const Eigen::MatrixXd & Hcore, double nucrep,
+double Calculateenergy(const Eigen::MatrixXd & Hcore, double nucrep,
                        const pulsar::math::IrrepSpinMatrixD & Dmat,
                        const pulsar::math::IrrepSpinMatrixD & Fmat,
                        pulsar::output::OutputStream & out);

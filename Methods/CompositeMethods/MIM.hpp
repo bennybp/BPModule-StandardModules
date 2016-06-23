@@ -44,7 +44,7 @@ class MIM : public pulsar::modulebase::EnergyMethod {
       using Base_t::EnergyMethod;
       
       ///The method that the base class will actually call
-      DerivReturnType Deriv_(size_t Order, 
+      DerivReturnType deriv_(size_t Order, 
         const pulsar::datastore::Wavefunction& Wfn);
 };
 

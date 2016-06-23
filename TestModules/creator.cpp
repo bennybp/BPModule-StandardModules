@@ -6,11 +6,11 @@ using pulsar::modulemanager::ModuleCreationFuncs;
 
 extern "C" {
 
-ModuleCreationFuncs InsertSupermodule(void)
+ModuleCreationFuncs insert_supermodule(void)
 {
     ModuleCreationFuncs cf;
-    cf.AddCppCreator<TestModule1>("TestModule1");
-    cf.AddCppCreator<TestExtLib>("TestExtLib");
+    cf.add_cpp_creator<TestModule1>("TestModule1");
+    cf.add_cpp_creator<TestExtLib>("TestExtLib");
     return cf;
 }
 

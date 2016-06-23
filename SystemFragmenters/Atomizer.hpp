@@ -12,7 +12,7 @@ class Atomizer : public pulsar::modulebase::SystemFragmenter
 public:
     using SystemFragmenter::SystemFragmenter;
 
-    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
+    virtual NMerSetType fragmentize_(const pulsar::system::System & mol);
 
 };
 

@@ -32,7 +32,7 @@ class Task{
       Task(const Wavefunction& Wfn,EMethodPtr&& Method, size_t TaskNum=0):
          Method_(std::move(Method)),Wfn_(Wfn),TaskNum_(TaskNum){}
       DerivReturnType operator()(size_t Order)const{ 
-        return Method_->Deriv(Order,Wfn_);
+        return Method_->deriv(Order,Wfn_);
       }
 };
 
@@ -111,7 +111,7 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
        const Wavefunction& WfnI=(SameSystem?Wfns[0]:Wfns[i]);
        const std::string& Key=(SameMethod?Keys[0]:Keys[i]);
        Results.push_back(
-        Task(WfnI,std::move(MM.GetModule<EnergyMethod>(Key,ID)))(Deriv)      
+        Task(WfnI,std::move(MM.get_module<EnergyMethod>(Key,ID)))(Deriv)      
        );
    }
    return Results;

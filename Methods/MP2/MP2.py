@@ -6,7 +6,7 @@ class MP2(psr.modulebase.EnergyMethod):
   def __init__(self, myid):
     super(MP2, self).__init__(myid)
 
-  def Deriv_(self,order,wfn):
+  def deriv_(self,order,wfn):
       return CallPsi4(self,"MP2",order,wfn)
            
 

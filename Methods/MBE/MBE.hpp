@@ -29,7 +29,7 @@ class MBE : public pulsar::modulebase::EnergyMethod{
         //Uses constructor of base class
         using Base_t::EnergyMethod;
         ///Returns the \p Order -th derivative of the MBE of system in \p wfn
-        DerivReturnType Deriv_(size_t Order,const Wfn_t& wfn);
+        DerivReturnType deriv_(size_t Order,const Wfn_t& wfn);
 
 };
 

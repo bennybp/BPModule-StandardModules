@@ -11,7 +11,7 @@ class DIIS : public pulsar::modulebase::EnergyMethod
     public:
         DIIS(ID_t id) : pulsar::modulebase::EnergyMethod(id), initialized_(false) { }
         
-        virtual DerivReturnType Deriv_(size_t order, const pulsar::datastore::Wavefunction & wfn);
+        virtual DerivReturnType deriv_(size_t order, const pulsar::datastore::Wavefunction & wfn);
 
 
     private:
@@ -20,7 +20,7 @@ class DIIS : public pulsar::modulebase::EnergyMethod
         std::shared_ptr<const Eigen::MatrixXd> Hcore_;
         std::shared_ptr<const Eigen::MatrixXd> S_;
 
-        void Initialize_(const pulsar::datastore::Wavefunction & wfn);
+        void initialize_(const pulsar::datastore::Wavefunction & wfn);
 
         double CalculateEnergy_(const pulsar::math::IrrepSpinMatrixD & Dmat,
                                 const pulsar::math::IrrepSpinMatrixD & Fmat);

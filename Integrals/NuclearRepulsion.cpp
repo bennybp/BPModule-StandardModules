@@ -10,7 +10,7 @@ using namespace pulsar::system;
 using namespace pulsar::datastore;
 
 
-void NuclearRepulsion::Initialize_(unsigned int deriv, const System & sys)
+void NuclearRepulsion::initialize_(unsigned int deriv, const System & sys)
 {
     if(deriv != 0)
         throw NotYetImplementedException("Not Yet Implemented: Nuclear Dipole with deriv != 0");
@@ -18,7 +18,7 @@ void NuclearRepulsion::Initialize_(unsigned int deriv, const System & sys)
     sys_ = &sys;
 }
 
-uint64_t NuclearRepulsion::Calculate_(double * outbuffer, size_t bufsize)
+uint64_t NuclearRepulsion::calculate_(double * outbuffer, size_t bufsize)
 {
     if(bufsize == 0)
         throw GeneralException("Not enough space in output buffer");
@@ -31,7 +31,7 @@ uint64_t NuclearRepulsion::Calculate_(double * outbuffer, size_t bufsize)
         std::advance(it2, 1);
 
         for(; it2 != sys_->end(); ++it2)
-            enuc += (it1->GetZ() * it2->GetZ()) / it1->Distance(*it2);
+            enuc += (it1->Z * it2->Z) / it1->distance(*it2);
     }
 
     outbuffer[0] = enuc;

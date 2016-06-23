@@ -16,7 +16,7 @@ using namespace pulsar::modulebase;
 namespace pulsarmethods {
 
 
-void BasicFockBuild::Initialize_(unsigned int deriv, const Wavefunction & wfn,
+void BasicFockBuild::initialize_(unsigned int deriv, const Wavefunction & wfn,
                                  const BasisSet & bs)
 {
     if(!wfn.system)
@@ -25,26 +25,26 @@ void BasicFockBuild::Initialize_(unsigned int deriv, const Wavefunction & wfn,
     /////////////////////////
     // Load the ERI to core
     /////////////////////////
-    auto mod_ao_eri = CreateChildFromOption<TwoElectronIntegral>("KEY_AO_ERI");
-    mod_ao_eri->Initialize(0, wfn, bs, bs, bs, bs);
+    auto mod_ao_eri = create_child_from_option<TwoElectronIntegral>("KEY_AO_ERI");
+    mod_ao_eri->initialize(0, wfn, bs, bs, bs, bs);
     eri_ = FillTwoElectronVector(mod_ao_eri, bs);
 
 
     /////////////////////////////////////
     // The one-electron integral cacher
     /////////////////////////////////////
-    auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
+    auto mod_ao_cache = create_child_from_option<OneElectronMatrix>("KEY_ONEEL_MAT");
 
     ////////////////////////////
     // One-electron hamiltonian
     ///////////////////////
-    const std::string ao_build_key = Options().Get<std::string>("KEY_AO_COREBUILD");
-    auto Hcoreimpl = mod_ao_cache->Calculate(ao_build_key, 0, wfn, bs, bs);
+    const std::string ao_build_key = options().get<std::string>("KEY_AO_COREBUILD");
+    auto Hcoreimpl = mod_ao_cache->calculate(ao_build_key, 0, wfn, bs, bs);
     Hcore_ = convert_to_eigen(Hcoreimpl.at(0));  // .at(0) = first (and only) component
 }
 
 
-IrrepSpinMatrixD BasicFockBuild::Calculate_(const Wavefunction & wfn)
+IrrepSpinMatrixD BasicFockBuild::calculate_(const Wavefunction & wfn)
 {
     if(!wfn.opdm)
         throw GeneralException("Missing OPDM");
@@ -56,13 +56,13 @@ IrrepSpinMatrixD BasicFockBuild::Calculate_(const Wavefunction & wfn)
     // the fock matrix we are returning
     IrrepSpinMatrixD Fmat;
 
-    for(auto ir : wfn.opdm->GetIrreps())
+    for(auto ir : wfn.opdm->get_irreps())
     {
-        const auto & spins = wfn.opdm->GetSpins(ir);
+        const auto & spins = wfn.opdm->get_spins(ir);
         if(spins == std::set<int>{0})
         {
             // Restricted
-            std::shared_ptr<const MatrixXd> Dptr = convert_to_eigen(wfn.opdm->Get(ir,0));
+            std::shared_ptr<const MatrixXd> Dptr = convert_to_eigen(wfn.opdm->get(ir,0));
             const auto & D = *Dptr;
 
             MatrixXd F(*Hcore_);
@@ -80,14 +80,14 @@ IrrepSpinMatrixD BasicFockBuild::Calculate_(const Wavefunction & wfn)
             }
 
             auto Fimpl = std::make_shared<EigenMatrixImpl>(std::move(F));
-            Fmat.Take(ir, 0, std::move(Fimpl));
+            Fmat.set(ir, 0, std::move(Fimpl));
         }
         else
         {
             /*
             // unrestricted
-            MappedConstMatrix Dalpha = MapConstSimpleMatrix(wfn.opdm->Get(ir, 1));
-            MappedConstMatrix Dbeta = MapConstSimpleMatrix(wfn.opdm->Get(ir, -1));
+            MappedConstMatrix Dalpha = MapConstSimpleMatrix(wfn.opdm->get(ir, 1));
+            MappedConstMatrix Dbeta = MapConstSimpleMatrix(wfn.opdm->get(ir, -1));
 
             SimpleMatrixD simpleFalpha(Dalpha.rows(), Dalpha.cols());
             SimpleMatrixD simpleFbeta(Dbeta.rows(), Dbeta.cols());
@@ -112,8 +112,8 @@ IrrepSpinMatrixD BasicFockBuild::Calculate_(const Wavefunction & wfn)
                 }
             }
 
-            Fmat.Take(ir, 1, std::move(simpleFalpha));
-            Fmat.Take(ir, -1, std::move(simpleFbeta));
+            Fmat.set(ir, 1, std::move(simpleFalpha));
+            Fmat.set(ir, -1, std::move(simpleFbeta));
             */
         }
     }

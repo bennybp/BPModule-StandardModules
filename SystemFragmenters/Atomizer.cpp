@@ -3,11 +3,11 @@
 using namespace pulsar::system;
 using namespace pulsar::modulebase;
 
-NMerSetType Atomizer::Fragmentize_(const System & mol)
+NMerSetType Atomizer::fragmentize_(const System & mol)
 {
     NMerSetType ret;
     size_t idx = 0;
-    for(const Atom & atom : mol.AsUniverse())
+    for(const Atom & atom : mol)
     {
         std::string idxstr = std::to_string(idx);
         NMerInfo Temp;
@@ -18,6 +18,6 @@ NMerSetType Atomizer::Fragmentize_(const System & mol)
         idx++;
     }
 
-    return MakeNMers(ret);
+    return make_nmers(ret);
 }
 

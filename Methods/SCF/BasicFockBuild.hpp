@@ -15,11 +15,11 @@ class BasicFockBuild : public pulsar::modulebase::FockBuilder
     public:
         BasicFockBuild(ID_t id) :  pulsar::modulebase::FockBuilder(id) { }
         
-        virtual void Initialize_(unsigned int deriv,
+        virtual void initialize_(unsigned int deriv,
                                  const pulsar::datastore::Wavefunction & wfn,
                                  const pulsar::system::BasisSet & bs);
 
-        virtual pulsar::math::IrrepSpinMatrixD Calculate_(const pulsar::datastore::Wavefunction & wfn);
+        virtual pulsar::math::IrrepSpinMatrixD calculate_(const pulsar::datastore::Wavefunction & wfn);
 
 
     private:

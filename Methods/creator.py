@@ -8,13 +8,13 @@ from .CompositeMethods import FPA
 from pulsar.modulemanager import ModuleCreationFuncs
 
 
-def InsertSupermodule():
+def insert_supermodule():
     cf = ModuleCreationFuncs()
-    cf.AddPyCreator("SCF", SCF.SCF)
-    cf.AddPyCreator("MP2",MP2.MP2)
-    cf.AddPyCreator("CCSD(T)",CCSDT.CCSDT)
-    cf.AddPyCreator("CP",CP.CP)
-    cf.AddPyCreator("HelgakerCBS",HelgakerCBS.HelgakerCBS)
-    cf.AddPyCreator("FellerCBS",FellerCBS.FellerCBS)
-    cf.AddPyCreator("FPA",FPA.FPA)
+    cf.add_py_creator("SCF", SCF.SCF)
+    cf.add_py_creator("MP2",MP2.MP2)
+    cf.add_py_creator("CCSD(T)",CCSDT.CCSDT)
+    cf.add_py_creator("CP",CP.CP)
+    cf.add_py_creator("HelgakerCBS",HelgakerCBS.HelgakerCBS)
+    cf.add_py_creator("FellerCBS",FellerCBS.FellerCBS)
+    cf.add_py_creator("FPA",FPA.FPA)
     return cf

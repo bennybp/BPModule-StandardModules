@@ -15,49 +15,49 @@ using namespace pulsar::exception;
 
 namespace pulsarmethods {
 
-void DIIS::Initialize_(const Wavefunction & wfn)
+void DIIS::initialize_(const Wavefunction & wfn)
 {
     // get the basis set
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
+    std::string bstag = options().get<std::string>("BASIS_SET");
 
-    const BasisSet bs = wfn.system->GetBasisSet(bstag);
+    const BasisSet bs = wfn.system->get_basis_set(bstag);
 
     ///////////////////////////////////////////
     // Load the one electron integral matrices
     // (and nuclear repulsion)
     ///////////////////////////////////////////
     // Nuclear repulsion
-    auto mod_nuc_rep = CreateChildFromOption<SystemIntegral>("KEY_NUC_REPULSION");
-    mod_nuc_rep->Initialize(0, *wfn.system);
-    mod_nuc_rep->Calculate(&nucrep_, 1);
+    auto mod_nuc_rep = create_child_from_option<SystemIntegral>("KEY_NUC_REPULSION");
+    mod_nuc_rep->initialize(0, *wfn.system);
+    mod_nuc_rep->calculate(&nucrep_, 1);
 
 
     /////////////////////////////////////
     // The one-electron integral cacher
     /////////////////////////////////////
-    auto mod_ao_cache = CreateChildFromOption<OneElectronMatrix>("KEY_ONEEL_MAT");
+    auto mod_ao_cache = create_child_from_option<OneElectronMatrix>("KEY_ONEEL_MAT");
 
 
     /////////////////////// 
     // Overlap
     /////////////////////// 
-    const std::string ao_overlap_key = Options().Get<std::string>("KEY_AO_OVERLAP");
-    auto overlapimpl = mod_ao_cache->Calculate(ao_overlap_key, 0, wfn, bs, bs);
+    const std::string ao_overlap_key = options().get<std::string>("KEY_AO_OVERLAP");
+    auto overlapimpl = mod_ao_cache->calculate(ao_overlap_key, 0, wfn, bs, bs);
     S_ = convert_to_eigen(overlapimpl.at(0));  // .at(0) = first (and only) component
 
 
     ////////////////////////////
     // One-electron hamiltonian
     ////////////////////////////
-    const std::string ao_build_key = Options().Get<std::string>("KEY_AO_COREBUILD");
-    auto Hcoreimpl = mod_ao_cache->Calculate(ao_build_key, 0, wfn, bs, bs);
+    const std::string ao_build_key = options().get<std::string>("KEY_AO_COREBUILD");
+    auto Hcoreimpl = mod_ao_cache->calculate(ao_build_key, 0, wfn, bs, bs);
     Hcore_ = convert_to_eigen(Hcoreimpl.at(0));  // .at(0) = first (and only) component
 
-    bs.Print(out);
+    bs.print(out);
 }
 
 
-DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
+DIIS::DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
 {
     if(order != 0)
         throw NotYetImplementedException("Test with deriv != 0");
@@ -65,10 +65,10 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
     if(!wfn.system)
         throw GeneralException("System is not set!");
 
-    Initialize_(wfn); // will only use the system from the wfn
+    initialize_(wfn); // will only use the system from the wfn
 
-    std::string bstag = Options().Get<std::string>("BASIS_SET");
-    const BasisSet bs = wfn.system->GetBasisSet(bstag);
+    std::string bstag = options().get<std::string>("BASIS_SET");
+    const BasisSet bs = wfn.system->get_basis_set(bstag);
   
     //////////////////////////////////////////////////////
     // Storage of eigen matrices, etc, by irrep and spin 
@@ -82,21 +82,21 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
     //////////////////////////
     if(!wfn.cmat) // c-matrix hasn't been set in the passed wfn
     {
-        out.Debug("Don't have C-matrices set. Will call initial guess module\n");
+        out.debug("Don't have C-matrices set. Will call initial guess module\n");
 
-        if(!Options().Has("KEY_INITIAL_GUESS"))
+        if(!options().has("KEY_INITIAL_GUESS"))
             throw GeneralException("Missing initial guess module when I don't have a C-matrix");
 
         // load and run the initial guess module
-        auto mod_iguess = CreateChildFromOption<EnergyMethod>("KEY_INITIAL_GUESS");
-        auto iguess_ret = mod_iguess->Energy(wfn);
+        auto mod_iguess = create_child_from_option<EnergyMethod>("KEY_INITIAL_GUESS");
+        auto iguess_ret = mod_iguess->energy(wfn);
 
         initial_wfn = iguess_ret.first;
         initial_energy = iguess_ret.second;
     }
     else
     {
-        out.Debug("Using given wavefunction as a starting point");
+        out.debug("Using given wavefunction as a starting point");
  
         // c-matrices have been set. Make sure we have occupations, etc, as well
         if(!wfn.occupations)
@@ -111,19 +111,19 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
     ///////////////////////////////
     // Obtain the options for SCF
     ///////////////////////////////
-    double etol = Options().Get<double>("E_TOLERANCE");
-    size_t maxniter = Options().Get<size_t>("MAX_ITER");
-    double dtol = Options().Get<double>("DENS_TOLERANCE");
-    //double damp = Options().Get<double>("DAMPING_FACTOR");
+    double etol = options().get<double>("E_TOLERANCE");
+    size_t maxniter = options().get<size_t>("MAX_ITER");
+    double dtol = options().get<double>("DENS_TOLERANCE");
+    //double damp = options().get<double>("DAMPING_FACTOR");
 
 
     //////////////////////////////////////////////////////////////////
     // Actual SCF Procedure
     //////////////////////////////////////////////////////////////////
     // Load and set up the iterator  and fockbuild modules
-    auto mod_iter = CreateChildFromOption<SCFIterator>("KEY_SCF_ITERATOR");
-    auto mod_fock = CreateChildFromOption<FockBuilder>("KEY_FOCK_BUILDER");
-    mod_fock->Initialize(order, wfn, bs); 
+    auto mod_iter = create_child_from_option<SCFIterator>("KEY_SCF_ITERATOR");
+    auto mod_fock = create_child_from_option<FockBuilder>("KEY_FOCK_BUILDER");
+    mod_fock->initialize(order, wfn, bs); 
 
 
     // Storing the results of the previous iterations
@@ -152,7 +152,7 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
         iter++; 
 
         // The Fock matrix
-        IrrepSpinMatrixD Fmat = mod_fock->Calculate(lastwfn);
+        IrrepSpinMatrixD Fmat = mod_fock->calculate(lastwfn);
 
         // pop the last one if we are beyond our limit
         if(errqueue.size() > 5)
@@ -166,15 +166,15 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
         BlockedEigenMatrix it_f;
 
         // calculate the error matrix
-        for(auto ir : Fmat.GetIrreps())
-        for(auto s : Fmat.GetSpins(ir))
+        for(auto ir : Fmat.get_irreps())
+        for(auto s : Fmat.get_spins(ir))
         {
-            const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
-            const MatrixXd & d = *(convert_to_eigen(lastwfn.opdm->Get(ir, s)));
+            const MatrixXd & f = *(convert_to_eigen(Fmat.get(ir, s)));
+            const MatrixXd & d = *(convert_to_eigen(lastwfn.opdm->get(ir, s)));
 
             MatrixXd e = f*d*S - S*d*f;
-            it_err.Take(ir, s, std::move(e));
-            it_f.Set(ir, s, f);
+            it_err.set(ir, s, std::move(e));
+            it_f.set(ir, s, f);
         }
 
         // add to the queues
@@ -188,8 +188,8 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
         {
             const auto & first = errqueue.front();
 
-            for(auto ir : first.GetIrreps())
-            for(auto s : first.GetSpins(ir))
+            for(auto ir : first.get_irreps())
+            for(auto s : first.get_spins(ir))
             {
                 Eigen::MatrixXd b(nvec+1, nvec+1);
 
@@ -199,7 +199,7 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
                     size_t j = 0;
                     for(const auto & it2 : errqueue)
                     {
-                        b(i,j) = (it1.Get(ir, s).cwiseProduct(it2.Get(ir,s))).sum();
+                        b(i,j) = (it1.get(ir, s).cwiseProduct(it2.get(ir,s))).sum();
                         j++;
                     }
 
@@ -222,19 +222,19 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
 
                 // form the new F matrix, and place it where we
                 // got the original
-                const size_t nrow = Fmat.Get(ir, s)->size(0);
-                const size_t ncol = Fmat.Get(ir, s)->size(1);
+                const size_t nrow = Fmat.get(ir, s)->size(0);
+                const size_t ncol = Fmat.get(ir, s)->size(1);
                 MatrixXd f = MatrixXd::Zero(nrow, ncol);
                 i = 0;
 
                 for(const auto & it : Fqueue)
                 {
-                    const MatrixXd & itf = it.Get(ir, s);
+                    const MatrixXd & itf = it.get(ir, s);
                     f += c(i) * itf;
                     i++;
                 }
 
-                Fmat.Take(ir, s, std::make_shared<EigenMatrixImpl>(std::move(f)));
+                Fmat.set(ir, s, std::make_shared<EigenMatrixImpl>(std::move(f)));
             }
         }
         //else if(nvec == 1)
@@ -247,17 +247,17 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
 
 
         // Iterate, making a new wavefunction
-        Wavefunction newwfn = mod_iter->Next(lastwfn, Fmat);
+        Wavefunction newwfn = mod_iter->next(lastwfn, Fmat);
 
 
         /*
         out << "Occupations:\n";
         const auto & occ = *newwfn.occupations;
-        for(auto ir : occ.GetIrreps())
+        for(auto ir : occ.get_irreps())
         {
-            for(auto s : occ.GetSpins(ir))
+            for(auto s : occ.get_spins(ir))
             {
-                const auto & o = occ.Get(ir, s);
+                const auto & o = occ.get(ir, s);
                 out << "   Spin " << s << ":";
                 for(size_t q = 0; q < o.Size(); q++)
                     out << " " << o(q);
@@ -272,7 +272,7 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
             throw GeneralException("Returned wfn doesn't have opdm");
 
         const IrrepSpinMatrixD dens = *newwfn.opdm;
-        current_energy = CalculateEnergy(*Hcore_, nucrep_, dens, Fmat, out);
+        current_energy = Calculateenergy(*Hcore_, nucrep_, dens, Fmat, out);
 
         // store the energy for next time
         energy_diff = current_energy - last_energy;
@@ -290,7 +290,7 @@ DIIS::DerivReturnType DIIS::Deriv_(size_t order, const Wavefunction & wfn)
 
 
 
-        out.Output("%5?  %16.8e  %16.8e  %16.8e\n",
+        out.output("%5?  %16.8e  %16.8e  %16.8e\n",
                     iter, current_energy, energy_diff, dens_diff);
 
     } while(fabs(energy_diff) > etol ||

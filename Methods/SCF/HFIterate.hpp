@@ -14,13 +14,13 @@ class HFIterate : public pulsar::modulebase::SCFIterator
         HFIterate(ID_t id) :  pulsar::modulebase::SCFIterator(id), initialized_(false) { }
         
         virtual pulsar::datastore::Wavefunction
-        Next_(const pulsar::datastore::Wavefunction & wfn, const pulsar::math::IrrepSpinMatrixD & fmat);
+        next_(const pulsar::datastore::Wavefunction & wfn, const pulsar::math::IrrepSpinMatrixD & fmat);
 
     private:
         bool initialized_;
         Eigen::MatrixXd S12_;
 
-        void Initialize_(const pulsar::datastore::Wavefunction & wfn);
+        void initialize_(const pulsar::datastore::Wavefunction & wfn);
 };
 
 }

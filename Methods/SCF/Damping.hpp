@@ -11,7 +11,7 @@ class Damping : public pulsar::modulebase::EnergyMethod
     public:
         Damping(ID_t id) : pulsar::modulebase::EnergyMethod(id), initialized_(false) { }
         
-        virtual DerivReturnType Deriv_(size_t order, const pulsar::datastore::Wavefunction & wfn);
+        virtual DerivReturnType deriv_(size_t order, const pulsar::datastore::Wavefunction & wfn);
 
 
     private:
@@ -19,7 +19,7 @@ class Damping : public pulsar::modulebase::EnergyMethod
         double nucrep_;
         std::shared_ptr<const Eigen::MatrixXd> Hcore_;
 
-        void Initialize_(const pulsar::datastore::Wavefunction & wfn);
+        void initialize_(const pulsar::datastore::Wavefunction & wfn);
 };
 
 }

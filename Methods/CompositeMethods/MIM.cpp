@@ -32,7 +32,7 @@ void PrintGradTable(const vector<string>& Rows,const DerivMap& Derivs,
 
 
 
-pulsar::modulebase::DerivReturnType MIM::Deriv_(size_t Order,const pulsar::datastore::Wavefunction& Wfn){
+pulsar::modulebase::DerivReturnType MIM::deriv_(size_t Order,const pulsar::datastore::Wavefunction& Wfn){
    /*//Get the system and compute the number of degrees of freedom for the result
    const System& Mol=*Wfn.system;
    size_t DoF=1;
@@ -40,14 +40,13 @@ pulsar::modulebase::DerivReturnType MIM::Deriv_(size_t Order,const pulsar::datas
     
    //Establish an atom order
    AtomMap_t AtomMap=MapAtoms(Mol);
-   vector<string> MethodNames=Options().Get<vector<string>>("METHODS");
-   vector<double> Coeffs=Options().Get<vector<double>>("WEIGHTS");
+   vector<string> MethodNames=options().get<vector<string>>("METHODS");
+   vector<double> Coeffs=options().get<vector<double>>("WEIGHTS");
    
    //Get the subsystems
-   Fragmenter_t Fragger=CreateChildFromOption<SystemFragmenter>("FRAGMENTIZER");
-   NMerSetType Systems=Fragger->Fragmentize(Mol);   
+   Fragmenter_t Fragger=create_child_from_option<SystemFragmenter>("FRAGMENTIZER");
+   NMerSetType Systems=Fragger->fragmentize(Mol);   
    
-   /*
    //Loop two, gettin results
    DerivMap Derivs; //Will be the derivatives per system
    Return_t TotalDeriv;
@@ -63,7 +62,7 @@ pulsar::modulebase::DerivReturnType MIM::Deriv_(size_t Order,const pulsar::datas
       ss<<"["<<MethodNames[SameMethod?0:TaskI]<<"]";
       Derivs[ss.str()]=Results[TaskI];
       RowTitles[TaskI]=ss.str();
-      FillDeriv(TotalDeriv.second,Results[TaskI].second,
+      Fillderiv(TotalDeriv.second,Results[TaskI].second,
                 SysI->second.Weight*Coeffs[TaskI],SubSys,
                 AtomMap,MapAtoms(SubSys),Order);
       if(!SameSystem)++SysI;

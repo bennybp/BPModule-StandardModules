@@ -21,9 +21,9 @@ std::vector<double>
 FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
                       const BasisSet & bs)
 {
-    const size_t nao = bs.NFunctions();
-    const size_t nshell = bs.NShell();
-    const size_t maxnfunc = bs.MaxNFunctions();
+    const size_t nao = bs.n_functions();
+    const size_t nshell = bs.n_shell();
+    const size_t maxnfunc = bs.max_n_functions();
 
     const size_t nao12 = (nao*(nao+1))/2;
     const size_t nao1234 = (nao12*(nao12+1))/2;
@@ -35,17 +35,17 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
     size_t i_start = 0;
     for(size_t i = 0; i < nshell; i++)
     {
-        const auto & sh1 = bs.Shell(i);
+        const auto & sh1 = bs.shell(i);
         size_t j_start = 0;
 
         for(size_t j = 0; j <= i; j++)
         {
-            const auto & sh2 = bs.Shell(j);
+            const auto & sh2 = bs.shell(j);
             size_t k_start = 0;
 
             for(size_t k = 0; k < nshell; k++)
             {
-                const auto & sh3 = bs.Shell(k);
+                const auto & sh3 = bs.shell(k);
                 size_t l_start = 0;
 
                 for(size_t l = 0; l <= k; l++)
@@ -53,33 +53,33 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
                     if(INDEX2(k,l) > INDEX2(i,j))
                         continue;
 
-                    const auto & sh4 = bs.Shell(l);
+                    const auto & sh4 = bs.shell(l);
 
-                    uint64_t ncalc = mod->Calculate(i, j, k, l, eribuf.data(), bufsize); 
+                    uint64_t ncalc = mod->calculate(i, j, k, l, eribuf.data(), bufsize); 
 
                     AOIterator<4> aoit({sh1, sh2, sh3, sh4}, false);
 
                     // make sure the right number of integrals was returned
-                    if(ncalc != aoit.NFunctions())
+                    if(ncalc != aoit.n_functions())
                         throw GeneralException("Bad number of integrals returned",
-                                               "ncalc", ncalc, "expected", aoit.NFunctions());
+                                               "ncalc", ncalc, "expected", aoit.n_functions());
 
                     do { 
-                        const size_t full_i = i_start+aoit.ShellFunctionIdx<0>();
-                        const size_t full_j = j_start+aoit.ShellFunctionIdx<1>();
-                        const size_t full_k = k_start+aoit.ShellFunctionIdx<2>();
-                        const size_t full_l = l_start+aoit.ShellFunctionIdx<3>();
+                        const size_t full_i = i_start+aoit.shell_function_idx<0>();
+                        const size_t full_j = j_start+aoit.shell_function_idx<1>();
+                        const size_t full_k = k_start+aoit.shell_function_idx<2>();
+                        const size_t full_l = l_start+aoit.shell_function_idx<3>();
 
-                        eri.at(INDEX4(full_i, full_j, full_k, full_l)) = eribuf.at(aoit.TotalIdx());
-                    } while(aoit.Next());
+                        eri.at(INDEX4(full_i, full_j, full_k, full_l)) = eribuf.at(aoit.total_idx());
+                    } while(aoit.next());
 
-                    l_start += sh4.NFunctions();   
+                    l_start += sh4.n_functions();   
                 }
-                k_start += sh3.NFunctions();
+                k_start += sh3.n_functions();
             }
-            j_start += sh2.NFunctions();
+            j_start += sh2.n_functions();
         }
-        i_start += sh1.NFunctions();
+        i_start += sh1.n_functions();
     }
 
     return std::move(eri);
@@ -96,7 +96,7 @@ IrrepSpinVectorD FindOccupations(size_t nelec)
         VectorXd docc(ndocc);
         for(size_t i = 0; i < ndocc; i++)
             docc(i) = 2.0;
-        occ.Take(Irrep::A, 0, std::make_shared<EigenVectorImpl>(std::move(docc)));
+        occ.set(Irrep::A, 0, std::make_shared<EigenVectorImpl>(std::move(docc)));
     }
     else
     {
@@ -107,8 +107,8 @@ IrrepSpinVectorD FindOccupations(size_t nelec)
         for(size_t i = 0; i < nalphaocc; i++) alphaocc(i) = 1.0;
         for(size_t i = 0; i < nbetaocc; i++) betaocc(i) = 1.0;
 
-        occ.Take(Irrep::A,  1, std::make_shared<EigenVectorImpl>(std::move(alphaocc)));
-        occ.Take(Irrep::A, -1, std::make_shared<EigenVectorImpl>(std::move(betaocc)));
+        occ.set(Irrep::A,  1, std::make_shared<EigenVectorImpl>(std::move(alphaocc)));
+        occ.set(Irrep::A, -1, std::make_shared<EigenVectorImpl>(std::move(betaocc)));
     }
 
     return occ;
@@ -120,11 +120,11 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
 {
     IrrepSpinMatrixD Dmat;
 
-    for(auto ir : Cmat.GetIrreps())
-    for(auto s : Cmat.GetSpins(ir))
+    for(auto ir : Cmat.get_irreps())
+    for(auto s : Cmat.get_spins(ir))
     {
-        const MatrixXd & c = *(convert_to_eigen(Cmat.Get(ir, s)));
-        const VectorXd & o = *(convert_to_eigen(occ.Get(ir, s)));
+        const MatrixXd & c = *(convert_to_eigen(Cmat.get(ir, s)));
+        const VectorXd & o = *(convert_to_eigen(occ.get(ir, s)));
 
         MatrixXd d(c.rows(), c.cols());
 
@@ -137,7 +137,7 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
         }
 
         auto dimpl = std::make_shared<EigenMatrixImpl>(std::move(d));
-        Dmat.Take(ir, s, std::move(dimpl));
+        Dmat.set(ir, s, std::move(dimpl));
     }
 
     return Dmat;
@@ -146,17 +146,17 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
 
 double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2)
 {
-    if(!m1.SameStructure(m2))
+    if(!m1.same_structure(m2))
         throw GeneralException("Density matrices have different structure");
 
     double rms = 0.0;
 
-    for(Irrep ir : m1.GetIrreps())
-    for(int spin : m1.GetSpins(ir))
+    for(Irrep ir : m1.get_irreps())
+    for(int spin : m1.get_spins(ir))
     {
 
-        const MatrixXd & mat1 = *(convert_to_eigen(m1.Get(ir, spin)));
-        const MatrixXd & mat2 = *(convert_to_eigen(m1.Get(ir, spin)));
+        const MatrixXd & mat1 = *(convert_to_eigen(m1.get(ir, spin)));
+        const MatrixXd & mat2 = *(convert_to_eigen(m1.get(ir, spin)));
 
         if(mat1.rows() != mat2.rows())
             throw GeneralException("Density matrices have different number of rows");
@@ -175,7 +175,7 @@ double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2
 }
 
 
-double CalculateEnergy(const MatrixXd & Hcore, double nucrep,
+double Calculateenergy(const MatrixXd & Hcore, double nucrep,
                        const IrrepSpinMatrixD & Dmat,
                        const IrrepSpinMatrixD & Fmat,
                        OutputStream & out)
@@ -184,11 +184,11 @@ double CalculateEnergy(const MatrixXd & Hcore, double nucrep,
     double oneelectron = 0.0;
     double twoelectron = 0.0;
 
-    for(auto ir : Dmat.GetIrreps())
-    for(auto s : Dmat.GetSpins(ir))
+    for(auto ir : Dmat.get_irreps())
+    for(auto s : Dmat.get_spins(ir))
     {
-        const MatrixXd & d = *(convert_to_eigen(Dmat.Get(ir, s)));
-        const MatrixXd & f = *(convert_to_eigen(Fmat.Get(ir, s)));
+        const MatrixXd & d = *(convert_to_eigen(Dmat.get(ir, s)));
+        const MatrixXd & f = *(convert_to_eigen(Fmat.get(ir, s)));
 
         for(long i = 0; i < d.rows(); i++)
         for(long j = 0; j < d.cols(); j++)
@@ -201,13 +201,13 @@ double CalculateEnergy(const MatrixXd & Hcore, double nucrep,
     twoelectron -= 0.5*oneelectron;
     energy = oneelectron + twoelectron;
 
-    out.Output("            One electron: %16.8e\n", oneelectron);
-    out.Output("            Two electron: %16.8e\n", twoelectron);
-    out.Output("        Total Electronic: %16.8e\n", energy);
-    out.Output("       Nuclear Repulsion: %16.8e\n", nucrep);
+    out.output("            One electron: %16.8e\n", oneelectron);
+    out.output("            Two electron: %16.8e\n", twoelectron);
+    out.output("        Total Electronic: %16.8e\n", energy);
+    out.output("       Nuclear Repulsion: %16.8e\n", nucrep);
 
     energy += nucrep;
-    out.Output("            Total energy: %16.8e\n", energy);
+    out.output("            Total energy: %16.8e\n", energy);
 
     return energy;
 }

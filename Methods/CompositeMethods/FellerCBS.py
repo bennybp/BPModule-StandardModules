@@ -79,18 +79,18 @@ E_X-\frac{E^2_N}{E_D}.
   def __init__(self, myid):
     super(FellerCBS, self).__init__(myid)
 
-  def Deriv_(self,order,wfn):
+  def deriv_(self,order,wfn):
       #Get derivatives of numerator, denominator, and smallest basis set
       Derivs[{},{},{}]
       Cs=[[1.0],[1.0,-1.0],[1.0,-2.0,1.0]]
       #Do Denom first as num calcs are subset
       for i in range(2,-1):
-         MIM=self.GetSubModule(self.Options().Get("MIM_KEY"))
-         MIM.Options().Change("WEIGHTS",Cs[i])
-         MIM.Options().Change("METHODS",[Options.Get("METHOD")])       
-         Deriv[i][order]=MIM.Deriv(order)
+         MIM=self.GetSubModule(self.options().get("MIM_KEY"))
+         MIM.options().change("WEIGHTS",Cs[i])
+         MIM.options().change("METHODS",[Options.get("METHOD")])       
+         Deriv[i][order]=MIM.deriv(order)
          for j in range(0,order-1):
-            Deriv[j][order]=MIM.Deriv(j)
+            Deriv[j][order]=MIM.deriv(j)
       Epsilon=Deriv[1][0][0]**2/Deriv[2][0][0]
       if order==0 :
          return [Deriv[0][0][0]-Epsilon]

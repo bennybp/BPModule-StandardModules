@@ -7,7 +7,7 @@
 #include "SystemFragmenters/Null.hpp"
 using namespace pulsar::modulebase;
 
-NMerSetType NullFragmenter::Fragmentize_(const pulsar::system::System & mol){
+NMerSetType NullFragmenter::fragmentize_(const pulsar::system::System & mol){
     NMerInfo NMer;
     NMer.SN.insert("SYSTEM");
     NMer.NMer=mol;

@@ -13,51 +13,51 @@ using namespace bphash;
 
 
 OneElectron_Eigen::ReturnType
-OneElectron_Eigen::Calculate_(const std::string & key,
+OneElectron_Eigen::calculate_(const std::string & key,
                               unsigned int deriv,
                               const Wavefunction & wfn,
                               const BasisSet & bs1,
                               const BasisSet & bs2)
 {
-    const bool usecache = Options().Get<bool>("CACHE_RESULTS");
+    const bool usecache = options().get<bool>("CACHE_RESULTS");
 
     std::string hashstr;
 
     if(usecache)
     {
         // Need the name and version of a module for the cache lookup
-        auto minfo = MManager().ModuleKeyInfo(key);
+        auto minfo = module_manager().module_key_info(key);
 
         // Create a hash for the lookup
-        auto hash = MakeHash(HashType::Hash128,
+        auto hash = make_hash(HashType::Hash128,
                              minfo.name,
                              minfo.version,
                              deriv, wfn, bs1, bs2);
 
         hashstr = hash_to_string(hash);
-        out.Debug("Going to lookup one-electron integrals with hash %?\n", hashstr);
+        out.debug("Going to lookup one-electron integrals with hash %?\n", hashstr);
 
-        if(Cache().Count(hashstr))
+        if(cache().count(hashstr))
         {
-            out.Debug("Integrals were found in the cache. Returning\n");
-            return Cache().Get<ReturnType>(hashstr);
+            out.debug("Integrals were found in the cache. Returning\n");
+            return cache().get<ReturnType>(hashstr);
         }
     }
 
 
-    out.Debug("Integrals not found or cache is not being used. Calculating\n");
+    out.debug("Integrals not found or cache is not being used. Calculating\n");
 
-    const size_t nshell1 = bs1.NShell();
-    const size_t nshell2 = bs2.NShell();
-    const size_t nfunc1 = bs1.NFunctions();
-    const size_t nfunc2 = bs2.NFunctions();
+    const size_t nshell1 = bs1.n_shell();
+    const size_t nshell2 = bs2.n_shell();
+    const size_t nfunc1 = bs1.n_functions();
+    const size_t nfunc2 = bs2.n_functions();
 
     // actually create the module
-    auto mod = CreateChild<OneElectronIntegral>(key);
-    mod->Initialize(deriv, wfn, bs1, bs2);
-    const unsigned int ncomp = mod->NComponents(); 
+    auto mod = create_child<OneElectronIntegral>(key);
+    mod->initialize(deriv, wfn, bs1, bs2);
+    const unsigned int ncomp = mod->n_components(); 
 
-    const size_t bufsize = ncomp * bs1.MaxNFunctions() * bs2.MaxNFunctions();
+    const size_t bufsize = ncomp * bs1.max_n_functions() * bs2.max_n_functions();
     std::unique_ptr<double []> buffer(new double[bufsize]);
 
     // vector of ncomp elements, each created with the proper size
@@ -65,33 +65,33 @@ OneElectron_Eigen::Calculate_(const std::string & key,
 
     for(size_t n1 = 0; n1 < nshell1; n1++)
     {
-        const auto & sh1 = bs1.Shell(n1);
-        const size_t rowstart = bs1.ShellStart(n1);
+        const auto & sh1 = bs1.shell(n1);
+        const size_t rowstart = bs1.shell_start(n1);
 
         for(size_t n2 = 0; n2 < nshell2; n2++)
         {
-            const auto & sh2  = bs2.Shell(n2);
-            const size_t colstart = bs2.ShellStart(n2);
+            const auto & sh2  = bs2.shell(n2);
+            const size_t colstart = bs2.shell_start(n2);
 
             // calculate
-            size_t ncalc = mod->Calculate(n1, n2, buffer.get(), bufsize);
+            size_t ncalc = mod->calculate(n1, n2, buffer.get(), bufsize);
 
             // iterate and fill in the matrix
             AOIterator<2> aoit({sh1, sh2}, false);
 
             // make sure the right number of integrals was returned
-            if(ncalc != aoit.NFunctions() * ncomp)
+            if(ncalc != aoit.n_functions() * ncomp)
                 throw GeneralException("Bad number of integrals returned",
-                                       "ncalc", ncalc, "expected", ncomp * aoit.NFunctions());
+                                       "ncalc", ncalc, "expected", ncomp * aoit.n_functions());
 
             do {
-                const size_t i = rowstart+aoit.ShellFunctionIdx<0>();
-                const size_t j = colstart+aoit.ShellFunctionIdx<1>();
+                const size_t i = rowstart+aoit.shell_function_idx<0>();
+                const size_t j = colstart+aoit.shell_function_idx<1>();
 
                 for(unsigned int c = 0; c < ncomp; c++)
-                    mats[c](i,j) = buffer[aoit.TotalIdx()];
+                    mats[c](i,j) = buffer[aoit.total_idx()];
 
-            } while(aoit.Next());
+            } while(aoit.next());
         }
     }
 
@@ -104,7 +104,7 @@ OneElectron_Eigen::Calculate_(const std::string & key,
 
     // Put in cache
     if(usecache)
-        Cache().Set(hashstr, ret); // note - ret is a vector of shared_ptr, so this is ok
+        cache().set(hashstr, ret); // note - ret is a vector of shared_ptr, so this is ok
  
     return ret;
 }

@@ -21,70 +21,70 @@ TestModule1::~TestModule1()
 
 
 
-void TestModule1::RunTest_(void)
+void TestModule1::run_test_(void)
 {
-    out.Output("+++ In TestModule1: RunTest. Info: (%?) %? %? v%?\n", ID(), Key(), Name(), Version());
+    out.output("+++ In TestModule1: run_test. Info: (%?) %? %? v%?\n", id(), key(), name(), version());
 
-    out.Output("   Cache entries: %?\n", Cache().Size());
-    for(const auto & it : Cache().GetKeys())
-        out.Output("                  > %?\n", it);
+    out.output("   Cache entries: %?\n", cache().size());
+    for(const auto & it : cache().get_keys())
+        out.output("                  > %?\n", it);
 
-    out.Output("   double_opt_def:    %?\n", Options().Get<double>("double_opt_def"));
-    out.Output("      int_opt_def:    %?\n", Options().Get<int>("int_opt_def"));
-    out.Output("     bool_opt_def:    %?\n", Options().Get<bool>("bool_opt_def"));
-    out.Output("      str_opt_def:    %?\n", Options().Get<std::string>("str_opt_def"));
-    out.Output("\n");
+    out.output("   double_opt_def:    %?\n", options().get<double>("double_opt_def"));
+    out.output("      int_opt_def:    %?\n", options().get<int>("int_opt_def"));
+    out.output("     bool_opt_def:    %?\n", options().get<bool>("bool_opt_def"));
+    out.output("      str_opt_def:    %?\n", options().get<std::string>("str_opt_def"));
+    out.output("\n");
 
-    if(Options().Has("double_opt"))
-        out.Output("       double_opt:    %?\n", Options().Get<double>("double_opt"));
+    if(options().has("double_opt"))
+        out.output("       double_opt:    %?\n", options().get<double>("double_opt"));
 
-    if(Options().Has("int_opt"))
-        out.Output("          int_opt:    %?\n", Options().Get<int>("int_opt"));
+    if(options().has("int_opt"))
+        out.output("          int_opt:    %?\n", options().get<int>("int_opt"));
 
-    if(Options().Has("bool_opt"))
-        out.Output("         bool_opt:    %?\n", Options().Get<bool>("bool_opt"));
+    if(options().has("bool_opt"))
+        out.output("         bool_opt:    %?\n", options().get<bool>("bool_opt"));
 
-    if(Options().Has("str_opt"))
-        out.Output("          str_opt:    %?\n", Options().Get<std::string>("str_opt"));
+    if(options().has("str_opt"))
+        out.output("          str_opt:    %?\n", options().get<std::string>("str_opt"));
 
-    Cache().Set( "Element 1", std::string("Something in the python cache") );
-    Cache().Set( "Element 2", 42);
-    Cache().Set( "Element 3", 42.0 );
-    Cache().Set( "Element 4", std::vector<int>{ 1, 2, 3, 4} );
+    cache().set( "Element 1", std::string("Something in the python cache") );
+    cache().set( "Element 2", 42);
+    cache().set( "Element 3", 42.0 );
+    cache().set( "Element 4", std::vector<int>{ 1, 2, 3, 4} );
 }
 
 
 
-void TestModule1::CallRunTest_(const std::string & other)
+void TestModule1::call_run_test_(const std::string & other)
 {
-    out.Output("+++ In TestModule1: CallRunTest with %?\n", other);
+    out.output("+++ In TestModule1: call_run_test with %?\n", other);
 
-    ModulePtr<Test_Base> tb2 = CreateChild<Test_Base>(other);
-    out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
-    tb2->RunTest();
-    out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
+    ModulePtr<Test_Base> tb2 = create_child<Test_Base>(other);
+    out.output("  + Obtained scoped module ID %?\n", tb2->id());
+    tb2->run_test();
+    out.output("  + Finished with scoped module %?. Deleting automatically\n", tb2->id());
 
-    out.Output("+++Done\n");
+    out.output("+++Done\n");
 }
 
 
-void TestModule1::CallRunTest2_(const std::string & other1, const std::string & other2)
+void TestModule1::call_run_test2_(const std::string & other1, const std::string & other2)
 {
-    out.Output("+++ In TestModule1: CallRunTest with %? %?\n", other1, other2);
+    out.output("+++ In TestModule1: call_run_test with %? %?\n", other1, other2);
 
-    ModulePtr<Test_Base> tb2 = CreateChild<Test_Base>(other1);
-    out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
-    tb2->CallRunTest(other2);
-    out.Output("  + Finished with scoped module %?. Deleting automatically\n", tb2->ID());
+    ModulePtr<Test_Base> tb2 = create_child<Test_Base>(other1);
+    out.output("  + Obtained scoped module ID %?\n", tb2->id());
+    tb2->call_run_test(other2);
+    out.output("  + Finished with scoped module %?. Deleting automatically\n", tb2->id());
 
-    out.Output("+++Done\n");
+    out.output("+++Done\n");
 }
 
 
 
-void TestModule1::TestThrow_(void)
+void TestModule1::test_throw_(void)
 {
-    out.Warning("+++ In TestModule1: Throwing an exception!\n");
+    out.warning("+++ In TestModule1: Throwing an exception!\n");
     throw GeneralException("This is a test exception",
                            "Data1", "Hi",
                            "Data 2", "Hello");
@@ -92,15 +92,15 @@ void TestModule1::TestThrow_(void)
 
 
 
-void TestModule1::CallThrow_(const std::string & other)
+void TestModule1::call_throw_(const std::string & other)
 {
-    out.Output("+++ In TestModule1: CallThrowTest with %?\n", other);
+    out.output("+++ In TestModule1: call_throwTest with %?\n", other);
 
-    ModulePtr<Test_Base> tb2 = CreateChild<Test_Base>(other);
-    out.Output("  + Obtained scoped module ID %?\n", tb2->ID());
-    tb2->TestThrow();
+    ModulePtr<Test_Base> tb2 = create_child<Test_Base>(other);
+    out.output("  + Obtained scoped module ID %?\n", tb2->id());
+    tb2->test_throw();
 
     // shouldn't be called
-    out.Output("+++Done\n");
+    out.output("+++Done\n");
 }
 

@@ -20,7 +20,7 @@
 /** \brief Breaks a system apart into groups of atoms that are seperated by at
  *         most a pre-defined number of bonds
  * 
- *   This fragmenter first calls pulsar::system::GetConns() so I suggest 
+ *   This fragmenter first calls pulsar::system::get_connectivity() so I suggest 
  *   modifying the covalent radii of the atoms you want to be bonded/not bonded
  *   to accomplish this. For example, say the user wants two atoms to be bonded.
  *   If you compute
@@ -37,7 +37,7 @@ class Bondizer : public pulsar::modulebase::SystemFragmenter
 public:
     using pulsar::modulebase::SystemFragmenter::SystemFragmenter;
 
-    virtual NMerSetType Fragmentize_(const pulsar::system::System & mol);
+    virtual NMerSetType fragmentize_(const pulsar::system::System & mol);
 
 };
 

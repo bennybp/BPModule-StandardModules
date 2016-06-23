@@ -22,21 +22,21 @@ static void CallAndBuild(ModulePtr<OneElectronIntegral> & mod,
                          uint64_t shell1, uint64_t shell2,
                          double * outbuffer, size_t bufsize)
 {
-    uint64_t n = mod->Calculate(shell1, shell2,
+    uint64_t n = mod->calculate(shell1, shell2,
                                 tmpbuf, bufsize);
 
 
     if(n != nexpected)
         throw GeneralException("Error - inconsistent number of values returned by OneElectronIntegrals",
                                "n", n, "nexpected", nexpected,
-                               "modulekey", mod->Key(), "modulename", mod->Name());
+                               "modulekey", mod->key(), "modulename", mod->name());
 
     for(size_t i = 0; i < n; i++)
         outbuffer[i] += tmpbuf[i];
 }
 
 
-uint64_t CoreBuild::Calculate_(uint64_t shell1, uint64_t shell2,
+uint64_t CoreBuild::calculate_(uint64_t shell1, uint64_t shell2,
                                double * outbuffer, size_t bufsize)
 {
     if(modules_.size() == 0)
@@ -45,7 +45,7 @@ uint64_t CoreBuild::Calculate_(uint64_t shell1, uint64_t shell2,
     auto it = modules_.begin();
 
     // put the first directly in the output buffer
-    uint64_t n_initial = it->second->Calculate(shell1, shell2,
+    uint64_t n_initial = it->second->calculate(shell1, shell2,
                                                outbuffer, bufsize);
 
     // now allocate the buffer and loop over the rest
@@ -66,16 +66,16 @@ uint64_t CoreBuild::Calculate_(uint64_t shell1, uint64_t shell2,
 
 
 
-void CoreBuild::Initialize_(unsigned int deriv,
+void CoreBuild::initialize_(unsigned int deriv,
                             const Wavefunction & wfn,
                             const BasisSet & bs1,
                             const BasisSet & bs2)
 {
-    const auto add = Options().Get<std::vector<std::string>>("KEY_AO_CORE_TERMS");
+    const auto add = options().get<std::vector<std::string>>("KEY_AO_CORE_TERMS");
     for(const auto & a : add)
     {
-        auto mod_add = CreateChild<OneElectronIntegral>(a);
-        mod_add->Initialize(deriv, wfn, bs1, bs2);
+        auto mod_add = create_child<OneElectronIntegral>(a);
+        mod_add->initialize(deriv, wfn, bs1, bs2);
         modules_.emplace(a, std::move(mod_add));
     }
 }

@@ -26,36 +26,36 @@ TestExtLib::~TestExtLib()
 
 
 
-void TestExtLib::RunTest_(void)
+void TestExtLib::run_test_(void)
 {
-    out.Output("+++ In TestExtLib: RunTest. Info: (%?) %? %? v%?\n", ID(), Key(), Name(), Version());
-    out.Output("*** Testing calling other libraries\n");
+    out.output("+++ In TestExtLib: run_test. Info: (%?) %? %? v%?\n", id(), key(), name(), version());
+    out.output("*** Testing calling other libraries\n");
     std::string sstr = Static_GetString();
     std::string dstr = Dynamic_GetString();
 
-    out.Output("       From static: %?\n", sstr);
-    out.Output("      From dynamic: %?\n", dstr);
+    out.output("       From static: %?\n", sstr);
+    out.output("      From dynamic: %?\n", dstr);
 }
 
 
 
-void TestExtLib::CallRunTest_(const std::string & other)
+void TestExtLib::call_run_test_(const std::string & other)
 {
 }
 
-void TestExtLib::CallRunTest2_(const std::string & other1, const std::string & other2)
-{
-}
-
-
-
-void TestExtLib::TestThrow_(void)
+void TestExtLib::call_run_test2_(const std::string & other1, const std::string & other2)
 {
 }
 
 
 
-void TestExtLib::CallThrow_(const std::string & other)
+void TestExtLib::test_throw_(void)
+{
+}
+
+
+
+void TestExtLib::call_throw_(const std::string & other)
 {
 }
 
