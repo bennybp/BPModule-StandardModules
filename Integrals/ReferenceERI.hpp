@@ -2,7 +2,6 @@
 #define _GUARD_REFERENCERI_HPP_
 
 #include <pulsar/modulebase/TwoElectronIntegral.hpp>
-#include <pulsar/system/BasisSet.hpp>
 
 class ReferenceERI : public pulsar::modulebase::TwoElectronIntegral
 {

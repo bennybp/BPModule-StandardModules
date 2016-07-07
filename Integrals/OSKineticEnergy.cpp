@@ -3,7 +3,7 @@
 #include <pulsar/constants.h>
 
 #include "Common/BasisSetCommon.hpp"
-#include "Integrals/KineticEnergy.hpp"
+#include "Integrals/OSKineticEnergy.hpp"
 
 
 // Get a value of S_IJ
@@ -14,13 +14,12 @@ using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;
 
+namespace psr_modules {
+namespace integrals {
 
-uint64_t KineticEnergy::calculate_(uint64_t shell1, uint64_t shell2,
-                                   double * outbuffer, size_t bufsize)
+uint64_t OSKineticEnergy::calculate_(uint64_t shell1, uint64_t shell2,
+                                     double * outbuffer, size_t bufsize)
 {
-    if(work_.size() == 0)
-        throw GeneralException("Workspace not allocated. Did you set the bases?");
-
     const BasisSetShell & sh1 = bs1_->shell(shell1);
     const BasisSetShell & sh2 = bs2_->shell(shell2);
 
@@ -28,7 +27,6 @@ uint64_t KineticEnergy::calculate_(uint64_t shell1, uint64_t shell2,
 
     if(bufsize < nfunc)
         throw GeneralException("Buffer is too small", "size", bufsize, "required", nfunc);
-
 
 
     // degree of general contraction
@@ -85,6 +83,9 @@ uint64_t KineticEnergy::calculate_(uint64_t shell1, uint64_t shell2,
     // The indexing of these arrays is pretty straightforward.
     // Sij = ptr[i*nam2+j]. This is in the S_IJ and T_IJ macros, hopefully
     // to make the code clearer.
+    //
+    // Also note that we build the OS overlap cartesian terms directly here, rather
+    // than a call to os_overlap_terms.
     /////////////////////////////////////////////////////////
     // loop over primitives
     const size_t nprim1 = sh1.n_primitives();
@@ -197,13 +198,13 @@ uint64_t KineticEnergy::calculate_(uint64_t shell1, uint64_t shell2,
 
 
 
-void KineticEnergy::initialize_(unsigned int deriv,
-                                const Wavefunction & wfn,
-                                const BasisSet & bs1,
-                                const BasisSet & bs2)
+void OSKineticEnergy::initialize_(unsigned int deriv,
+                                  const Wavefunction & wfn,
+                                  const BasisSet & bs1,
+                                  const BasisSet & bs2)
 {
     if(deriv != 0)
-        throw NotYetImplementedException("Not Yet Implemented: KineticEnergy integral with deriv != 0");
+        throw NotYetImplementedException("Not Yet Implemented: OSKineticEnergy integral with deriv != 0");
 
     // from common components
     bs1_ = NormalizeBasis(cache(), out, bs1);
@@ -239,3 +240,6 @@ void KineticEnergy::initialize_(unsigned int deriv,
     transformwork_ = xyzwork_[5] + worksize;
     sourcework_ = transformwork_ + transformwork_size;
 }
+
+} // close namespace integrals
+} // close namespace psr_modules

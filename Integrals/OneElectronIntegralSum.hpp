@@ -1,10 +1,17 @@
-#ifndef _GUARD_COREBUILD_HPP_
-#define _GUARD_COREBUILD_HPP_
+#pragma once
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include <pulsar/system/BasisSet.hpp>
 
-class CoreBuild : public pulsar::modulebase::OneElectronIntegral
+namespace psr_modules {
+namespace integrals {
+
+/*! \brief Calculates a sum of one-electron integrals
+ *
+ * The keys for which modules to incorporate into the summation. Each call
+ * to calculate() will in turn call these modules and sum the results into
+ * the output buffer.
+ */
+class OneElectronIntegralSum : public pulsar::modulebase::OneElectronIntegral
 {
     public:
         using pulsar::modulebase::OneElectronIntegral::OneElectronIntegral;
@@ -20,8 +27,9 @@ class CoreBuild : public pulsar::modulebase::OneElectronIntegral
     private:
         typedef pulsar::modulemanager::ModulePtr<pulsar::modulebase::OneElectronIntegral> OneInt;
 
+        //! The modules to use in constructing the core hamiltonian
         std::map<std::string, OneInt> modules_;
 };
 
-
-#endif
+} // close namespace integrals
+} // close namespace psr_modules

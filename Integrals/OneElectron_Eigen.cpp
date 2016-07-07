@@ -12,6 +12,11 @@ using namespace pulsar::datastore;
 using namespace bphash;
 
 
+namespace psr_modules {
+namespace integrals {
+
+
+
 OneElectron_Eigen::ReturnType
 OneElectron_Eigen::calculate_(const std::string & key,
                               unsigned int deriv,
@@ -30,22 +35,22 @@ OneElectron_Eigen::calculate_(const std::string & key,
 
         // Create a hash for the lookup
         auto hash = make_hash(HashType::Hash128,
-                             minfo.name,
-                             minfo.version,
-                             deriv, wfn, bs1, bs2);
+                              minfo.name,
+                              minfo.version,
+                              deriv, wfn, bs1, bs2);
 
         hashstr = hash_to_string(hash);
         out.debug("Going to lookup one-electron integrals with hash %?\n", hashstr);
 
         if(cache().count(hashstr))
         {
-            out.debug("Integrals were found in the cache. Returning\n");
+            out.debug("integrals were found in the cache. Returning\n");
             return cache().get<ReturnType>(hashstr);
         }
     }
 
 
-    out.debug("Integrals not found or cache is not being used. Calculating\n");
+    out.debug("integrals not found or cache is not being used. Calculating\n");
 
     const size_t nshell1 = bs1.n_shell();
     const size_t nshell2 = bs2.n_shell();
@@ -109,3 +114,6 @@ OneElectron_Eigen::calculate_(const std::string & key,
     return ret;
 }
 
+
+} // close namespace integrals
+} // close namespace psr_modules

@@ -1,10 +1,14 @@
-#ifndef _GUARD_DIPOLE_HPP_
-#define _GUARD_DIPOLE_HPP_
+#pragma once
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include <pulsar/system/BasisSet.hpp>
 
-class Dipole : public pulsar::modulebase::OneElectronIntegral
+namespace psr_modules {
+namespace integrals {
+
+
+/*! \brief Calculation of electronic dipole integrals via Obara-Saika recurrence
+ */
+class OSKineticEnergy : public pulsar::modulebase::OneElectronIntegral
 {
     public:
         using pulsar::modulebase::OneElectronIntegral::OneElectronIntegral;
@@ -14,8 +18,6 @@ class Dipole : public pulsar::modulebase::OneElectronIntegral
                                  const pulsar::system::BasisSet & bs1,
                                  const pulsar::system::BasisSet & bs2);
 
-        virtual unsigned int n_components_(void) const { return 3; }
-
         virtual uint64_t calculate_(uint64_t shell1, uint64_t shell2,
                                     double * outbuffer, size_t bufsize);
 
@@ -24,10 +26,11 @@ class Dipole : public pulsar::modulebase::OneElectronIntegral
 
         double * transformwork_;
         double * sourcework_;
-        double * xyzwork_[3];
+        double * xyzwork_[6];
 
         std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_;
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules

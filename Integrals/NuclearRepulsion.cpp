@@ -1,14 +1,11 @@
-#include <pulsar/output/Output.hpp>
-#include <pulsar/modulemanager/ModuleManager.hpp>
-
 #include "Integrals/NuclearRepulsion.hpp"
 
 
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
-using namespace pulsar::datastore;
 
+namespace psr_modules {
+namespace integrals {
 
 void NuclearRepulsion::initialize_(unsigned int deriv, const System & sys)
 {
@@ -37,3 +34,7 @@ uint64_t NuclearRepulsion::calculate_(double * outbuffer, size_t bufsize)
     outbuffer[0] = enuc;
     return 1;
 }
+
+} // close namespace integrals
+} // close namespace psr_modules
+

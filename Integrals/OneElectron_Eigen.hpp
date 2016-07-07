@@ -1,7 +1,10 @@
-#ifndef _GUARD_ONEELECTRON_EIGEN_HPP_
-#define _GUARD_ONEELECTRON_EIGEN_HPP_
+#pragma once
 
 #include <pulsar/modulebase/OneElectronMatrix.hpp>
+
+namespace psr_modules {
+namespace integrals {
+
 
 class OneElectron_Eigen : public pulsar::modulebase::OneElectronMatrix
 {
@@ -16,4 +19,5 @@ class OneElectron_Eigen : public pulsar::modulebase::OneElectronMatrix
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules

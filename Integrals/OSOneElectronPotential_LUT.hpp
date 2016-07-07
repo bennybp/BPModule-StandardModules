@@ -1,9 +1,10 @@
-#ifndef STANDARD_ONELECTRONPOTENTIAL_LUT_HPP
-#define STANDARD_ONELECTRONPOTENTIAL_LUT_HPP
+#pragma once
 
 #include <map>
 #include <vector>
 
+namespace psr_modules {
+namespace integrals {
 namespace lut {
 
 
@@ -46,9 +47,10 @@ struct RecurInfo
 typedef std::vector<std::vector<RecurInfo>> RecurMap;
 
 
-// in OneElectronPotential_LUT.cpp
+// in OSOneElectronPotential_LUT.cpp
 extern const RecurMap am_recur_map;
 
 } // close namespace lut
+} // close namespace inetgrals
+} // close namespace psr_modules
 
-#endif

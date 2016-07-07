@@ -1,8 +1,13 @@
-#ifndef _GUARD_NUCLEARDIPOLE_HPP_
-#define _GUARD_NUCLEARDIPOLE_HPP_
+#pragma once
 
 #include <pulsar/modulebase/SystemIntegral.hpp>
 
+namespace psr_modules {
+namespace integrals {
+
+
+/*! \brief Calculation of simple nuclear dipole integrals
+ */
 class NuclearDipole : public pulsar::modulebase::SystemIntegral
 {
     public:
@@ -17,4 +22,6 @@ class NuclearDipole : public pulsar::modulebase::SystemIntegral
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules
+

@@ -1,10 +1,15 @@
-#ifndef _GUARD_OVERLAP_HPP_
-#define _GUARD_OVERLAP_HPP_
+#pragma once
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include <pulsar/system/BasisSet.hpp>
+#include <pulsar/math/Grid.hpp>
 
-class Overlap : public pulsar::modulebase::OneElectronIntegral
+namespace psr_modules {
+namespace integrals {
+
+
+/*! \brief Calculation of one-electron potential integrals via Obara-Saika recurrence
+ */
+class OSOneElectronPotential : public pulsar::modulebase::OneElectronIntegral
 {
     public:
         using pulsar::modulebase::OneElectronIntegral::OneElectronIntegral;
@@ -20,12 +25,20 @@ class Overlap : public pulsar::modulebase::OneElectronIntegral
     private:
         std::vector<double> work_;
 
+        // amwork_[i][j] = work for am pair i,j
+        std::vector<std::vector<double *>> amwork_;
+        std::shared_ptr<const pulsar::system::System> sys_;
+
         double * transformwork_;
         double * sourcework_;
-        double * xyzwork_[3];
 
         std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_;
+
+        uint64_t calculate_with_grid_(uint64_t shell1, uint64_t shell2,
+                                      const pulsar::math::Grid & grid,
+                                      double * outbuffer, size_t bufsize);
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules

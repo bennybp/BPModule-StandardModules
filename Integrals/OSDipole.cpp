@@ -2,22 +2,21 @@
 #include <pulsar/system/SphericalTransformIntegral.hpp>
 
 #include "Common/BasisSetCommon.hpp"
-#include "Integrals/OSOverlap.hpp"
-#include "Integrals/Dipole.hpp"
+#include "Integrals/OSOverlapTerms.hpp"
+#include "Integrals/OSDipole.hpp"
 
 
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;
 
+namespace psr_modules {
+namespace integrals {
 
 
-uint64_t Dipole::calculate_(uint64_t shell1, uint64_t shell2,
-                            double * outbuffer, size_t bufsize)
+uint64_t OSDipole::calculate_(uint64_t shell1, uint64_t shell2,
+                              double * outbuffer, size_t bufsize)
 {
-    if(work_.size() == 0)
-        throw GeneralException("Workspace not allocated. Did you set the bases?");
-
     const BasisSetShell & sh1 = bs1_->shell(shell1);
     const BasisSetShell & sh2 = bs2_->shell(shell2);
 
@@ -72,9 +71,9 @@ uint64_t Dipole::calculate_(uint64_t shell1, uint64_t shell2,
     for(size_t a = 0; a < nprim1; a++)
     for(size_t b = 0; b < nprim2; b++)
     {
-        OSOverlap(sh1.alpha(a), xyz1,
-                  sh2.alpha(b), xyz2,
-                  nam1, nam2, xyzwork_);
+        detail::os_overlap_terms(sh1.alpha(a), xyz1,
+                                 sh2.alpha(b), xyz2,
+                                 nam1, nam2, xyzwork_);
 
         // general contraction and combined am
         size_t outidx = 0;
@@ -120,7 +119,7 @@ uint64_t Dipole::calculate_(uint64_t shell1, uint64_t shell2,
 
 
 
-void Dipole::initialize_(unsigned int deriv,
+void OSDipole::initialize_(unsigned int deriv,
                          const Wavefunction & wfn,
                          const BasisSet & bs1,
                          const BasisSet & bs2)
@@ -159,3 +158,8 @@ void Dipole::initialize_(unsigned int deriv,
     transformwork_ = xyzwork_[2] + worksize;
     sourcework_ = transformwork_ + transformwork_size;
 }
+
+
+} // close namespace integrals
+} // close namespace psr_modules
+

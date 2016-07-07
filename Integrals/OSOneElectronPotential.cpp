@@ -4,9 +4,9 @@
 #include <pulsar/constants.h>
 
 #include "Common/BasisSetCommon.hpp"
-#include "Integrals/Boys.hpp"
-#include "Integrals/OneElectronPotential.hpp"
-#include "Integrals/OneElectronPotential_LUT.hpp"
+#include "Integrals/boys/Boys.hpp"
+#include "Integrals/OSOneElectronPotential.hpp"
+#include "Integrals/OSOneElectronPotential_LUT.hpp"
 
 
 using namespace pulsar::exception;
@@ -15,9 +15,13 @@ using namespace pulsar::datastore;
 using namespace pulsar::math;
 
 
-uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shell2,
-                                                  const Grid & grid,
-                                                  double * outbuffer, size_t bufsize)
+namespace psr_modules {
+namespace integrals {
+
+
+uint64_t OSOneElectronPotential::calculate_with_grid_(uint64_t shell1, uint64_t shell2,
+                                                      const Grid & grid,
+                                                      double * outbuffer, size_t bufsize)
 {
     if(!sys_)
         throw GeneralException("No system given");
@@ -84,7 +88,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shel
 
                 // boys function
                 const double T = PC2 * p;
-                CalculateF(amwork_[0][0], absam12, T); 
+                detail::calculate_f(amwork_[0][0], absam12, T); 
                 for(int i = 0; i <= absam12; i++)
                     amwork_[0][0][i] *= 2*PI*oop*exp(-mu*AB2);
 
@@ -93,7 +97,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shel
                 for(int i = 0; i <= absam1; i++)
                 {
                     // vector of recurrence info
-                    const auto & am1info = ::lut::am_recur_map[i];
+                    const auto & am1info = lut::am_recur_map[i];
 
                     // number of cartesians in the previous two shells
                     const size_t incart   = n_cartesian_gaussian(i);
@@ -145,7 +149,7 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shel
                     for(int j = 1; j <= absam2; j++)
                     {
                         // vector of recurrence info
-                        const auto & am2info = ::lut::am_recur_map[j];
+                        const auto & am2info = lut::am_recur_map[j];
 
                         // number of cartesians in the previous two shells
                         //const size_t jncart   = n_cartesian_gaussian(j);
@@ -169,16 +173,16 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shel
                                 // precompute some of the offsets
                                 // storage is  m, cart1, cart2
                                 // so total index would be (m*ncart1*ncart2 + cart1*ncart2 + cart2)
-                                const size_t offset1 = jncart_1*(m*incart + cartidx_1); // m*incart*jncart_1 + cartidx_1*jncart_1 
-                                const size_t offset4 = jncart_1*((m+1)*incart + cartidx_1); // (m+1)*incart*jncart_1 + cartidx_1*jncart_1
-                                const size_t offset3 = jncart_2*(m*incart + cartidx_1); // m*incart*jncart_2 + cartidx_1*jncart_2
-                                const size_t offset6 = jncart_2*((m+1)*incart + cartidx_1); // (m+1)*incart*jncart_2 + cartidx_1*jncart_2
-                                const size_t offset2[3] = { jncart_1*(m*incart_1 + cart1.idx[0][0]),   // m*incart_1*jncart_1 + cart1.idx[0][0]*jncart_1 
-                                                            jncart_1*(m*incart_1 + cart1.idx[1][0]),   // m*incart_1*jncart_1 + cart1.idx[1][0]*jncart_1 
-                                                            jncart_1*(m*incart_1 + cart1.idx[2][0]) }; // m*incart_1*jncart_1 + cart1.idx[2][0]*jncart_1 
+                                const size_t offset1 = jncart_1*(m*incart + cartidx_1);                     // m*incart*jncart_1 + cartidx_1*jncart_1 
+                                const size_t offset4 = jncart_1*((m+1)*incart + cartidx_1);                 // (m+1)*incart*jncart_1 + cartidx_1*jncart_1
+                                const size_t offset3 = jncart_2*(m*incart + cartidx_1);                     // m*incart*jncart_2 + cartidx_1*jncart_2
+                                const size_t offset6 = jncart_2*((m+1)*incart + cartidx_1);                 // (m+1)*incart*jncart_2 + cartidx_1*jncart_2
+                                const size_t offset2[3] = { jncart_1*(m*incart_1 + cart1.idx[0][0]),        // m*incart_1*jncart_1 + cart1.idx[0][0]*jncart_1 
+                                                            jncart_1*(m*incart_1 + cart1.idx[1][0]),        // m*incart_1*jncart_1 + cart1.idx[1][0]*jncart_1 
+                                                            jncart_1*(m*incart_1 + cart1.idx[2][0]) };      // m*incart_1*jncart_1 + cart1.idx[2][0]*jncart_1 
                                 const size_t offset5[3] = { jncart_1*((m+1)*incart_1 + cart1.idx[0][0]),    // (m+1)*incart_1*jncart_1 + cart1.idx[0][0]*jncart_1 
                                                             jncart_1*((m+1)*incart_1 + cart1.idx[1][0]),    // (m+1)*incart_1*jncart_1 + cart1.idx[1][0]*jncart_1 
-                                                            jncart_1*((m+1)*incart_1 + cart1.idx[2][0]) }; // (m+1)*incart_1*jncart_1 + cart1.idx[2][0]*jncart_1 
+                                                            jncart_1*((m+1)*incart_1 + cart1.idx[2][0]) };  // (m+1)*incart_1*jncart_1 + cart1.idx[2][0]*jncart_1 
 
                                 for(const auto & cart2 : am2info)
                                 {
@@ -246,8 +250,8 @@ uint64_t OneElectronPotential::CalculateWithGrid_(uint64_t shell1, uint64_t shel
 }
 
 
-uint64_t OneElectronPotential::calculate_(uint64_t shell1, uint64_t shell2,
-                                          double * outbuffer, size_t bufsize)
+uint64_t OSOneElectronPotential::calculate_(uint64_t shell1, uint64_t shell2,
+                                            double * outbuffer, size_t bufsize)
 {
     // what grid are we using?
     std::string gridopt = options().get<std::string>("grid");
@@ -268,18 +272,18 @@ uint64_t OneElectronPotential::calculate_(uint64_t shell1, uint64_t shell2,
     Grid grid(std::make_shared<GridUniverse>(std::move(gu)), true);
 
     // will check sizes of buffer, etc
-    return CalculateWithGrid_(shell1, shell2, grid, outbuffer, bufsize);
+    return calculate_with_grid_(shell1, shell2, grid, outbuffer, bufsize);
 }
 
 
 
-void OneElectronPotential::initialize_(unsigned int deriv,
-                                       const Wavefunction & wfn,
-                                       const BasisSet & bs1,
-                                       const BasisSet & bs2)
+void OSOneElectronPotential::initialize_(unsigned int deriv,
+                                         const Wavefunction & wfn,
+                                         const BasisSet & bs1,
+                                         const BasisSet & bs2)
 {
     if(deriv != 0)
-        throw NotYetImplementedException("Not Yet Implemented: OneElectronPotential integral with deriv != 0");
+        throw NotYetImplementedException("Not Yet Implemented: OSOneElectronPotential integral with deriv != 0");
 
     sys_ = wfn.system;
 
@@ -331,3 +335,7 @@ void OneElectronPotential::initialize_(unsigned int deriv,
     transformwork_ = ptr;
     sourcework_ = transformwork_ + transformwork_size;
 }
+
+
+} // close namespace integrals
+} // close namespace psr_modules

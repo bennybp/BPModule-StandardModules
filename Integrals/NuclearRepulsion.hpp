@@ -1,7 +1,9 @@
-#ifndef _GUARD_NUCLEARREPULSION_HPP_
-#define _GUARD_NUCLEARREPULSION_HPP_
+#pragma once
 
 #include <pulsar/modulebase/SystemIntegral.hpp>
+
+namespace psr_modules {
+namespace integrals {
 
 class NuclearRepulsion : public pulsar::modulebase::SystemIntegral
 {
@@ -17,4 +19,6 @@ class NuclearRepulsion : public pulsar::modulebase::SystemIntegral
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules
+

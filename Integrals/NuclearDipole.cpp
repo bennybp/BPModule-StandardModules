@@ -1,15 +1,10 @@
-#include <pulsar/output/Output.hpp>
-#include <pulsar/modulemanager/ModuleManager.hpp>
-#include <pulsar/math/PointManipulation.hpp>
-
 #include "Integrals/NuclearDipole.hpp"
 
-
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
-using namespace pulsar::datastore;
-using namespace pulsar::math;
+
+namespace psr_modules {
+namespace integrals {
 
 
 void NuclearDipole::initialize_(unsigned int deriv, const System & sys)
@@ -19,6 +14,7 @@ void NuclearDipole::initialize_(unsigned int deriv, const System & sys)
 
     sys_ = &sys;
 }
+
 
 uint64_t NuclearDipole::calculate_(double * outbuffer, size_t bufsize)
 {
@@ -39,3 +35,8 @@ uint64_t NuclearDipole::calculate_(double * outbuffer, size_t bufsize)
 
     return 3;
 }
+
+
+} // close namespace integrals
+} // close namespace psr_modules
+

@@ -1,13 +1,14 @@
-#ifndef _GUARD_ONEELECTRONPOTENTIAL_HPP_
-#define _GUARD_ONEELECTRONPOTENTIAL_HPP_
+#pragma once
 
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include <pulsar/system/BasisSet.hpp>
-#include <pulsar/math/Grid.hpp>
+
+namespace psr_modules {
+namespace integrals {
 
 
-
-class OneElectronPotential : public pulsar::modulebase::OneElectronIntegral
+/*! \brief Calculation of electronic dipole integrals via Obara-Saika recurrence
+ */
+class OSDipole : public pulsar::modulebase::OneElectronIntegral
 {
     public:
         using pulsar::modulebase::OneElectronIntegral::OneElectronIntegral;
@@ -17,25 +18,21 @@ class OneElectronPotential : public pulsar::modulebase::OneElectronIntegral
                                  const pulsar::system::BasisSet & bs1,
                                  const pulsar::system::BasisSet & bs2);
 
+        virtual unsigned int n_components_(void) const { return 3; }
+
         virtual uint64_t calculate_(uint64_t shell1, uint64_t shell2,
                                     double * outbuffer, size_t bufsize);
 
     private:
         std::vector<double> work_;
 
-        // amwork_[i][j] = work for am pair i,j
-        std::vector<std::vector<double *>> amwork_;
-        std::shared_ptr<const pulsar::system::System> sys_;
-
         double * transformwork_;
         double * sourcework_;
+        double * xyzwork_[3];
 
         std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_;
-
-        uint64_t CalculateWithGrid_(uint64_t shell1, uint64_t shell2,
-                                    const pulsar::math::Grid & grid,
-                                    double * outbuffer, size_t bufsize);
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules

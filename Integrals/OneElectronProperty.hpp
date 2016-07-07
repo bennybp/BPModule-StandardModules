@@ -1,7 +1,10 @@
-#ifndef _GUARD_ONEELECTRONPROPERTY_HPP_
-#define _GUARD_ONEELECTRONPROPERTY_HPP_
+#pragma once
 
 #include <pulsar/modulebase/PropertyCalculator.hpp>
+
+namespace psr_modules {
+namespace integrals {
+
 
 class OneElectronProperty : public pulsar::modulebase::PropertyCalculator
 {
@@ -15,4 +18,5 @@ class OneElectronProperty : public pulsar::modulebase::PropertyCalculator
 };
 
 
-#endif
+} // close namespace integrals
+} // close namespace psr_modules

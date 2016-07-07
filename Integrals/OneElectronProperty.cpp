@@ -5,12 +5,15 @@
 #include "Integrals/OneElectronProperty.hpp"
 
 
-using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;
 using namespace pulsar::modulebase;
 using namespace pulsar::math;
+
+
+namespace psr_modules {
+namespace integrals {
 
 
 std::vector<double>
@@ -71,3 +74,7 @@ OneElectronProperty::calculate_(unsigned int deriv,
 
     return val;
 }
+
+
+} // close namespace integrals
+} // close namespace psr_modules

@@ -1,18 +1,21 @@
 set(INTEGRALS_FILES creator.cpp
+                    OSOverlapTerms.cpp
                     OSOverlap.cpp
-                    Overlap.cpp
-                    Dipole.cpp
-                    KineticEnergy.cpp
-                    OneElectronPotential.cpp
-                    OneElectronPotential_LUT.cpp
+                    OSKineticEnergy.cpp
+                    OSDipole.cpp
+                    OSOneElectronPotential.cpp
+                    OSOneElectronPotential_LUT.cpp
+
                     OneElectronProperty.cpp
                     OneElectron_Eigen.cpp
-                    CoreBuild.cpp
-                    Boys.cpp
+                    OneElectronIntegralSum.cpp
                     ReferenceERI.cpp
                     ValeevRef.cpp
                     NuclearRepulsion.cpp
                     NuclearDipole.cpp
+
+                    boys/Boys_shortgrid.cpp
+                    boys/Boys_longfac.cpp
    )
 
 add_library(Integrals MODULE ${INTEGRALS_FILES})

@@ -3,52 +3,52 @@ from pulsar.datastore.OptionValidators import *
 
 minfo = {
 
-  "Overlap" :
+  "OSOverlap" :
   {
     "type"        : "c_module",
     "base"        : "OneElectronIntegral",
     "modpath"     : "Integrals.so",
     "version"     : "0.1a",
-    "description" : "Calculation of AO overlap integrals over gaussian basis functions",
+    "description" : "Calculation of AO overlap integrals over gaussian basis functions via Obara-Saika",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
                     }
   },
 
-  "Dipole" :
+  "OSDipole" :
   {
     "type"        : "c_module",
     "base"        : "OneElectronIntegral",
     "modpath"     : "Integrals.so",
     "version"     : "0.1a",
-    "description" : "Calculation of AO overlap integrals over gaussian basis functions",
+    "description" : "Calculation of AO overlap integrals over gaussian basis functions via Obara-Saika",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
                     }
   },
 
-  "KineticEnergy" :
+  "OSKineticEnergy" :
   {
     "type"        : "c_module",
     "base"        : "OneElectronIntegral",
     "modpath"     : "Integrals.so",
     "version"     : "0.1a",
-    "description" : "Calculation of AO kinetic energy integrals over gaussian basis functions",
+    "description" : "Calculation of AO kinetic energy integrals over gaussian basis functions via Obara-Saika",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
                     }
   },
 
-  "OneElectronPotential" :
+  "OSOneElectronPotential" :
   {
     "type"        : "c_module",
     "base"        : "OneElectronIntegral",
     "modpath"     : "Integrals.so",
     "version"     : "0.1a",
-    "description" : "Calculation of AO nuclear repulsion integrals over gaussian basis functions",
+    "description" : "Calculation of AO electron-nuclear attraction integrals over gaussian basis functions",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
@@ -56,17 +56,17 @@ minfo = {
                     }
   },
 
-  "CoreBuild" :
+  "OneElectronIntegralSum" :
   {
     "type"        : "c_module",
     "base"        : "OneElectronIntegral",
     "modpath"     : "Integrals.so",
     "version"     : "0.1a",
-    "description" : "Building of the core hamiltonian",
+    "description" : "Building of sum of one-electron integrals",
     "authors"     : ["Benjamin Pritchard <ben@bennyp.org>"],
     "refs"        : [],
     "options"     : {
-                        "KEY_AO_CORE_TERMS":   ( OptionType.ListString,  None, True, None,  "One-electron integrals to use in the core")
+                        "KEY_AO_TERMS":   ( OptionType.ListString,  None, True, None,  "Keys to the one-electron integral modules to sum")
                     }
   },
   "OneElectronProperty" :

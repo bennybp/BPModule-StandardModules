@@ -1,6 +1,7 @@
-#include "Integrals/OneElectronPotential_LUT.hpp"
+#include "Integrals/OSOneElectronPotential_LUT.hpp"
 
-
+namespace psr_modules {
+namespace integrals {
 namespace lut {
 
 extern const RecurMap am_recur_map{
@@ -489,3 +490,5 @@ extern const RecurMap am_recur_map{
 
 
 } // close namespace lut
+} // close namespace inetgrals
+} // close namespace psr_modules
