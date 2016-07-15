@@ -1,6 +1,6 @@
 #include <pulsar/system/AOIterator.hpp>
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include "Common/EigenCommon.hpp"
+#include <pulsar/math/EigenCommon.hpp>
 #include "Integrals/OneElectron_Eigen.hpp"
 
 using Eigen::MatrixXd;
