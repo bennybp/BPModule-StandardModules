@@ -5,7 +5,7 @@
 
 #include <pulsar/exception/Exceptions.hpp>
 #include <pulsar/parallel/InitFinalize.hpp>
-#include <LibTaskForce.hpp>
+#include <LibTaskForce/LibTaskForce.hpp>
 #include <pulsar/output/Table.hpp>
 #include <pulsar/output/GlobalOutput.hpp>
 #include "Methods/CompositeMethods/MIM.hpp" 

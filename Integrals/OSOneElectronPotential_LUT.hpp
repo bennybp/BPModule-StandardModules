@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <cstdint>
 #include <vector>
 
 namespace psr_modules {
