@@ -65,39 +65,6 @@ minfo = {
                     'The key used to fragment the system'),
                     }
   },
-  "SCF" :
-  {
-    "type"         : "python_module",
-    "base"        : "EnergyMethod",
-    "version"     : "0.1a",
-    "description" : "Calls Psi4 via a system call and then runs an SCF",
-    "authors"     : ["Ryan Richard"],
-    "refs"        : [""], 
-    "options"     : {
-                    }
-  },
-  "MP2" :
-  {
-    "type"        : "python_module",
-    "base"        : "EnergyMethod",
-    "version"     : "0.1a",
-    "description" : "Calls Psi4 via a system call and then runs MP2",
-    "authors"     : ["Ryan Richard"],
-    "refs"        : [""], 
-    "options"     : {
-                    }
-  },
-  "CCSD(T)" :
-  {
-    "type"        : "python_module",
-    "base"        : "EnergyMethod",
-    "version"     : "0.1a",
-    "description" : "Calls Psi4 via a system call and then runs CCSD(T)",
-    "authors"     : ["Ryan Richard"],
-    "refs"        : [""], 
-    "options"     : {
-                    }
-  },
   "HelgakerCBS" :
     {
     "type"        : "python_module",
