@@ -1,5 +1,4 @@
 set(STANDARDMODULES_COMMON_FILES 
-        EigenCommon.cpp
         BasisSetCommon.cpp
  )
 
