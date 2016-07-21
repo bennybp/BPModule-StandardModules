@@ -32,7 +32,7 @@ class OSOneElectronPotential : public pulsar::modulebase::OneElectronIntegral
         double * transformwork_;
         double * sourcework_;
 
-        std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_;
+        std::shared_ptr<const pulsar::system::BasisSet> bs1_, bs2_;
 
         uint64_t calculate_with_grid_(uint64_t shell1, uint64_t shell2,
                                       const pulsar::math::Grid & grid,

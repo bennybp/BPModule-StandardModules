@@ -45,7 +45,7 @@ OneElectron_Eigen::calculate_(const std::string & key,
         if(cache().count(hashstr))
         {
             out.debug("integrals were found in the cache. Returning\n");
-            return cache().get<ReturnType>(hashstr);
+            return *cache().get<ReturnType>(hashstr);
         }
     }
 

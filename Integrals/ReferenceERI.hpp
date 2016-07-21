@@ -22,7 +22,7 @@ public:
 
 
 private:
-    std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_, bs3_, bs4_;
+    std::shared_ptr<const pulsar::system::BasisSet> bs1_, bs2_, bs3_, bs4_;
 
     std::vector<double> work_;
     double * sourcework_;
