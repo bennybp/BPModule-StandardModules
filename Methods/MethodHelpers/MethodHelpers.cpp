@@ -7,6 +7,8 @@
 #include <LibTaskForce/LibTaskForce.hpp>
 #include <pulsar/util/IterTools.hpp>
 #include <pulsar/exception/Exceptions.hpp>
+#include <pulsar/output/GlobalOutput.hpp>
+#include "Common/ProgressBar.hpp"
 #include "Methods/MethodHelpers/MethodHelpers.hpp"
 
 using std::vector;
@@ -106,14 +108,17 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
         pulsar::parallel::GetEnv().Comm();
     LibTaskForce::Communicator NewComm=ParentComm.Split(ParentComm.NThreads(),1,
                                          std::min(ParentComm.NProcs(),NTasks));*/
-   vector<DerivReturnType> Results; 
+   vector<DerivReturnType> Results;
+   ProgressBar PB(NTasks,pulsar::output::get_global_output());
    for(size_t i: Range<0>(NTasks)){
        const Wavefunction& WfnI=(SameSystem?Wfns[0]:Wfns[i]);
        const std::string& Key=(SameMethod?Keys[0]:Keys[i]);
        Results.push_back(
         Task(WfnI,std::move(MM.get_module<EnergyMethod>(Key,ID)))(Deriv)      
        );
+       ++PB;
    }
+   pulsar::output::get_global_output()<<std::endl;
    return Results;
 }
 

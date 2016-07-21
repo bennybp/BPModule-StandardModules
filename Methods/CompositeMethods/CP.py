@@ -16,11 +16,11 @@ class CP(psr.modulebase.EnergyMethod):
       self.module_manager().change_option(NewMBEKey,"FRAGMENTIZER",GhosterKey)
       
       MyMod=self.create_child(MethodKey)
-      SSWfn,SSDeriv=MyMod.deriv(order,wfn)
+      SSWfn,SSDeriv=MyMod.deriv(order,wfn) #Super System
       MyMod=self.create_child(MBEKey)
-      MBEWfn,MBEDeriv=MyMod.deriv(order,wfn)
+      MBEWfn,MBEDeriv=MyMod.deriv(order,wfn) #No Ghost functions
       MyMod=self.create_child(NewMBEKey)
-      CPWfn,CPDeriv=MyMod.deriv(order,wfn)
+      CPWfn,CPDeriv=MyMod.deriv(order,wfn) #With Ghost functions
    
       FinalDeriv=[SSDeriv[i]-CPDeriv[i]+MBEDeriv[i] for i in range(0,len(SSDeriv))]
       return wfn,FinalDeriv

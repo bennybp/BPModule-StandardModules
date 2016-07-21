@@ -6,7 +6,7 @@
 #include <pulsar/output/OutputStream.hpp>
 
 
-std::shared_ptr<pulsar::system::BasisSet>
+std::shared_ptr<const pulsar::system::BasisSet>
 NormalizeBasis(pulsar::datastore::CacheData & cache,
                pulsar::output::OutputStream & out,
                const pulsar::system::BasisSet & bs);

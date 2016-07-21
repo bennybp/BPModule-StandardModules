@@ -1,5 +1,6 @@
 set(STANDARDMODULES_COMMON_FILES 
         BasisSetCommon.cpp
+        ProgressBar.cpp
  )
 
 

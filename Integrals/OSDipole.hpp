@@ -30,7 +30,7 @@ class OSDipole : public pulsar::modulebase::OneElectronIntegral
         double * sourcework_;
         double * xyzwork_[3];
 
-        std::shared_ptr<pulsar::system::BasisSet> bs1_, bs2_;
+        std::shared_ptr<const pulsar::system::BasisSet> bs1_, bs2_;
 };
 
 

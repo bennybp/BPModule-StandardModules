@@ -82,7 +82,7 @@ static BasisShellInfo NormalizeShell_(const BasisShellInfo & shell, const CoordT
 }
 
 
-std::shared_ptr<BasisSet> NormalizeBasis(CacheData & cache,
+std::shared_ptr<const BasisSet> NormalizeBasis(CacheData & cache,
                                          OutputStream & out,
                                          const BasisSet & bs)
 {
@@ -91,12 +91,12 @@ std::shared_ptr<BasisSet> NormalizeBasis(CacheData & cache,
     std::string cachekey = std::string("bs:") + hash_to_string(bs.my_hash());
     if(cache.count(cachekey)) // options are unimportant
     {
-        auto ret = cache.get<std::shared_ptr<BasisSet>>(cachekey);
+        auto ret = cache.get<BasisSet>(cachekey);
 
         out.debug("Found normalized basis in cache: %? -> %?\n",
                   hash_to_string(bs.my_hash()), hash_to_string(ret->my_hash()));
 
-        return ret;
+       return ret;
     }
 
     auto newbs = std::make_shared<BasisSet>(bs.transform(NormalizeShell_));
