@@ -99,11 +99,13 @@ std::shared_ptr<const BasisSet> NormalizeBasis(CacheData & cache,
        return ret;
     }
 
-    auto newbs = std::make_shared<BasisSet>(bs.transform(NormalizeShell_));
+    auto newbs = bs.transform(NormalizeShell_);
 
     // add to the cache
     cache.set(cachekey, newbs);
 
-    return newbs;
+    // retrieve the shared_ptr from cache and return
+
+    return cache.get<BasisSet>(cachekey);
 }
 
