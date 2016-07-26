@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 #include <unordered_map>
-#include <LibTaskForce/LibTaskForce.hpp>
+#include <pulsar/parallel/InitFinalize.hpp>
 #include <pulsar/util/IterTools.hpp>
 #include <pulsar/exception/Exceptions.hpp>
 #include <pulsar/output/GlobalOutput.hpp>
@@ -29,12 +29,13 @@ class Task{
    private:
       EMethodPtr Method_;
       const Wavefunction& Wfn_;
-      size_t TaskNum_;
+      size_t Order_,TaskNum_;
    public:
-      Task(const Wavefunction& Wfn,EMethodPtr&& Method, size_t TaskNum=0):
-         Method_(std::move(Method)),Wfn_(Wfn),TaskNum_(TaskNum){}
-      DerivReturnType operator()(size_t Order)const{ 
-        return Method_->deriv(Order,Wfn_);
+      Task(const Wavefunction& Wfn,EMethodPtr&& Method, size_t Order,
+           size_t TaskNum=0):
+         Method_(std::move(Method)),Wfn_(Wfn),Order_(Order),TaskNum_(TaskNum){}
+      DerivReturnType operator()(LibTaskForce::HybridComm&)const{ 
+        return Method_->deriv(Order_,Wfn_);
       }
 };
 
@@ -103,22 +104,26 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
               "The number of coefficients must match the number of methods",
               "NMethods=",Keys.size(),"NCoefficients=",Cs.size());
     
-    ///TODO: Get parallel running again
-    /*const LibTaskForce::Communicator& ParentComm=
-        pulsar::parallel::GetEnv().Comm();
-    LibTaskForce::Communicator NewComm=ParentComm.Split(ParentComm.NThreads(),1,
-                                         std::min(ParentComm.NProcs(),NTasks));*/
-   vector<DerivReturnType> Results;
+    const LibTaskForce::HybridComm& ParentComm=
+         pulsar::parallel::get_env().comm();
+    std::unique_ptr<LibTaskForce::HybridComm> NewComm=ParentComm.split(0,1);
+
+    
+   vector<LibTaskForce::HybridFuture<DerivReturnType>> TempResults;
    ProgressBar PB(NTasks,pulsar::output::get_global_output());
    for(size_t i: Range<0>(NTasks)){
        const Wavefunction& WfnI=(SameSystem?Wfns[0]:Wfns[i]);
        const std::string& Key=(SameMethod?Keys[0]:Keys[i]);
-       Results.push_back(
-        Task(WfnI,std::move(MM.get_module<EnergyMethod>(Key,ID)))(Deriv)      
+       Task DaTask(WfnI,std::move(MM.get_module<EnergyMethod>(Key,ID)),Deriv);
+       TempResults.push_back(
+         NewComm->add_task<DerivReturnType>(std::move(DaTask))      
        );
        ++PB;
    }
-   pulsar::output::get_global_output()<<std::endl;
+   NewComm->barrier();
+   pulsar::output::get_global_output()<<std::endl;//For progress bar
+   vector<DerivReturnType> Results;
+   for(size_t i: Range<0>(NTasks))Results.push_back(TempResults[i].get());
    return Results;
 }
 
