@@ -111,7 +111,7 @@ DIIS::DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
     ///////////////////////////////
     // Obtain the options for SCF
     ///////////////////////////////
-    double etol = options().get<double>("E_TOLERANCE");
+    double etol = options().get<double>("EGY_TOLERANCE");
     size_t maxniter = options().get<size_t>("MAX_ITER");
     double dtol = options().get<double>("DENS_TOLERANCE");
     //double damp = options().get<double>("DAMPING_FACTOR");
