@@ -109,7 +109,7 @@ OneElectron_Eigen::calculate_(const std::string & key,
 
     // Put in cache
     if(usecache)
-        cache().set(hashstr, ret); // note - ret is a vector of shared_ptr, so this is ok
+        cache().set(hashstr, ret, CacheData::CheckpointGlobal); // note - ret is a vector of shared_ptr, so this is ok
  
     return ret;
 }

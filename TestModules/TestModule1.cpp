@@ -5,8 +5,23 @@
 
 using namespace pulsar::modulemanager;
 using namespace pulsar::exception;
+using namespace pulsar::datastore;
 
+struct SomeStruct
+{
+    int i;
+};
 
+struct SomeSerializableStruct
+{
+    int i;
+
+    template<typename Archive>
+    void serialize(Archive & ar)
+    {
+        ar(i);
+    }
+};
 
 TestModule1::TestModule1(ID_t id)
     : Test_Base(id)
@@ -26,8 +41,7 @@ void TestModule1::run_test_(void)
     out.output("+++ In TestModule1: run_test. Info: (%?) %? %? v%?\n", id(), key(), name(), version());
 
     out.output("   Cache entries: %?\n", cache().size());
-    for(const auto & it : cache().get_keys())
-        out.output("                  > %?\n", it);
+    cache().print(out);
 
     out.output("   double_opt_def:    %?\n", options().get<double>("double_opt_def"));
     out.output("      int_opt_def:    %?\n", options().get<int>("int_opt_def"));
@@ -47,10 +61,12 @@ void TestModule1::run_test_(void)
     if(options().has("str_opt"))
         out.output("          str_opt:    %?\n", options().get<std::string>("str_opt"));
 
-    cache().set( "Element 1", std::string("Something in the python cache") );
-    cache().set( "Element 2", 42);
-    cache().set( "Element 3", 42.0 );
-    cache().set( "Element 4", std::vector<int>{ 1, 2, 3, 4} );
+    cache().set( "Element 1", std::string("Something in the python cache"), CacheData::CheckpointLocal);
+    cache().set( "Element 2", 42, CacheData::CheckpointLocal);
+    cache().set( "Element 3", 42.0, CacheData::CheckpointLocal );
+    cache().set( "Element 4", std::vector<int>{ 1, 2, 3, 4}, CacheData::CheckpointLocal );
+    cache().set( "Element 5", SomeStruct{10}, CacheData::CheckpointLocal );
+    cache().set( "Element 6", SomeSerializableStruct{10}, CacheData::CheckpointLocal );
 }
 
 

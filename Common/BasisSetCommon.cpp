@@ -102,7 +102,7 @@ std::shared_ptr<const BasisSet> NormalizeBasis(CacheData & cache,
     auto newbs = bs.transform(NormalizeShell_);
 
     // add to the cache
-    cache.set(cachekey, newbs);
+    cache.set(cachekey, std::move(newbs), CacheData::CheckpointGlobal);
 
     // retrieve the shared_ptr from cache and return
 

@@ -10,8 +10,7 @@ class TestPyModule1(psr.modulebase.Test_Base):
 
     self.out.output("   Cache entries: {}\n".format(self.cache().size()))
 
-    for it in self.cache().get_keys():
-        self.out.output("                  > {}\n".format(it))
+    self.cache().print(self.out)
 
     self.out.output("   double_opt_def:    {}\n".format(self.options().get("double_opt_def")))
     self.out.output("      int_opt_def:    {}\n".format(self.options().get("int_opt_def")))
@@ -29,10 +28,12 @@ class TestPyModule1(psr.modulebase.Test_Base):
 
 
     # cache something
-    self.cache().set( "Element 1", "Something in the python cache")
-    self.cache().set( "Element 2", 42)
-    self.cache().set( "Element 3", 42.0)
-    self.cache().set( "Element 4", [ 1, 2, 3, 4 ])
+    cp = int(psr.datastore.CacheData.CheckpointLocal)
+
+    self.cache().set( "Element 1", "Something in the python cache", cp)
+    self.cache().set( "Element 2", 42, cp)
+    self.cache().set( "Element 3", 42.0, cp)
+    self.cache().set( "Element 4", [ 1, 2, 3, 4 ], cp)
 
   def call_run_test_(self, other):
     self.out.output("+++ In TestPyModule1: call_run_test with {}\n".format(other))
