@@ -42,19 +42,19 @@ namespace pulsarmethods{
         }
         vector<Return_t> Results=
                 RunSeriesOfMethods(module_manager(),id(),Keys,Wfns,Cs,Order);
-        Map_t SprMap;
+        Map_t SuperMap;
         vector<double> Result(std::pow(3*Mol.size(),Order));
-        for(const Atom& AtomI: Mol)SprMap.insert({AtomI,SprMap.size()});
-        const size_t Offset=SprMap.size();
+        for(const Atom& AtomI: Mol)SuperMap.insert({AtomI,SuperMap.size()});
+        const size_t Offset=SuperMap.size();
         for(const Atom& AtomI: Mol)
-            SprMap.insert({make_ghost_atom(AtomI),SprMap.size()-Offset});
+            SuperMap.insert({make_ghost_atom(AtomI),SuperMap.size()-Offset});
         
         for(size_t i: Range<0>(Results.size())){
             Map_t SubMap;
             const System& NMerI=*Results[i].first.system;
             for(const Atom& AtomI: NMerI)
                 SubMap.insert({AtomI,SubMap.size()});
-            FillDeriv(Result,Results[i].second,Cs[i],NMerI,SprMap,SubMap,Order);
+            FillDeriv(Result,Results[i].second,Cs[i],NMerI,SuperMap,SubMap,Order);
         }
             
         return {Wfn,Result};

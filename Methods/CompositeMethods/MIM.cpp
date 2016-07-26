@@ -33,6 +33,7 @@ void PrintGradTable(const vector<string>& Rows,const DerivMap& Derivs,
 
 
 pulsar::modulebase::DerivReturnType MIM::deriv_(size_t Order,const pulsar::datastore::Wavefunction& Wfn){
+    return {Wfn,{0.0}};
    /*//Get the system and compute the number of degrees of freedom for the result
    const System& Mol=*Wfn.system;
    size_t DoF=1;
