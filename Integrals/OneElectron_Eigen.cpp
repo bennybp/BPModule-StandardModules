@@ -1,6 +1,6 @@
 #include <pulsar/system/AOIterator.hpp>
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include <pulsar/math/EigenCommon.hpp>
+#include <pulsar/math/EigenImpl.hpp>
 #include "Integrals/OneElectron_Eigen.hpp"
 
 using Eigen::MatrixXd;
@@ -9,6 +9,7 @@ using namespace pulsar::modulebase;
 using namespace pulsar::exception;
 using namespace pulsar::system;
 using namespace pulsar::datastore;
+using namespace pulsar::math;
 using namespace bphash;
 
 
@@ -24,6 +25,9 @@ OneElectron_Eigen::calculate_(const std::string & key,
                               const BasisSet & bs1,
                               const BasisSet & bs2)
 {
+    // This is similar to ReturnType, but missing some const-ness
+    using CacheType = std::vector<std::shared_ptr<EigenMatrixImpl>>;
+
     const bool usecache = options().get<bool>("CACHE_RESULTS");
 
     std::string hashstr;
@@ -45,7 +49,10 @@ OneElectron_Eigen::calculate_(const std::string & key,
         if(cache().count(hashstr))
         {
             out.debug("integrals were found in the cache. Returning\n");
-            return *cache().get<ReturnType>(hashstr);
+            const auto & cached = *(cache().get<CacheType>(hashstr));
+
+            // add back constness required by the return type
+            return ReturnType(cached.begin(), cached.end());
         }
     }
 
@@ -100,18 +107,19 @@ OneElectron_Eigen::calculate_(const std::string & key,
         }
     }
 
+    // Make a vector of EigenImpl
+    CacheType emats;
+    for(size_t i = 0; i < mats.size(); i++)
+        emats.push_back(std::make_shared<EigenMatrixImpl>(std::move(mats[i])));
+
+
+    // Copy into the cache
+    if(usecache)
+        cache().set(hashstr, emats, CacheData::CheckpointGlobal);
 
     // convert to the appropriate type
-    ReturnType ret;
-
-    for(unsigned int i = 0; i < ncomp; i++)
-        ret.push_back(std::make_shared<EigenMatrixImpl>(std::move(mats[i])));
-
-    // Put in cache
-    if(usecache)
-        cache().set(hashstr, ret, CacheData::CheckpointGlobal); // note - ret is a vector of shared_ptr, so this is ok
- 
-    return ret;
+    // This add the constness back
+    return ReturnType(emats.begin(), emats.end());
 }
 
 
