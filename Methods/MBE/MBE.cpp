@@ -29,7 +29,7 @@ namespace pulsarmethods{
     
     Return_t MBE::deriv_(size_t Order,const Wfn_t& Wfn)
     {
-        vector<string> Keys(1,options().get<string>("METHOD"));
+        vector<string> Keys={options().get<string>("METHOD")};
         const System& Mol=*Wfn.system;
         NMerSetType NMers=
                 create_child_from_option<SFer>("FRAGMENTIZER")->fragmentize(Mol);
