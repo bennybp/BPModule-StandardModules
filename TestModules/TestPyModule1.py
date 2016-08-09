@@ -57,12 +57,17 @@ class TestPyModule1(psr.modulebase.Test_Base):
     self.out.output("+++Done\n")
 
   def test_throw_(self):
-    psr.output.GlobalWarning("+++ In TestPyModule1: Throwing an exception!\n")
-    raise psr.exception.GeneralException("Here in py", "Key", "Some Data")
-    #self.Throw("This is a test exception from python")
-
+    self.out.warning("+++ In TestPyModule1: Throwing an exception!\n")
+    raise RuntimeError("Testing a runtime error")
+    #raise psr.exception.GeneralException("Here in py", "Key", "Some Data")
 
   def call_throw_(self, other):
+    return self.indirect_1_(other);
+
+  def indirect_1_(self, other):
+    return self.indirect_2_(other)
+
+  def indirect_2_(self, other):
     self.out.output("+++ In TestPyModule1: call_run_test with {}\n".format(other))
 
     tb = self.create_child(other)
