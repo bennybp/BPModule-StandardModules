@@ -1,6 +1,6 @@
 #include <pulsar/system/AOIterator.hpp>
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
-#include <pulsar/math/EigenCommon.hpp>
+#include <pulsar/math/EigenImpl.hpp>
 #include "Integrals/OneElectron_Eigen.hpp"
 
 using Eigen::MatrixXd;
@@ -105,7 +105,7 @@ OneElectron_Eigen::calculate_(const std::string & key,
     ReturnType ret;
 
     for(unsigned int i = 0; i < ncomp; i++)
-        ret.push_back(std::make_shared<EigenMatrixImpl>(std::move(mats[i])));
+        ret.push_back(std::make_shared<pulsar::math::EigenMatrixImpl>(std::move(mats[i])));
 
     // Put in cache
     if(usecache)

@@ -1,7 +1,7 @@
 #ifndef PULSAR_GUARD_SCF__SCFCOMMON_HPP_
 #define PULSAR_GUARD_SCF__SCFCOMMON_HPP_
 
-#include <pulsar/math/EigenCommon.hpp>
+#include <pulsar/math/EigenImpl.hpp>
 #include <pulsar/output/OutputStream.hpp>
 #include <pulsar/modulebase/OneElectronIntegral.hpp>
 #include <pulsar/modulebase/TwoElectronIntegral.hpp>
