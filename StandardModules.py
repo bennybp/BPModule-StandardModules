@@ -3,7 +3,7 @@ import argparse
 import traceback
 import pulsar as psr
 
-psr.initialize(sys.argv, out = "stdout", color = True, debug = True)
+psr.initialize(sys.argv)
 
 def LoadDefaultModules(mm):
    #mm.load_module("Methods","MIM","PSR_MIM")
