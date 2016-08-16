@@ -1,4 +1,4 @@
-def MBEHelper(order,wfn,mbe_key,frag_key,n,mm,parent=0):
+def mbe_helper(order,wfn,mbe_key,frag_key,n,mm,parent=0):
     """
     A function designed to quickly compute useful MBE quantities
 
