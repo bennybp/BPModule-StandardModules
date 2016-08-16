@@ -24,6 +24,7 @@ OneElectron_Eigen::calculate_(const std::string & key,
                               const BasisSet & bs1,
                               const BasisSet & bs2)
 {
+    typedef std::vector<std::shared_ptr<pulsar::math::MatrixDImpl>> CachedType;
     const bool usecache = options().get<bool>("CACHE_RESULTS");
 
     std::string hashstr;
@@ -45,7 +46,8 @@ OneElectron_Eigen::calculate_(const std::string & key,
         if(cache().count(hashstr))
         {
             out.debug("integrals were found in the cache. Returning\n");
-            return *cache().get<ReturnType>(hashstr);
+            auto ret = *cache().get<CachedType>(hashstr);
+            return {ret.begin(), ret.end()}; // convert from const to non-const
         }
     }
 
@@ -101,17 +103,18 @@ OneElectron_Eigen::calculate_(const std::string & key,
     }
 
 
-    // convert to the appropriate type
-    ReturnType ret;
+    // std::shared_ptr<const ...> is not serializable, so we actually store
+    // non-const version in cache
+    CachedType ret;
 
     for(unsigned int i = 0; i < ncomp; i++)
         ret.push_back(std::make_shared<pulsar::math::EigenMatrixImpl>(std::move(mats[i])));
 
     // Put in cache
     if(usecache)
-        cache().set(hashstr, ret, CacheData::CheckpointGlobal); // note - ret is a vector of shared_ptr, so this is ok
+        cache().set(hashstr, ret, CacheData::CheckpointLocal); // note - ret is a vector of shared_ptr, so this is ok
  
-    return ret;
+    return ReturnType(ret.begin(), ret.end());
 }
 
 
