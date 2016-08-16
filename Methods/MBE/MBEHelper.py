@@ -28,7 +28,6 @@ def MBEHelper(order,wfn,mbe_key,frag_key,n,mm,parent=0):
         mm.change_option(temp_mbe_name,"FRAGMENTIZER",temp_frag_name)
         mymod=mm.get_module(temp_mbe_name,parent)
         oldwfn,Result=mymod.deriv(order,wfn)
-        print(Result)
         if i==n:BestWfn=oldwfn
         Returns[TotalEName(i)]=Result
         if i<n:
