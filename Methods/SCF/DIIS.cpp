@@ -1,4 +1,5 @@
 #include <pulsar/modulebase/All.hpp>
+#include <pulsar/util/Format.hpp> // for format_string
 
 #include "Methods/SCF/DIIS.hpp"
 #include "Methods/SCF/SCFCommon.hpp"
@@ -10,7 +11,9 @@ using namespace pulsar::datastore;
 using namespace pulsar::modulebase;
 using namespace pulsar::system;
 using namespace pulsar::math;
+using namespace pulsar::util;
 using namespace pulsar::exception;
+using namespace bphash;
 
 
 namespace pulsarmethods {
@@ -64,6 +67,19 @@ DIIS::DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
 
     if(!wfn.system)
         throw GeneralException("System is not set!");
+
+    // have we already calculated this (and the result is in the cache)?
+    auto hash = make_hash(HashType::Hash128, wfn);
+    std::string hashstr = format_string("deriv_%?_wfn:%?", order, hash_to_string(hash));
+    out.debug("Checking for key %? in the cache\n", hashstr);
+
+    if(cache().count(hashstr))
+    {
+        out.debug("Found. Returning that\n");
+        return *(cache().get<DerivReturnType>(hashstr));
+    }
+
+    out.debug("Not found. I have to calculate it :(\n");
 
     initialize_(wfn); // will only use the system from the wfn
 
@@ -299,8 +315,11 @@ DIIS::DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
 
     //! \todo form C if only opdm is set in final wfn?
 
-    // What are we returning 
-    return {std::move(lastwfn), {current_energy}};
+    // cache the result
+    DerivReturnType ret{std::move(lastwfn), {current_energy}};
+    cache().set(hashstr, ret, CacheData::CheckpointGlobal);
+
+    return ret;
 }
     
 
