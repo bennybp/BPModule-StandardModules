@@ -7,8 +7,6 @@ set(BPTEST_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/BasicFockBuild.cpp
  )
 
-install(FILES "SCF.py"  DESTINATION Methods/SCF)
-
 set(BPMETHODS_SRC
        ${BPMETHODS_SRC}
        ${BPTEST_FILES}

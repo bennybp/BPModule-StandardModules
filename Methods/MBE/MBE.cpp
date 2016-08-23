@@ -60,5 +60,4 @@ namespace pulsarmethods{
         return {Wfn,Result};
     }
     
-
 }//End namespace

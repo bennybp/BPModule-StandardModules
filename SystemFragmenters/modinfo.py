@@ -6,7 +6,7 @@ TruncOrderOption=(OptionType.Int,1,False,None,
 SubFragger=(OptionType.String,"PSR_BOND_FRAG",False,None,
         'The SystemFragmenter used to chop the supercell into fragments.')
 GhosterKey=(OptionType.String,"PSR_GHOST_FRAG",False,None,
-        'The generic ghoted frament maker.')
+        'The generic ghosted frament maker.')
     
 minfo = {
 
@@ -56,6 +56,7 @@ minfo = {
                       'How large of a supercell should we fragment?'),
                     },
   },
+  #TODO: Can I get rid of this middle fragmenter, if not why?
   "Ghoster":
   {
     "type"        : "c_module",

@@ -17,7 +17,7 @@ using NMerSet_t=typename NMerSetType::value_type;
 
 const string FraggerKey="SYSTEM_FRAGMENTER_KEY";
 const string GhTruncKey="GHOST_TRUNCATION_ORDERS";
-
+ 
 
 /************  The inline functions below are defined to simplify understanding
                of the code.
@@ -60,31 +60,38 @@ NMerSetType Ghoster::fragmentize_(const System& mol){
     //All fragments have same universe so just grab one
     AtomSetUniverse NewU,OldU;
     NewU=OldU=*(OrigFrags.begin()->second.NMer.get_universe());
+    
+    //A map from a real atom to its ghost equiv, abuse return type of map to
+    //fill NewU
     R2G_t R2G;
     for(const Atom& AtomI : OldU)
         NewU.insert(R2G.insert({AtomI,make_ghost_atom(AtomI)}).first->second);
+        
     System NewSys(NewU,false);
     std::pair<size_t,size_t> Stats=NMerStats(OrigFrags);
     const size_t NFrags=Stats.first,MaxN=Stats.second;
     TruncOrder_t TruncOrders=options().get<TruncOrder_t>(GhTruncKey);
-    bool OnlyFull=true,VMFCn=true;
+    bool OnlyFull=true,VMFCn=true,NoBSSE=true;
     
     for(const auto& TO: TruncOrders){
         if(TO.second<NFrags-TO.first)OnlyFull=false;
         if(TO.second!=MaxN-TO.first)VMFCn=false;
+        if(TO.second!=0)NoBSSE=false;
     }
-
-    if(!OnlyFull && ! VMFCn)
-        throw pulsar::exception::GeneralException(
-                "I have not coded up weights for arbitrary "
-                "combinations of real and ghost monomers.");
     
-    //Supersystem SN
-    SNType FullSN;
+    //For VMFC(n) with n==N OnlyFull and VMFCn will both be true
+    //leading to only running supersystem calcs, fix that...
+    if(VMFCn && OnlyFull)OnlyFull=false;
+    
+    if(!OnlyFull && ! VMFCn && !NoBSSE)throw pulsar::exception::GeneralException(
+        "I have not coded up weights for arbitrary "
+        "combinations of real and ghost monomers."
+    );
+    
+    SNType FullSN;//The super systems SN
     for(size_t i=0;i<NFrags;++i)FullSN.insert(std::to_string(i));
     
-    //The frags to be returned
-    NMerSetType NewFrags;
+    NMerSetType NewFrags;//The frags to be returned
     for(const NMerSet_t& NMerI: OrigFrags){
         NMerSet_t NMerJ=InitializeNMerSet_t(NMerI,NewSys);
         SNType TempSN=ActiveSN(FullSN,NMerJ);
@@ -113,19 +120,24 @@ NMerSetType CommonGuts(const System& Mol,
                        bool UseSuper,
                        const SystemFragmenter* SF,
                        pulsar::modulemanager::ModuleManager& MM){
+    //Do some back-door trickery to get the original fragments
+    //so we can get N and n
     using Fragger_t=pulsar::modulemanager::ModulePtr<SystemFragmenter>;
     const string GhostKey=SF->options().get<string>("GHOSTER_KEY");
     Fragger_t Fragger=SF->create_child<SystemFragmenter>(GhostKey);
     const string OrigKey=Fragger->options().get<string>(FraggerKey);
     NMerSetType OrigFrags=
             SF->create_child<SystemFragmenter>(OrigKey)->fragmentize(Mol);
+        
+    //Make and set the truncation order map for the ghoster
     std::pair<size_t,size_t> Stats=NMerStats(OrigFrags);
+    TruncOrder_t NewTruncs;
+    const size_t Max=(UseSuper?Stats.first:Stats.second);    
+    for(size_t i=1;i<=Stats.second;++i)NewTruncs.insert({i,Max-i});
     const string NewKey=MM.generate_unique_key();
     MM.duplicate_key(GhostKey,NewKey);
-    TruncOrder_t NewTruncs;
-    const size_t Max=(UseSuper?Stats.first:Stats.second);
-    for(size_t i=1;i<=Stats.second;++i)NewTruncs.insert({i,Max-i});
     MM.change_option(NewKey,GhTruncKey,NewTruncs);
+    
     return SF->create_child<SystemFragmenter>(NewKey)->fragmentize(Mol);
 }
 

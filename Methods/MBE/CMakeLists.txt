@@ -7,3 +7,5 @@ set(BPMETHODS_SRC
        ${MBE_FILES}
     PARENT_SCOPE
 )
+
+install(FILES "MBEHelper.py"  DESTINATION Methods/MBE)

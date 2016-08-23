@@ -35,7 +35,7 @@
  * 
  *  Once we have the real fragments the trick is to now apply the ghost
  *  fragments correctly.  We do this by reading in a map that for a
- *  given \f$r\f$ tells us the values of \f$g\f$ to apply.  For CP this would
+ *  given \f$r\f$ tel-ls us the values of \f$g\f$ to apply.  For CP this would
  *  be \f$(N-1)\f$ to all \f$r\f$-mers.  For VMFC this is the power set of
  *  \f$(n-r)\f$.  And for MGMBE this is the power set of specified value.  We
  *  can only accept a dictionary of int to int.  If we assume [x]->y means
