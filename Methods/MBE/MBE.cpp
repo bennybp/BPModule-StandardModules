@@ -41,7 +41,7 @@ namespace pulsarmethods{
             Wfns.back().system=std::make_shared<System>(NMerI.second.NMer);
         }
         vector<Return_t> Results=
-                RunSeriesOfMethods(module_manager(),id(),Keys,Wfns,Cs,Order);
+                RunSeriesOfMethods(module_manager(),id(),Keys,Wfns,Order);
         Map_t SuperMap;
         vector<double> Result(std::pow(3*Mol.size(),Order));
         for(const Atom& AtomI: Mol)SuperMap.insert({AtomI,SuperMap.size()});

@@ -6,10 +6,11 @@ import pulsar as psr
 psr.initialize(sys.argv)
 
 def LoadDefaultModules(mm):
-   #mm.load_module("Methods","MIM","PSR_MIM")
    mm.load_module("Methods","MBE","PSR_MBE")
    mm.load_module("Methods","CP","PSR_CP")
    mm.load_module("Methods","FPA","PSR_FPA")
+   mm.load_module("Methods","MyCrzyCompMeth","PSR_CRZY_METHOD")
+   mm.load_module("Methods","CorrelationEnergy","PSR_CORRELATION_ENERGY")
    mm.load_module("Methods","HelgakerCBS","PSR_HELGAKER_CBS")
    mm.load_module("Methods","FellerCBS","PSR_FELLER_CBS")
    mm.load_module("SystemFragmenters","UserDefined","PSR_UD_FRAG")

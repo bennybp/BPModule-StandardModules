@@ -8,6 +8,7 @@
 #include <pulsar/util/IterTools.hpp>
 #include <pulsar/exception/Exceptions.hpp>
 #include <pulsar/output/GlobalOutput.hpp>
+#include <pybind11/pybind11.h>
 #include "Common/ProgressBar.hpp"
 #include "Methods/MethodHelpers/MethodHelpers.hpp"
 
@@ -83,26 +84,26 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
                                    ID_t ID,
                                    const vector<string>& Keys,
                                    const vector<Wavefunction>& Wfns, 
-                                   const vector<double> Cs,
+                                   //const vector<double> Cs,
                                    size_t Deriv)
 {
+    const size_t NTasks=std::max(Keys.size(),Wfns.size());
     const bool SameMethod=(Keys.size()==1),SameSystem=(Wfns.size()==1);
     const bool BothSpecified=(!SameMethod && !SameSystem);
-    const size_t NTasks=Cs.size();
-    if(SameMethod && SameSystem && Cs.size()!=1)
+    if(SameMethod && SameSystem && NTasks!=1)
         throw GeneralException(
               "Minimally, either the number of systems or the number of methods"
               " must equal the number of coefficients",
               "NSystems=",Wfns.size(),"NMethods=",Keys.size(),"NCoefficients=",
               NTasks);
-    if((BothSpecified || SameMethod) && Wfns.size()!=Cs.size())
+    if((BothSpecified || SameMethod) && Wfns.size()!=NTasks)
         throw GeneralException(
               "The number of coefficients must match the number of systems",
-              "NSystems=",Wfns.size(),"NCoefficients=",Cs.size());
-    if((BothSpecified || SameSystem) && Keys.size()!=Cs.size())
+              "NSystems=",Wfns.size(),"NCoefficients=",NTasks);
+    if((BothSpecified || SameSystem) && Keys.size()!=NTasks)
         throw GeneralException(
               "The number of coefficients must match the number of methods",
-              "NMethods=",Keys.size(),"NCoefficients=",Cs.size());
+              "NMethods=",Keys.size(),"NCoefficients=",NTasks);
     
     const LibTaskForce::HybridComm& ParentComm=
          pulsar::parallel::get_env().comm();
@@ -126,5 +127,7 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
    for(size_t i: Range<0>(NTasks))Results.push_back(TempResults[i].get());
    return Results;
 }
+
+
 
 }//End namespace pulsarmethods

@@ -84,7 +84,7 @@ minfo = {
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
-                     "GHOSTER_KEY":GhosterKey,
+                     "SYSTEM_FRAGMENTER_KEY":SubFragger
                     }
   }, 
   "VMFCGhoster":
@@ -97,7 +97,7 @@ minfo = {
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
-                     "GHOSTER_KEY":GhosterKey
+                     "SYSTEM_FRAGMENTER_KEY":SubFragger
                     }
   },
   "UserDefined" :

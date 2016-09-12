@@ -1,3 +1,5 @@
+import copy
+import pulsar as psr
 def mbe_helper(order,wfn,mbe_key,frag_key,n,mm,parent=0,HasGhosts=False,**kwargs):
     """
     A function designed to quickly compute useful MBE quantities
@@ -25,39 +27,49 @@ def mbe_helper(order,wfn,mbe_key,frag_key,n,mm,parent=0,HasGhosts=False,**kwargs
         returns a dictionary of names of energetic quantities indexed by their
                 names
     """
-    Returns={}
-    prefix="" if "PREFIX" not in kwargs else kwargs["PREFIX"]
-    def TotalEName(i):
-        return "Total "+prefix+str(i)+"-body derivative"
-    def IntEName(i):
-        return "Total of "+str(i)+"-body "+prefix+"interactions"
+    
+    #Run the MBE
+    my_mod=mm.get_module(mbe_key,parent)
+    NewWfn,newegy=my_mod.deriv(order,wfn)#Egy reomputed as byproduct below
+    print(newegy)
+    
+    #Get the name of the method the MBE called and make instance
+    egy_meth_name=my_mod.options().get("METHOD")
+    print(egy_meth_name)
+    egy_meth=mm.get_module(egy_meth_name,parent)
+    
+    Returns={}#Will be the results
+    
+    prefix="" if "PREFIX" not in kwargs else kwargs["PREFIX"] #For printing
+    
+    def egy_title(n_in):
+        return prefix+" "+str(n_in)+"-body energy"
+    
+    ckco=psr.modulemanager.copy_key_change_options
     
     for i in range(n,0,-1):
-        temp_mbe_name=mm.generate_unique_key()
-        temp_frag_name=mm.generate_unique_key()
-        mm.duplicate_key(mbe_key,temp_mbe_name)
-        mm.duplicate_key(frag_key,temp_frag_name)
-        mm.change_option(temp_frag_name,"TRUNCATION_ORDER",i)
-        frag_name=temp_frag_name
+        #This is the fragmenter that generates the non-ghosted fragments
+        fragger=ckco(frag_key,parent,mm,{"TRUNCATION_ORDER":i})
+        
+        #Pass it to the fragger that makes ghosts
         if HasGhosts:
-            bsse_name=mm.generate_unique_key()
-            mm.duplicate_key(kwargs["MAIN_FRAGGER"],bsse_name)
-            frag_name=bsse_name #Will actually call this guy
-            if "GHOST_FRAGGER" in kwargs:
-                ghoster_name=mm.generate_unique_key()
-                mm.duplicate_key(kwargs["GHOST_FRAGGER"],ghoster_name)
-                mm.change_option(bsse_name,"GHOSTER_KEY",ghoster_name)
-                bsse_name=ghoster_name #Ghoster actually gets the fragmenter
-            mm.change_option(bsse_name,"SYSTEM_FRAGMENTER_KEY",temp_frag_name)
-        mm.change_option(temp_mbe_name,"FRAGMENTIZER",frag_name)
-        mymod=mm.get_module(temp_mbe_name,parent)
-        oldwfn,Result=mymod.deriv(order,wfn)
-        if i==n:BestWfn=oldwfn
-        Returns[TotalEName(i)]=Result
-        if i<n:
-            Returns[IntEName(i+1)]=[Returns[TotalEName(i+1)][j]-Result[j] 
-                for j in range(0,len(Result))]
-    return BestWfn,Returns
+            fragger=ckco(kwargs["MAIN_FRAGGER"],parent,mm,{"SYSTEM_FRAGMENTER_KEY":fragger.key()})
+        mmers=fragger.fragmentize(wfn.system)
+        egyname=egy_title(i)
+        Returns[egyname]=0.0
+        print("------------------------")
+        print(wfn.system)
+        for key,val in mmers.items():
+            oldsys=wfn.system
+            wfn.system=val.NMer
+            tempwfn,tempEgy=egy_meth.deriv(order,wfn)
+            Returns[str(key)]=tempEgy
+            Returns[egyname]+=(tempEgy[0]*val.Weight)
+            wfn.system=oldsys
+    print(Returns)
+    exit()
+
+    return NewWfn,Returns
 
 def vmfc_helper(order,wfn,mbe_key,frag_key,sub_frag_key,n,mm,
                 parent=0,ghoster_key="PSR_GHOST_FRAG"):
@@ -81,6 +93,7 @@ def vmfc_helper(order,wfn,mbe_key,frag_key,sub_frag_key,n,mm,
         
     """
     #First run the VMFC computations
+    psr.output.print_global_debug("VMFC(m) energies and interactions")
     BestWfn,Returns=mbe_helper(order,wfn,mbe_key,sub_frag_key,n,mm,parent,True,
         PREFIX="BSSE-Corrected ",MAIN_FRAGGER=frag_key,GHOST_FRAGGER=ghoster_key)
     
@@ -91,6 +104,7 @@ def vmfc_helper(order,wfn,mbe_key,frag_key,sub_frag_key,n,mm,
     ghoster_name=mm.generate_unique_key()
     mm.duplicate_key(ghoster_key,ghoster_name)
     mm.change_option(ghoster_name,"GHOST_TRUNCATION_ORDERS",{i:0 for i in range(0,n)})
+    psr.output.print_global_debug("In VMFC(m), but MBE energies and interactions")
     okwfn,okReturns=mbe_helper(order,wfn,mbe_key,sub_frag_key,n,mm,parent,True,
         MAIN_FRAGGER=ghoster_name)
     Returns.update(okReturns)

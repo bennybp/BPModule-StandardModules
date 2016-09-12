@@ -1,4 +1,6 @@
 import pulsar as psr
+import Methods.Methods
+import numpy as np
 
 class FPA(psr.modulebase.EnergyMethod):
    """This module performs a focal point analysis (FPA)
@@ -9,9 +11,7 @@ class FPA(psr.modulebase.EnergyMethod):
       \f]
       where "large" and "small" refer to the relative sizes of the basis sets
       used.  Technically this is one particular flavor of FPA, but it is one
-      of the more common ones.  If you would like a more general FPA consult
-      the MIM module which is capable of running an arbitrary linear combination
-      of methods.
+      of the more common ones.
 
       Module Options:
         LARGE_MP2_KEY (str) : What module key should be used to find the MP2
@@ -44,12 +44,13 @@ class FPA(psr.modulebase.EnergyMethod):
           Nothing
 
       """
-      MIM=self.create_child(self.options().get("MIM_KEY"))
-      MIM.change_option("METHODS",
-            [self.options().get("LARGE_MP2_KEY"),
-             self.options().get("CCSD(T)_KEY"),
-             self.options().get("SMALL_MP2_KEY")
-            ]
-      )
-      MIM.change_option("FPA_MIM","WEIGHTS",[1.0,-1.0,1.0])
-      return MIM.deriv(order,wfn)
+      Results=Methods.Methods.run_series_of_methods(
+                    self.module_manager(),self.id(),
+                    [self.options().get("CCSD(T)_KEY"),
+                     self.options().get("LARGE_MP2_KEY"),
+                     self.options().get("SMALL_MP2_KEY")],
+                     [wfn],
+                     order)
+      da_sum=np.array(Results[0][1])+np.array(Results[1][1])-np.array(Results[2][1])
+      #TODO: Combine wfns
+      return wfn,da_sum.tolist()

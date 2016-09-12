@@ -47,7 +47,7 @@ std::vector<pulsar::modulebase::DerivReturnType> RunSeriesOfMethods(
     ID_t ID,
     const std::vector<std::string>& Keys,
     const std::vector<pulsar::datastore::Wavefunction>& Wfns, 
-    const std::vector<double> Cs,
+    //const std::vector<double> Cs,
     size_t Deriv
 );
 

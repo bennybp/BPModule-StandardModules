@@ -1,6 +1,5 @@
 
 #include "Methods/MBE/MBE.hpp"
-#include "Methods/CompositeMethods/MIM.hpp"
 #include "Methods/SCF/Damping.hpp"
 #include "Methods/SCF/DIIS.hpp"
 #include "Methods/SCF/HFIterate.hpp"
@@ -15,7 +14,6 @@ extern "C" {
 ModuleCreationFuncs insert_supermodule(void){
     ModuleCreationFuncs cf;
     cf.add_cpp_creator<pulsarmethods::MBE>("MBE");
-    cf.add_cpp_creator<pulsarmethods::MIM>("MIM");
     cf.add_cpp_creator<pulsarmethods::Damping>("Damping");
     cf.add_cpp_creator<pulsarmethods::DIIS>("DIIS");
     cf.add_cpp_creator<pulsarmethods::HFIterate>("HFIterate");

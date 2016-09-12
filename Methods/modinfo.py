@@ -45,24 +45,19 @@ minfo = {
                      "FRAGMENTIZER": FraggerOption
                     }
   },
-  "MIM" :
-  {
-    "type"        : "c_module",
+  "CorrelationEnergy" :
+    {
+    "type"        : "python_module",
     "base"        : "EnergyMethod",
-    "modpath"     : "Methods.so",
     "version"     : "0.1a",
-    "description" : "Performs a Molecules in Molecules (MIM) computation",
+    "description" : "Computes correlation energy by subtacting refernce",
     "authors"     : ["Ryan Richard"],
     "refs"        : [""],
     "options"     : {
-                    "WEIGHTS":(OptionType.ListFloat,None,True,None,
-                    'WEIGHTS[i] is the i-th weight of the i-th system using '\
-                    'the i-th method.'),
-                    "METHODS":(OptionType.ListString,None,True,None,
-                    "METHODS[i] is the i-th method's key, you may provide only"\
-                    ' one key if it is the systems that are changing'),
-                    "FRAGMENTIZER":(OptionType.String,"BP_NULL_FRAG",False,None,
-                    'The key used to fragment the system'),
+                    "CORRELATED_KEY":(OptionType.String,None,True,None,
+                    "The key for the method that generates the correlated egy"),
+                    "REFERENCE_KEY":(OptionType.String,None,True,None,
+                    "The key for the method that generates the reference egy")
                     }
   },
   "HelgakerCBS" :
@@ -77,7 +72,9 @@ minfo = {
     "options"     : {
                     "BASIS_CARDINAL_NUMS":(OptionType.ListInt,None,True,None,
                     "The cardinal numbers of the two basis sets."),
-                    "MIM_KEY":MIMOption
+                    "METHODS":(OptionType.ListString,None,True,None,
+                    "The respective methods for the cardinal numbers"
+                    )
                     }
   },
   "FellerCBS" :
@@ -93,7 +90,9 @@ minfo = {
                     "analytic derivative available.  At the moment this is 2"),
                     "BASIS_CARDINAL_NUMS":(OptionType.ListInt,None,True,None,
                     "The cardinal numbers of the two basis sets."),
-                    "MIM_KEY":MIMOption
+                    "METHODS":(OptionType.ListString,None,True,None,
+                    "Keys of methods for the respective cardinal numbers"
+                    )
                     }
   },
   "FPA" :
@@ -112,6 +111,18 @@ minfo = {
                     "CCSD(T)_KEY":(OptionType.String,"BP_CCSD(T)",False,None,
                        "The key for the CCSD(T) module"),
                     "MIM_KEY":MIMOption
+                    }
+  },
+  "MyCrzyCompMeth" :
+    {
+    "type"        : "python_module",
+    "version"     : "0.1a",
+    "description" : "Proof of concept crzy nested method",
+    "authors"     : ["Ryan Richard"],
+    "refs"        : [""],
+    "options"     : {
+                    "MAX_DERIV":(OptionType.Int,2,False,None,"The maximum "\
+                    "analytic derivative available.  At the moment this is 2"),
                     }
   },
   "HFIterate" :

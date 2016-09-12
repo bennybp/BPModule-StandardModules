@@ -1,5 +1,5 @@
 #Each method should append their source files to this variable
-set(BPMETHODS_SRC creator.cpp)
+set(BPMETHODS_SRC creator.cpp export.cpp)
 
 #Each method should append their include files to this variable
 set(BPMETHODS_INC "")

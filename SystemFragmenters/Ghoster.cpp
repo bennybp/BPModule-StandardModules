@@ -119,11 +119,12 @@ NMerSetType Ghoster::fragmentize_(const System& mol){
 NMerSetType CommonGuts(const System& Mol,
                        bool UseSuper,
                        const SystemFragmenter* SF,
+                       const std::string& NewFraggerKey,
                        pulsar::modulemanager::ModuleManager& MM){
     //Do some back-door trickery to get the original fragments
     //so we can get N and n
     using Fragger_t=pulsar::modulemanager::ModulePtr<SystemFragmenter>;
-    const string GhostKey=SF->options().get<string>("GHOSTER_KEY");
+    const string GhostKey="PSR_GHOST_FRAG";//SF->options().get<string>("GHOSTER_KEY");
     Fragger_t Fragger=SF->create_child<SystemFragmenter>(GhostKey);
     const string OrigKey=Fragger->options().get<string>(FraggerKey);
     NMerSetType OrigFrags=
@@ -137,16 +138,17 @@ NMerSetType CommonGuts(const System& Mol,
     const string NewKey=MM.generate_unique_key();
     MM.duplicate_key(GhostKey,NewKey);
     MM.change_option(NewKey,GhTruncKey,NewTruncs);
+    MM.change_option(NewKey,FraggerKey,NewFraggerKey);
     
     return SF->create_child<SystemFragmenter>(NewKey)->fragmentize(Mol);
 }
 
 
 NMerSetType CPGhoster::fragmentize_(const pulsar::system::System& Mol){
-    return CommonGuts(Mol,true,this,module_manager());
+    return CommonGuts(Mol,true,this,options().get<std::string>(FraggerKey),module_manager());
 }
 
 NMerSetType VMFCGhoster::fragmentize_(const pulsar::system::System& Mol){
-    return CommonGuts(Mol,false,this,module_manager());
+    return CommonGuts(Mol,false,this,options().get<std::string>(FraggerKey),module_manager());
 }
 
