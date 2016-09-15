@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 #include <unordered_map>
-#include <pulsar/parallel/InitFinalize.hpp>
+#include <pulsar/parallel/Parallel.hpp>
 #include <pulsar/util/IterTools.hpp>
 #include <pulsar/exception/Exceptions.hpp>
 #include <pulsar/output/GlobalOutput.hpp>
