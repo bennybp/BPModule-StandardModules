@@ -10,8 +10,6 @@ class TestPyModule1(psr.modulebase.Test_Base):
 
     self.out.output("   Cache entries: {}\n".format(self.cache().size()))
 
-    self.cache().print(self.out)
-
     self.out.output("   double_opt_def:    {}\n".format(self.options().get("double_opt_def")))
     self.out.output("      int_opt_def:    {}\n".format(self.options().get("int_opt_def")))
     self.out.output("     bool_opt_def:    {}\n".format(self.options().get("bool_opt_def")))

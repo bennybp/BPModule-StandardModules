@@ -41,7 +41,6 @@ void TestModule1::run_test_(void)
     out.output("+++ In TestModule1: run_test. Info: (%?) %? %? v%?\n", id(), key(), name(), version());
 
     out.output("   Cache entries: %?\n", cache().size());
-    cache().print(out);
 
     out.output("   double_opt_def:    %?\n", options().get<double>("double_opt_def"));
     out.output("      int_opt_def:    %?\n", options().get<int>("int_opt_def"));
