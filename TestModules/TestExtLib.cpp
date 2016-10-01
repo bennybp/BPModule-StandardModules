@@ -59,3 +59,11 @@ void TestExtLib::call_throw_(const std::string & other)
 {
 }
 
+void TestExtLib::add_to_cache_(const std::string & key, unsigned int policy)
+{
+}
+
+void TestExtLib::get_from_cache_(const std::string & key)
+{
+}
+

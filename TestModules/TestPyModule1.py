@@ -8,8 +8,6 @@ class TestPyModule1(psr.modulebase.Test_Base):
   def run_test_(self):
     self.out.output("+++ In TestPyModule1: run_test. Info: ({}) {} {} v{}\n".format(self.id(), self.key(), self.name(), self.version()))
 
-    self.out.output("   Cache entries: {}\n".format(self.cache().size()))
-
     self.out.output("   double_opt_def:    {}\n".format(self.options().get("double_opt_def")))
     self.out.output("      int_opt_def:    {}\n".format(self.options().get("int_opt_def")))
     self.out.output("     bool_opt_def:    {}\n".format(self.options().get("bool_opt_def")))
@@ -28,10 +26,6 @@ class TestPyModule1(psr.modulebase.Test_Base):
     # cache something
     cp = int(psr.datastore.CacheData.CheckpointLocal)
 
-    self.cache().set( "Element 1", "Something in the python cache", cp)
-    self.cache().set( "Element 2", 42, cp)
-    self.cache().set( "Element 3", 42.0, cp)
-    self.cache().set( "Element 4", [ 1, 2, 3, 4 ], cp)
 
   def call_run_test_(self, other):
     self.out.output("+++ In TestPyModule1: call_run_test with {}\n".format(other))
@@ -69,3 +63,13 @@ class TestPyModule1(psr.modulebase.Test_Base):
 
     # shouldn't be run?
     self.out.output("+++Done\n")
+
+  def add_to_cache_(self, key, policy):
+    val = "TestModule1::DataInCacheForKey:{}".format(key)
+    self.cache().set(key, val, policy)
+
+  def get_from_cache_(self, key):
+    val = self.cache().get(key)
+    self.out.output("From cache: Key = {} Value = {}\n".format(key, val))
+
+

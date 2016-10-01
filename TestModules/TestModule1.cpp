@@ -40,8 +40,6 @@ void TestModule1::run_test_(void)
 {
     out.output("+++ In TestModule1: run_test. Info: (%?) %? %? v%?\n", id(), key(), name(), version());
 
-    out.output("   Cache entries: %?\n", cache().size());
-
     out.output("   double_opt_def:    %?\n", options().get<double>("double_opt_def"));
     out.output("      int_opt_def:    %?\n", options().get<int>("int_opt_def"));
     out.output("     bool_opt_def:    %?\n", options().get<bool>("bool_opt_def"));
@@ -59,13 +57,6 @@ void TestModule1::run_test_(void)
 
     if(options().has("str_opt"))
         out.output("          str_opt:    %?\n", options().get<std::string>("str_opt"));
-
-    cache().set( "Element 1", std::string("Something in the python cache"), CacheData::CheckpointLocal);
-    cache().set( "Element 2", 42, CacheData::CheckpointLocal);
-    cache().set( "Element 3", 42.0, CacheData::CheckpointLocal );
-    cache().set( "Element 4", std::vector<int>{ 1, 2, 3, 4}, CacheData::CheckpointLocal );
-    cache().set( "Element 5", SomeStruct{10}, CacheData::CheckpointLocal );
-    cache().set( "Element 6", SomeSerializableStruct{10}, CacheData::CheckpointLocal );
 }
 
 
@@ -118,4 +109,20 @@ void TestModule1::call_throw_(const std::string & other)
     // shouldn't be called
     out.output("+++Done\n");
 }
+
+
+void TestModule1::add_to_cache_(const std::string & key, unsigned int policy)
+{
+    std::string val("TestModule1::DataInCacheForKey:");
+    val += key;
+    cache().set(key, val, policy);
+}
+
+
+void TestModule1::get_from_cache_(const std::string & key)
+{
+    std::string val = *(cache().get<std::string>(key));
+    out.output("From cache: Key = %? Value = %?\n", key, val);
+}
+
 

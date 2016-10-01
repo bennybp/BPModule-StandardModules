@@ -18,6 +18,10 @@ public:
 
     virtual void call_throw_(const std::string & other);
 
+    virtual void add_to_cache_(const std::string & key, unsigned int policy);
+
+    virtual void get_from_cache_(const std::string & key);
+
     virtual ~TestModule1();
 
 };
