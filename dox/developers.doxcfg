@@ -1,0 +1,6 @@
+INPUT+=  dox/atomizer.md \
+         dox/bondizer.md \
+         dox/cpghoster.md \
+         dox/nmerizer.md \
+         dox/vmfcghoster.md
+INPUT += dox/mainpage.dox

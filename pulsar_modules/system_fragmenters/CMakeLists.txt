@@ -1,0 +1,10 @@
+set(PULSAR_SYSTEM_FRAGMENTERS_SRC
+                     Atomizer.cpp
+                     Bondizer.cpp
+                     CrystalFragger.cpp
+                     CPGhoster.cpp
+                     NMerizer.cpp
+                     UserDefined.cpp
+                     VMFCGhoster.cpp
+    PARENT_SCOPE
+   )

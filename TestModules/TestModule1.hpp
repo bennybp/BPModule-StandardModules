@@ -3,7 +3,7 @@
 
 #include <pulsar/modulebase/Test_Base.hpp>
 
-class TestModule1 : public pulsar::modulebase::Test_Base
+class TestModule1 : public pulsar::Test_Base
 {
 public:
     TestModule1(ID_t id);

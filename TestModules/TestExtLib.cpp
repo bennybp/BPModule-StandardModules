@@ -7,10 +7,7 @@
 #include "staticlib.hpp"
 #include "dynlib.hpp"
 
-using namespace pulsar::output;
-using namespace pulsar::modulemanager;
-using namespace pulsar::exception;
-
+using namespace pulsar;
 
 
 TestExtLib::TestExtLib(ID_t id)

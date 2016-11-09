@@ -3,9 +3,7 @@
 #include "TestModule1.hpp"
 
 
-using namespace pulsar::modulemanager;
-using namespace pulsar::exception;
-using namespace pulsar::datastore;
+using namespace pulsar;
 
 struct SomeStruct
 {

@@ -1,0 +1,5 @@
+pulsar_py_test(TestAtomizer)
+pulsar_py_test(TestBondizer)
+pulsar_py_test(TestCPGhoster)
+pulsar_py_test(TestNMerizer)
+pulsar_py_test(TestVMFCGhoster)

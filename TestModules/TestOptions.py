@@ -1,6 +1,6 @@
 import pulsar as psr
 
-class TestOptions(psr.modulebase.Test_Base):
+class TestOptions(psr.Test_Base):
   def __init__(self, myid):
     super(TestOptions, self).__init__(self, myid)
 

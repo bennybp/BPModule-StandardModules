@@ -1,0 +1,42 @@
+/////////////////////////
+// MAINPAGE            //
+/////////////////////////
+/*! \mainpage
+
+Welcome to the Pulsar Standard Modules manual.  Pulsar's Standard Modules is the
+name given to the super module that contains module implementations written
+specifically for Pulsar.  In many cases these modules serve as reference
+implementations; however, there is also an effort to ensure the reference
+implementations are of production quality.  This documentation is largely
+geared at users as the developer's notes of the main Pulsar documentation still
+apply for developers of Standard Modules.  The index below provides the details
+of each implementation currently in the super module, arranged by module base
+type.
+
+\section main_sec Contents
+
+  - Integrals
+  - Energy Methods
+  - System Fragmenters
+    - [Atomizer](@ref atomizer): One atom per fragment
+    - [Bondizer](@ref bondizer): All atoms within n bonds are in a fragment
+    - [Crystal Fragger](@ref crystfragger): Fragments periodic systems
+    - [CPGhoster](@ref cpghoster): Applies ghost atoms to a set of fragments in
+      a manner consistent with the Boys and Bernardi counterpoise correction
+    - [NMerizer](@ref nmerizer): Makes unions of up to n fragments
+    - [User Defined](@ref udfragger): Assigns atoms as the user requests
+    - [VMFCGhoster](@ref vmfcghoster): Applies ghost atoms in a manner 
+      consistent with the Valiron Mayer functional counterpoise scheme
+
+    
+
+
+\section Authors
+
+\todo Authors
+
+\section license_sec License
+
+\todo License info
+
+*/
