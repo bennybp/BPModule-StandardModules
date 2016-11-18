@@ -50,7 +50,7 @@ class TestPyModule1(psr.est_Base):
 
   def test_throw_(self):
     psr.output.GlobalWarning("+++ In TestPyModule1: Throwing an exception!\n")
-    raise psr.GeneralException("Here in py", "Key", "Some Data")
+    raise psr.PulsarException("Here in py", "Key", "Some Data")
     #self.Throw("This is a test exception from python")
 
 

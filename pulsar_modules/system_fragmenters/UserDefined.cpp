@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#include <pulsar/exception/Exceptions.hpp>
+#include <pulsar/exception/PulsarException.hpp>
 #include "pulsar_modules/system_fragmenters/UserDefined.hpp"
 
 using std::vector;
@@ -16,7 +16,7 @@ NMerSetType UserDefined::fragmentize_(const System & mol){
     vector<int> AtomsPerFrag=options().get<vector<int>>("ATOMS_PER_FRAG");
     vector<int> Frags=options().get<vector<int>>("FRAGMENTS");
     if(Names.size()!=AtomsPerFrag.size())
-        throw pulsar::GeneralException("The number of names for your fragments must"
+        throw pulsar::PulsarException("The number of names for your fragments must"
                 " match the length of the array of fragment sizes",
                 "NNames",Names.size(),
                  "NSizes",AtomsPerFrag.size());

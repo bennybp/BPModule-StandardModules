@@ -23,7 +23,7 @@ uint64_t OSDipole::calculate_(uint64_t shell1, uint64_t shell2,
     const size_t nfunc = sh1.n_functions() * sh2.n_functions();
 
     if(bufsize < 3*nfunc)
-        throw GeneralException("Buffer is too small", "size", bufsize, "required", nfunc);
+        throw PulsarException("Buffer is too small", "size", bufsize, "required", nfunc);
 
 
 

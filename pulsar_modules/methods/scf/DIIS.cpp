@@ -61,7 +61,7 @@ DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
         throw NotYetImplementedException("Test with deriv != 0");
 
     if(!wfn.system)
-        throw GeneralException("System is not set!");
+        throw PulsarException("System is not set!");
 
     // have we already calculated this (and the result is in the cache)?
     auto hash = make_hash(HashType::Hash128, wfn);
@@ -97,7 +97,7 @@ DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
         out.debug("Don't have C-matrices set. Will call initial guess module\n");
 
         if(!options().has("KEY_INITIAL_GUESS"))
-            throw GeneralException("Missing initial guess module when I don't have a C-matrix");
+            throw PulsarException("Missing initial guess module when I don't have a C-matrix");
 
         // load and run the initial guess module
         auto mod_iguess = create_child_from_option<EnergyMethod>("KEY_INITIAL_GUESS");
@@ -112,9 +112,9 @@ DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
  
         // c-matrices have been set. Make sure we have occupations, etc, as well
         if(!wfn.occupations)
-            throw GeneralException("Missing Occupations in given wavefunction");
+            throw PulsarException("Missing Occupations in given wavefunction");
         if(!wfn.epsilon)
-            throw GeneralException("Missing Epsilon in given wavefunction");
+            throw PulsarException("Missing Epsilon in given wavefunction");
 
         initial_wfn = wfn;
     }
@@ -281,7 +281,7 @@ DerivReturnType DIIS::deriv_(size_t order, const Wavefunction & wfn)
 
         // Form the new density and calculate the energy
         if(!newwfn.opdm)
-            throw GeneralException("Returned wfn doesn't have opdm");
+            throw PulsarException("Returned wfn doesn't have opdm");
 
         const IrrepSpinMatrixD dens = *newwfn.opdm;
         current_energy = Calculateenergy(*Hcore_, nucrep_, dens, Fmat, out);

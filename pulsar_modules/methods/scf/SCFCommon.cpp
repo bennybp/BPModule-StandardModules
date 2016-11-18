@@ -55,7 +55,7 @@ FillTwoElectronVector(ModulePtr<TwoElectronIntegral> & mod,
 
                     // make sure the right number of integrals was returned
                     if(ncalc != aoit.n_functions())
-                        throw GeneralException("Bad number of integrals returned",
+                        throw PulsarException("Bad number of integrals returned",
                                                "ncalc", ncalc, "expected", aoit.n_functions());
 
                     do { 
@@ -141,7 +141,7 @@ IrrepSpinMatrixD FormDensity(const IrrepSpinMatrixD & Cmat,
 double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2)
 {
     /*if(!m1.same_structure(m2))
-        throw GeneralException("Density matrices have different structure");
+        throw PulsarException("Density matrices have different structure");
 
     double rms = 0.0;
 
@@ -153,9 +153,9 @@ double CalculateRMSDens(const IrrepSpinMatrixD & m1, const IrrepSpinMatrixD & m2
         const MatrixXd & mat2 = *(convert_to_eigen(m1.get(ir, spin)));
 
         if(mat1.rows() != mat2.rows())
-            throw GeneralException("Density matrices have different number of rows");
+            throw PulsarException("Density matrices have different number of rows");
         if(mat1.cols() != mat2.cols())
-            throw GeneralException("Density matrices have different number of columns");
+            throw PulsarException("Density matrices have different number of columns");
 
         for(long i = 0; i < mat1.rows(); i++)
         for(long j = 0; j < mat1.cols(); j++)

@@ -33,7 +33,7 @@ uint64_t OneElectronIntegralSum::calculate_(uint64_t shell1, uint64_t shell2,
                                            n_initial);
 
         if(n != n_initial)
-            throw GeneralException("Error - inconsistent number of values returned by OneElectronIntegrals",
+            throw PulsarException("Error - inconsistent number of values returned by OneElectronIntegrals",
                                    "n", n, "nexpected", n_initial,
                                    "modulekey", it->second->key(),
                                    "modulename", it->second->name());
@@ -58,7 +58,7 @@ void OneElectronIntegralSum::initialize_(unsigned int deriv,
 
     const auto mods = options().get<std::vector<std::string>>("KEY_AO_TERMS");
     if(mods.size() == 0)
-        throw GeneralException("No modules given to OneElectronIntegralSum");
+        throw PulsarException("No modules given to OneElectronIntegralSum");
 
 
     for(const auto & a : mods)

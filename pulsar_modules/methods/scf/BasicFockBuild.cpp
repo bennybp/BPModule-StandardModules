@@ -14,7 +14,7 @@ void BasicFockBuild::initialize_(unsigned int deriv, const Wavefunction & wfn,
                                  const BasisSet & bs)
 {
     if(!wfn.system)
-        throw GeneralException("System is not set!");
+        throw PulsarException("System is not set!");
 
     /////////////////////////
     // Load the ERI to core
@@ -41,7 +41,7 @@ void BasicFockBuild::initialize_(unsigned int deriv, const Wavefunction & wfn,
 IrrepSpinMatrixD BasicFockBuild::calculate_(const Wavefunction & wfn)
 {
     if(!wfn.opdm)
-        throw GeneralException("Missing OPDM");
+        throw PulsarException("Missing OPDM");
 
     const size_t nao1 = Hcore_->rows();
     const size_t nao2 = Hcore_->cols();

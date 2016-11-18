@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <pulsar/parallel/Parallel.hpp>
 #include <pulsar/util/IterTools.hpp>
-#include <pulsar/exception/Exceptions.hpp>
+#include <pulsar/exception/PulsarException.hpp>
 #include <pulsar/output/GlobalOutput.hpp>
 #include <pybind11/pybind11.h>
 #include "pulsar_modules/common/ProgressBar.hpp"
@@ -86,17 +86,17 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
     const bool SameMethod=(Keys.size()==1),SameSystem=(Wfns.size()==1);
     const bool BothSpecified=(!SameMethod && !SameSystem);
     if(SameMethod && SameSystem && NTasks!=1)
-        throw GeneralException(
+        throw PulsarException(
               "Minimally, either the number of systems or the number of methods"
               " must equal the number of coefficients",
               "NSystems=",Wfns.size(),"NMethods=",Keys.size(),"NCoefficients=",
               NTasks);
     if((BothSpecified || SameMethod) && Wfns.size()!=NTasks)
-        throw GeneralException(
+        throw PulsarException(
               "The number of coefficients must match the number of systems",
               "NSystems=",Wfns.size(),"NCoefficients=",NTasks);
     if((BothSpecified || SameSystem) && Keys.size()!=NTasks)
-        throw GeneralException(
+        throw PulsarException(
               "The number of coefficients must match the number of methods",
               "NMethods=",Keys.size(),"NCoefficients=",NTasks);
     
