@@ -1,4 +1,4 @@
-from pulsar.datastore import OptionType
+from pulsar import OptionType
 
 minfo = {
 

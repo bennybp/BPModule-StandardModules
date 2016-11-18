@@ -1,6 +1,6 @@
 import pulsar as psr
 
-class TestPyModule1(psr.modulebase.Test_Base):
+class TestPyModule1(psr.est_Base):
   def __init__(self, myid):
     super(TestPyModule1, self).__init__(myid)
 
@@ -24,7 +24,7 @@ class TestPyModule1(psr.modulebase.Test_Base):
 
 
     # cache something
-    cp = int(psr.datastore.CacheData.CheckpointLocal)
+    cp = int(psr.CacheData.CheckpointLocal)
 
 
   def call_run_test_(self, other):
@@ -50,7 +50,7 @@ class TestPyModule1(psr.modulebase.Test_Base):
 
   def test_throw_(self):
     psr.output.GlobalWarning("+++ In TestPyModule1: Throwing an exception!\n")
-    raise psr.exception.GeneralException("Here in py", "Key", "Some Data")
+    raise psr.GeneralException("Here in py", "Key", "Some Data")
     #self.Throw("This is a test exception from python")
 
 

@@ -1,55 +1,60 @@
 cmake_minimum_required(VERSION 3.0)
+include(ExternalProject)
 
-# Find the pulsar core
-list(APPEND CMAKE_PREFIX_PATH "${PULSAR_PATH}")
-find_package(pulsar REQUIRED)
+# RMR Should this be moved to PulsarConfig file????
+set(Python_ADDITIONAL_VERSIONS "3.3;3.4;3.5;3.6")
+find_package(PythonLibs "3.3" REQUIRED)
+find_package(PythonInterp ${PYTHONLIBS_VERSION_STRING} EXACT REQUIRED)
+message(STATUS "Python version: ${PYTHONLIBS_VERSION_STRING}")
+message(STATUS "Python libs: ${PYTHON_LIBRARIES}")
+message(STATUS "Python include: ${PYTHON_INCLUDE_DIRS}")
+message(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
 
+set(STAGE_DIR ${CMAKE_BINARY_DIR}/stage)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/cmake)
+ExternalProject_Add(standard_modules
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pulsar_modules
+   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+              -DCMAKE_BUILD_TYPE=${PULSAR_BUILD_TYPE}
+              -DPULSAR_MODULE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
+              -DDESTDIR=${STAGE_DIR} # Pass in for searching for dependencies 
+              -DCMAKE_PREFIX_PATH=${STAGE_DIR}/${CMAKE_INSTALL_PREFIX}/external
+              -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
+              -DMPI_C_COMPILER=${MPI_C_COMPILER}
+              -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+              -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+              -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+              -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+   CMAKE_CACHE_ARGS -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
+                    -DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}
+   BUILD_COMMAND $(MAKE)
+   BUILD_ALWAYS 1
+   INSTALL_COMMAND $(MAKE) install DESTDIR=${STAGE_DIR}
+)
 
-# Common flags for standard modules
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-std=c++11")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-w3")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-restrict;-DRESTRICT=restrict")
+ExternalProject_Add(pulsar_modules_test
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test
+   BINARY_DIR ${CMAKE_BINARY_DIR}/test   
+   CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+              -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+              -DSTAGE_DIR=${STAGE_DIR}${CMAKE_INSTALL_PREFIX}
+              -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
+              -DMPI_C_COMPILER=${MPI_C_COMPILER}
+              -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+              -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+              -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+              -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+              -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+   CMAKE_CACHE_ARGS -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
+                    -DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}
+   BUILD_COMMAND $(MAKE)
+   BUILD_ALWAYS 1
+   INSTALL_COMMAND $(MAKE) install
+)
+add_dependencies(pulsar_modules_test standard_modules)
 
-    # some useless remarks
-    #  1418  : external function definition with no prior declaration
-    #  1419  : external declaration in primary source file (happens in boost files)
-    #   383  : value copied to temporary, reference to temporary used (generally ok in c++)
-    #   981  : operands are evaluated in unspecified order (generally ok in c++)
-    #   869  : parameter "XXX" was never referenced.
-    #          This is due to a bug in Intel before Intel 16 that causes this
-    #          remark to be printed for variadic templates
-    # 11074  : Inlining inhibited by limit max-size (etc)
-    # 11076  : To get full report use -qopt-report=4 -qopt-report-phase ipo
-    #   444  : destructor for base class .. not virtual (even warns for classes without virtual functions)
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd1418")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd1419")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd383")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd981")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd869")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd11074")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd11076")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-wd444")
-elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-std=c++11")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-DRESTRICT=__restrict__")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-Wall;-Wextra;-pedantic")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-Wfloat-equal;-Wshadow")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-Wswitch-default")
-    list(APPEND PULSAR_CXX_STRICT_FLAGS "-Wconversion")
-endif()
-
-
-
-include_directories(${CMAKE_CURRENT_LIST_DIR})
-
-
-# Modules are in subdirectories
-add_subdirectory(Common)
-add_subdirectory(SystemFragmenters)
-add_subdirectory(Methods)
-add_subdirectory(Integrals)
-add_subdirectory(TestModules)
-
+# Install the staging directory
+install(DIRECTORY ${CMAKE_BINARY_DIR}/stage/${CMAKE_INSTALL_PREFIX}/ 
+        DESTINATION ${CMAKE_INSTALL_PREFIX} USE_SOURCE_PERMISSIONS)
 # install additional python files
 install(FILES "StandardModules.py" DESTINATION ${CMAKE_INSTALL_PREFIX})

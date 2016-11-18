@@ -3,7 +3,7 @@
 
 #include <pulsar/modulebase/Test_Base.hpp>
 
-class TestExtLib : public pulsar::modulebase::Test_Base
+class TestExtLib : public pulsar::Test_Base
 {
 public:
     TestExtLib(ID_t id);
