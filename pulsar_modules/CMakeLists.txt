@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.0)
 # Find the pulsar core
 list(APPEND CMAKE_PREFIX_PATH "${PULSAR_PATH}")
 find_package(pulsar REQUIRED)

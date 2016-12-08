@@ -1,7 +1,7 @@
-from TestFxns import *
+import pulsar as psr
 
 def run(mm):
-    tester = Tester("Testing Atomizer")
+    tester = psr.PyTester("Testing Atomizer")
 
     water6=psr.make_system("""
     0 1
@@ -27,7 +27,6 @@ def run(mm):
     
     mm.load_module("pulsar_modules","Atomizer","PSR_ATOM_FRAG")
     my_mod=mm.get_module("PSR_ATOM_FRAG",0)
-    frags=my_mod.fragmentize(water6)
 
     #This will make the right answer
     corr={}
@@ -37,15 +36,14 @@ def run(mm):
         Temp.nmer=psr.System(water6,False)
         Temp.nmer.insert(atomi)
         Temp.weight=1.0
-        Temp.sn={i}
+        Temp.sn=set({i,})
         corr[SN]=Temp
-
-    tester.test_value("Resulting fragments are correct",corr,frags)
+    print("done with corr answer")
+    tester.test_return("Resulting fragments are correct",
+        corr,my_mod.fragmentize,water6)
 
     tester.print_results()
 
-
-with psr.ModuleAdministrator() as mm:
-    run(mm)
-    
-psr.finalize()
+def run_test():
+    with psr.ModuleAdministrator() as mm:
+        run(mm)

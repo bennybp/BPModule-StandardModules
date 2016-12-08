@@ -7,7 +7,7 @@ no_options={}
 no_ref,Ben,Ryan=[""],["Ben Pritchard"],["Ryan Richard"]
 
 sys_frags=["Atomizer","Bondizer","CrystalFragger","CPGhoster","VMFCGhoster",\
-           "UserDefined","NMerizer"]
+           "UserDefined","NMerizer","MBE"]
 minfo={i:{
     "type":c_mod,
     "base":sysfrag,
@@ -57,6 +57,13 @@ minfo["NMerizer"]["options"]={
                     "The maximum number of fragments involved in a union"),
                     "DISTANCE_THRESHOLDS":(OptionType.DictIntFloat,{},False,
                      None,"Maximum distance per truncation order to use") 
+                    }
+minfo["MBE"]["description"]="Runs a many-body expansion"
+minfo["MBE"]["options"]={
+                "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
+                "Fragmenter to call for original fragments"),
+                "METHOD_KEY":(OptionType.String,None,True,None,
+                "EnergyMethod to call"),
                     }
 
 #  "CP":{

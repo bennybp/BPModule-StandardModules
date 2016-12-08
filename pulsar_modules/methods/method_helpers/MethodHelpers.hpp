@@ -18,8 +18,6 @@
 #include <pulsar/datastore/Wavefunction.hpp>
 #include <pulsar/types.h>
 
-namespace pulsarmethods {
-
 
 /** \brief Given a series of computations to perform runs them in embarassingly
  *         parallel fashion and combines the results
@@ -68,6 +66,5 @@ void FillDeriv(std::vector<double>& Result,
                   std::vector<pulsar::Atom>(),
                std::vector<size_t> Comp=std::vector<size_t>());
 
-}//End namespace pulsar
 #endif /* PULSAR_GHUARD_METHODHELPERS_HPP */
 

@@ -17,29 +17,22 @@ ExternalProject_Add(standard_modules
    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
               -DCMAKE_BUILD_TYPE=${PULSAR_BUILD_TYPE}
               -DPULSAR_MODULE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}
-              -DDESTDIR=${STAGE_DIR} # Pass in for searching for dependencies 
               -DCMAKE_PREFIX_PATH=${STAGE_DIR}/${CMAKE_INSTALL_PREFIX}/external
-              -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
-              -DMPI_C_COMPILER=${MPI_C_COMPILER}
               -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
               -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
               -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
               -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
    CMAKE_CACHE_ARGS -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
                     -DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}
-   BUILD_COMMAND $(MAKE)
    BUILD_ALWAYS 1
    INSTALL_COMMAND $(MAKE) install DESTDIR=${STAGE_DIR}
 )
 
 ExternalProject_Add(pulsar_modules_test
    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test
-   BINARY_DIR ${CMAKE_BINARY_DIR}/test   
    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-              -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+              -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/test_stage
               -DSTAGE_DIR=${STAGE_DIR}${CMAKE_INSTALL_PREFIX}
-              -DMPI_CXX_COMPILER=${MPI_CXX_COMPILER}
-              -DMPI_C_COMPILER=${MPI_C_COMPILER}
               -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
               -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
               -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
@@ -47,11 +40,14 @@ ExternalProject_Add(pulsar_modules_test
               -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
    CMAKE_CACHE_ARGS -DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}
                     -DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}
-   BUILD_COMMAND $(MAKE)
    BUILD_ALWAYS 1
-   INSTALL_COMMAND $(MAKE) install
 )
 add_dependencies(pulsar_modules_test standard_modules)
+#This file will allow us to run ctest in the top-level build dir
+
+#Basically it just defers to the actual top-level CTestTestfile.cmake in the
+#build directory for this project
+file(WRITE ${CMAKE_BINARY_DIR}/CTestTestfile.cmake "subdirs(test_stage)")
 
 # Install the staging directory
 install(DIRECTORY ${CMAKE_BINARY_DIR}/stage/${CMAKE_INSTALL_PREFIX}/ 
