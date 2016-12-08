@@ -55,7 +55,7 @@ OneElectronProperty::calculate_(unsigned int deriv,
 
             // make sure the right number of integrals was returned
             if(ncalc != aoit.n_functions())
-                throw GeneralException("Bad number of integrals returned",
+                throw PulsarException("Bad number of integrals returned",
                                        "ncalc", ncalc, "expected", aoit.n_functions());
 
 

@@ -24,7 +24,7 @@ uint64_t OSOneElectronPotential::calculate_with_grid_(uint64_t shell1, uint64_t 
                                                       double * outbuffer, size_t bufsize)
 {
     if(!sys_)
-        throw GeneralException("No system given");
+        throw PulsarException("No system given");
 
     const BasisSetShell & sh1 = bs1_->shell(shell1);
     const BasisSetShell & sh2 = bs2_->shell(shell2);
@@ -32,7 +32,7 @@ uint64_t OSOneElectronPotential::calculate_with_grid_(uint64_t shell1, uint64_t 
     const size_t nfunc = sh1.n_functions() * sh2.n_functions();
 
     if(bufsize < nfunc)
-        throw GeneralException("Buffer is too small", "size", bufsize, "required", nfunc);
+        throw PulsarException("Buffer is too small", "size", bufsize, "required", nfunc);
 
     // degree of general contraction
     size_t ngen1 = sh1.n_general_contractions();
@@ -267,7 +267,7 @@ uint64_t OSOneElectronPotential::calculate_(uint64_t shell1, uint64_t shell2,
         
     }
     else
-        throw GeneralException("Unknown grid", "gridopt", gridopt);
+        throw PulsarException("Unknown grid", "gridopt", gridopt);
 
     Grid grid(std::make_shared<GridUniverse>(std::move(gu)), true);
 

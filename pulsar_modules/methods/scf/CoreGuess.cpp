@@ -25,7 +25,7 @@ CoreGuess::DerivReturnType CoreGuess::deriv_(size_t order, const Wavefunction & 
 
     // make sure stuff is set in wavefunction
     if(!wfn.system)
-        throw GeneralException("System is not set!");
+        throw PulsarException("System is not set!");
 
 
     // get the basis set
@@ -71,7 +71,7 @@ CoreGuess::DerivReturnType CoreGuess::deriv_(size_t order, const Wavefunction & 
     //////////////////////////
     double nelec_d = sys.get_n_electrons();
     if(!is_integer(nelec_d))
-        throw GeneralException("Can't handle non-integer occupations", "nelectrons", nelec_d);
+        throw PulsarException("Can't handle non-integer occupations", "nelectrons", nelec_d);
     size_t nelec = numeric_cast<size_t>(nelec_d);
 
 

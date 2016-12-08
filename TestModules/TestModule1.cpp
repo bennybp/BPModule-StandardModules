@@ -89,7 +89,7 @@ void TestModule1::call_run_test2_(const std::string & other1, const std::string 
 void TestModule1::test_throw_(void)
 {
     out.warning("+++ In TestModule1: Throwing an exception!\n");
-    throw GeneralException("This is a test exception",
+    throw PulsarException("This is a test exception",
                            "Data1", "Hi",
                            "Data 2", "Hello");
 }

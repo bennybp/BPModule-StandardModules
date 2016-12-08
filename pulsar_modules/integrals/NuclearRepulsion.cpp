@@ -18,7 +18,7 @@ void NuclearRepulsion::initialize_(unsigned int deriv, const System & sys)
 uint64_t NuclearRepulsion::calculate_(double * outbuffer, size_t bufsize)
 {
     if(bufsize == 0)
-        throw GeneralException("Not enough space in output buffer");
+        throw PulsarException("Not enough space in output buffer");
 
 
     double enuc = 0.0;

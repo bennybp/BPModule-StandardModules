@@ -14,7 +14,7 @@ namespace pulsarmethods {
 void HFIterate::initialize_(const Wavefunction & wfn)
 {
     if(!wfn.system)
-        throw GeneralException("System is not set!");
+        throw PulsarException("System is not set!");
 
     // get the basis set
     const System & sys = *(wfn.system);

@@ -33,7 +33,7 @@ uint64_t ReferenceERI::calculate_(size_t shell1, size_t shell2,
     size_t nfunc = sh1.n_functions() * sh2.n_functions() * sh3.n_functions() * sh4.n_functions();
 
     if(bufsize < nfunc)
-        throw GeneralException("Buffer to small for ERI", "bufsize", bufsize, "nfunc", nfunc);
+        throw PulsarException("Buffer to small for ERI", "bufsize", bufsize, "nfunc", nfunc);
 
     // lots of loops. This isn't really meant to be fast....
     size_t idx = 0;

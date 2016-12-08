@@ -19,7 +19,7 @@ void NuclearDipole::initialize_(unsigned int deriv, const System & sys)
 uint64_t NuclearDipole::calculate_(double * outbuffer, size_t bufsize)
 {
     if(bufsize < 3)
-        throw GeneralException("Not enough space in output buffer");
+        throw PulsarException("Not enough space in output buffer");
 
     outbuffer[0] = 0.0;
     outbuffer[1] = 0.0;

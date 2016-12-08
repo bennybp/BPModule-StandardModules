@@ -88,7 +88,7 @@ OneElectron_Eigen::calculate_(const std::string & key,
 
             // make sure the right number of integrals was returned
             if(ncalc != aoit.n_functions() * ncomp)
-                throw GeneralException("Bad number of integrals returned",
+                throw PulsarException("Bad number of integrals returned",
                                        "ncalc", ncalc, "expected", ncomp * aoit.n_functions());
 
             do {
