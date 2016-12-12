@@ -27,7 +27,7 @@ def run(mm):
     corr={str(0)+" ":Frag1,str(1)+" ":Frag2}  
     
     tester.test_return("Resulting water dimer fragments are correct",
-        corr,my_mod.fragmentize,water2)
+        True,corr,my_mod.fragmentize,water2)
     
     ethane=psr.make_system("""
     C 0.00 0.00 0.00
@@ -54,7 +54,7 @@ def run(mm):
     corr["1 "]=Frag2
     corr["2 "]=Frag3
        
-    tester.test_return("Ethane fragmented correctly",corr,my_mod.fragmentize,ethane)
+    tester.test_return("Ethane fragmented correctly",True,corr,my_mod.fragmentize,ethane)
 
     tester.print_results()
 

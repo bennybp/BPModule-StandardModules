@@ -39,7 +39,7 @@ def run(mm):
         Temp.sn=set({i,})
         corr[SN]=Temp
     print("done with corr answer")
-    tester.test_return("Resulting fragments are correct",
+    tester.test_return("Resulting fragments are correct",True,
         corr,my_mod.fragmentize,water6)
 
     tester.print_results()
