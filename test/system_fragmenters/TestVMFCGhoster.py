@@ -95,10 +95,11 @@ def run(mm):
             corr,my_mod.fragmentize,water6)
     
     tester.print_results()
+    return tester.nfailed()
 
 def run_test():
     with psr.ModuleAdministrator() as mm:
-        run(mm)
+        return run(mm)
 
 
 

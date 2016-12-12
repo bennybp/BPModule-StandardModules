@@ -57,7 +57,8 @@ def run(mm):
     tester.test_return("Ethane fragmented correctly",True,corr,my_mod.fragmentize,ethane)
 
     tester.print_results()
+    return tester.nfailed()
 
 def run_test():
     with psr.ModuleAdministrator() as mm:
-        run(mm)
+        return run(mm)
