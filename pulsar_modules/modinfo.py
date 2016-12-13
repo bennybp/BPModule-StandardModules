@@ -58,6 +58,7 @@ minfo["NMerizer"]["options"]={
                     "DISTANCE_THRESHOLDS":(OptionType.DictIntFloat,{},False,
                      None,"Maximum distance per truncation order to use") 
                     }
+minfo["MBE"]["base"]="EnergyMethod"
 minfo["MBE"]["description"]="Runs a many-body expansion"
 minfo["MBE"]["options"]={
                 "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,

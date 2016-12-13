@@ -11,5 +11,7 @@ foreach(dir methods system_fragmenters)
   install(FILES ${CMAKE_BINARY_DIR}/${dir}/CTestTestfile.cmake DESTINATION ${dir})
 endforeach()
 
+add_subdirectory(testmodules)
+
 # This file was created from the various add_test commands
 install(FILES ${CMAKE_BINARY_DIR}/CTestTestfile.cmake DESTINATION .)
