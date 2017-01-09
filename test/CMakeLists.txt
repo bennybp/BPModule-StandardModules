@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 #Should find the Pulsar in the staging area
 #This sets PULSAR_RUNTEST variable
 find_package(pulsar REQUIRED)
-include(CTestMacros)
+include(pulsar/CTestMacros)
 ########################
 # Core pulsar module tests
 ########################

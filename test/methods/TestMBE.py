@@ -38,8 +38,6 @@ def run(mm):
     mm.load_module("pulsar_modules","Bondizer","PSR_BOND_FRAG")
     mm.load_module("pulsar_modules","MBE","PSR_MBE")
     mm.load_module("testmodules","Fake SCF","Fake SCF")
-    mm.load_module("pulsar_psi4","DF-SCF","PSI4_SCF")
-    mm.change_option("PSI4_SCF","BASIS_SET","aug-cc-pvdz")
     mm.change_option("PSR_NMER_FRAG","SYSTEM_FRAGMENTER_KEY","PSR_BOND_FRAG")
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",2)
     mm.change_option("PSR_MBE","SYSTEM_FRAGMENTER_KEY","PSR_BOND_FRAG")
