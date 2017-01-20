@@ -2,10 +2,16 @@ cmake_minimum_required(VERSION 3.0)
 #Should find the Pulsar in the staging area
 #This sets PULSAR_RUNTEST variable
 find_package(pulsar REQUIRED)
-include(pulsar/CTestMacros)
+include(CTestMacros)
 ########################
 # Core pulsar module tests
 ########################
+
+#Macro for defining a python test
+function(pulsar_mod_py_test dir test_name)
+  pulsar_py_test(${dir} ${test_name} ${STAGE_DIR}/${PULSAR_MODULE_DIR})
+endfunction()
+
 foreach(dir methods system_fragmenters)
   add_subdirectory(${dir})
   install(FILES ${CMAKE_BINARY_DIR}/${dir}/CTestTestfile.cmake DESTINATION ${dir})

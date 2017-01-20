@@ -32,7 +32,7 @@ ExternalProject_Add(pulsar_modules_test
    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test
    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
               -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/test_stage
-              -DSTAGE_DIR=${STAGE_DIR}${CMAKE_INSTALL_PREFIX}
+              -DSTAGE_DIR=${STAGE_DIR}
               -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
               -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
               -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
@@ -52,5 +52,4 @@ file(WRITE ${CMAKE_BINARY_DIR}/CTestTestfile.cmake "subdirs(test_stage)")
 # Install the staging directory
 install(DIRECTORY ${CMAKE_BINARY_DIR}/stage/${CMAKE_INSTALL_PREFIX}/ 
         DESTINATION ${CMAKE_INSTALL_PREFIX} USE_SOURCE_PERMISSIONS)
-# install additional python files
-install(FILES "StandardModules.py" DESTINATION ${CMAKE_INSTALL_PREFIX})
+
