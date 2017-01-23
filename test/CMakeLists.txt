@@ -12,7 +12,7 @@ function(pulsar_mod_py_test dir test_name)
   pulsar_py_test(${dir} ${test_name} ${STAGE_DIR}/${PULSAR_MODULE_DIR})
 endfunction()
 
-foreach(dir methods system_fragmenters)
+foreach(dir analysis methods system_fragmenters)
   add_subdirectory(${dir})
   install(FILES ${CMAKE_BINARY_DIR}/${dir}/CTestTestfile.cmake DESTINATION ${dir})
 endforeach()
