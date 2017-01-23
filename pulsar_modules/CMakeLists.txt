@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-# Find the pulsar core
-list(APPEND CMAKE_PREFIX_PATH "${PULSAR_PATH}")
 find_package(pulsar REQUIRED)
 
 # Common flags for standard modules
@@ -29,7 +27,12 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     endforeach()
 endif()
 
-include_directories(${PULSAR_MODULE_ROOT})
+#########################################
+# Includes, compile flags, and linking
+#########################################
+# We need to add the parent of this directory
+get_filename_component(PULSAR_STANDARDMODULES_PARENT_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
+include_directories(${PULSAR_STANDARDMODULES_PARENT_DIR})
 
 
 #################################################

@@ -4,7 +4,6 @@ set(PULSAR_SYSTEM_FRAGMENTERS_SRC
                      CrystalFragger.cpp
                      CPGhoster.cpp
                      NMerizer.cpp
-                     UserDefined.cpp
                      VMFCGhoster.cpp
     PARENT_SCOPE
    )

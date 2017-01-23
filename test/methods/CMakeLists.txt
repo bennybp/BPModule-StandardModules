@@ -1,3 +1,3 @@
-pulsar_mod_py_test(methods TestMBE)
+pulsar_sm_py_test(methods TestMBE)
 
 

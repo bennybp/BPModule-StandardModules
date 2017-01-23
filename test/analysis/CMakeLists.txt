@@ -1,1 +1,1 @@
-pulsar_mod_py_test(analysis TestMBEHelper)
+pulsar_sm_py_test(analysis TestMBEHelper)

@@ -1,8 +1,9 @@
 import os
 import sys
 import pulsar as psr
-from pulsar_modules.analysis.MBEHelper import MBE_wrapper
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+print(sys.path)
+from pulsar_modules.analysis.MBEHelper import MBE_wrapper
 
 def run(mm):
     tester=psr.PyTester("Testing the MBEHelper Analysis Module")
