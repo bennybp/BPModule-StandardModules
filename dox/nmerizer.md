@@ -32,6 +32,6 @@ The recognized options for NMerizer are:
   generate the first set of fragments.
 - TRUNCATION_KEY: The maximum number of fragments involved in a union
 - DISTANCE_THRESHOLDS: A map from an integer, \f$m\f$, to a double, \f$r_0\f$, 
-  such that if \f$r_0>(\prod_{i=1}^mr_i)^m}\f$ is true the \f$m\f$-mer is
+  such that if \f$r_0>(\prod_{i=1}^mr_i)^m\f$ is true the \f$m\f$-mer is
   considered significant, where \f$r_i\f$ is the distance from the center of
   mass of the \f$m\f$-mer to the \f$i\f$-th monomer

@@ -2,6 +2,8 @@ INPUT+=  dox/atomizer.md \
          dox/bondizer.md \
          dox/cpghoster.md \
          dox/mbe.md \
+         dox/mbehelper.md \
          dox/nmerizer.md \
+         dox/pesscan.md \
          dox/vmfcghoster.md
 INPUT += dox/mainpage.dox

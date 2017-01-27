@@ -18,7 +18,7 @@ E\approx\sum_{I=1}^NE_I.
 Assuming the smaller systems are much smaller than the supersystem this will be
 a poor approximation to the supersystem energy.  To improve upon this we can
 consider the so-called two-body interactions, the two-body interaction between
-subsystems \f$I\f$ and \f$J\f$ being denoted, \f$\Delta E_{IJ}$, and given by:
+subsystems \f$I\f$ and \f$J\f$ being denoted, \f$\Delta E_{IJ}\f$, and given by:
 \f[
 \Delta E_{IJ}=E_{IJ}-E_{I}-E_{J}.
 \f]

@@ -7,7 +7,7 @@ take \f$E_X(Y)\f$ to be the energy of some system \f$X\f$, that has been
 computed in the \f$Y\f$ basis, VMFC computes the energy of an \f$N\f$ fragment
 system as:
 \f[
-E=\sum_{I=1}^N E_I(I)+\sum_{I<J=1}^{_NC_2}\left[E_{IJ}(IJ)-E_{I}(I)-E_J(IJ)+\cdots
+E=\sum_{I=1}^N E_I(I)+\sum_{I<J=1}^{_NC_2}\left[E_{IJ}(IJ)-E_{I}(I)-E_J(IJ)\right]+\cdots
 \f]
 that is all the terms needed to compute the one-body energy are in the one-body
 basis, all the terms needed to compute the two-body energy are in the dimer
