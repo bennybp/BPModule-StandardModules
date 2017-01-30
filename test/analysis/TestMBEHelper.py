@@ -3,7 +3,7 @@ import sys
 import pulsar as psr
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 print(sys.path)
-from pulsar_modules.analysis.MBEHelper import MBE_wrapper
+from pulsar_modules.analysis.MBEHelper import *
 
 def run(mm):
     tester=psr.PyTester("Testing the MBEHelper Analysis Module")
@@ -48,12 +48,22 @@ def run(mm):
     my_mod=mm.get_module("PSR_MBE",0)
     wfn=psr.Wavefunction()
     wfn.system=water3
-    egy=MBE_wrapper(mm,wfn,2,my_mod,"PSR_NMER_FRAG",['Fake SCF'])
+    egy=mbe_wrapper(mm,wfn,2,my_mod,"PSR_NMER_FRAG",['Fake SCF'])
     corr_egys={1:-228.1242232726998,2:-228.1287815638595}
     for meth,test_egy in egy.items():
         for order,egy_i in test_egy.items():
             msg=meth+" "+str(order)+" -body energy"
             tester.test_double(msg,egy_i,corr_egys[order])
+
+    corr_ints={'1 ': [-76.04140775809373], '0 1 ': [-0.0014981983144224387],
+               '0 2 ': [-0.002230289885289949], '0 ': [-76.0414077582649],
+               '1 2 ': [-0.0008298029599842494], '2 ': [-76.04140775634117]}
+    ints=mbe_interactions(mm,wfn,2,my_mod,"PSR_NMER_FRAG",['Fake SCF'])
+    for meth,test_int in ints.items():
+        for inti,egyi in test_int.items():
+            msg=meth+" "+str(inti)+" "+str(len(inti.split()))+"-body interaction"
+            tester.test_double(msg,egyi,corr_ints[inti])
+
     return tester.nfailed()
 
 def run_test():
