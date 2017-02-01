@@ -1,7 +1,7 @@
 import pulsar as psr
 import copy
 from itertools import combinations
-def mbe_wrapper(mm,wfn,truncation_order,MBEMod,nmerizer_key,sub_keys=[]):
+def mbe_wrapper(mm,wfn,truncation_order,MBEMod,nmerizer_key,sub_keys=[],**kwargs):
     """ Relies on Pulsar's cacheing ability to compute 1-body, 2-body, etc.
         derivatives.
 
@@ -12,6 +12,10 @@ def mbe_wrapper(mm,wfn,truncation_order,MBEMod,nmerizer_key,sub_keys=[]):
         MBEmod: the MBE EnergyMethod module instance to call
         nmerizer_key: the key for Fragmentizer that makes the n-mers
         sub_keys: a list of EnergyMethod keys to call
+
+        Kwargs:
+        bsse_key: The key of a BSSE correction to apply to the n-mers (if desired)
+
     """
     Derivs={meth:{} for meth in sub_keys}
     for i in range(truncation_order,0,-1):
@@ -19,6 +23,12 @@ def mbe_wrapper(mm,wfn,truncation_order,MBEMod,nmerizer_key,sub_keys=[]):
         if not mm.has_key(newkey):
             mm.duplicate_key(nmerizer_key,newkey)
             mm.change_option(newkey,"TRUNCATION_ORDER",i)
+        if "bsse_key" in kwargs:
+            temp_bsse_key=kwargs["bsse_key"]+str(i)
+            if not mm.has_key(temp_bsse_key):
+                mm.duplicate_key(kwargs["bsse_key"],temp_bsse_key)
+                mm.change_option(temp_bsse_key,"SYSTEM_FRAGMENTER_KEY",newkey)
+            newkey=temp_bsse_key
         MBEMod.options().change("SYSTEM_FRAGMENTER_KEY",newkey)
         if sub_keys != []:
             for meth in sub_keys:

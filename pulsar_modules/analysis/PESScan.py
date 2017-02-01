@@ -39,6 +39,27 @@ def angle_scan(un,t,sys_in,orig):
     origin_sys=psr.translate(rot_sys,from_origin)
     return psr.System(origin_sys.as_universe()+sys_in[1].as_universe(),True)
 
+def make_pes_range(start,stop,increment,to_au=1.0):
+    """Computes a scan range for you.
+
+    The Python range function won't work with integers, which is not what we
+    usually want to scan over for a PES scan.  This little function will map
+    those integers to a range for you.
+
+    Note: range is inclusive, i.e. [start,stop], not [start,stop)
+
+    Args:
+    start : float the first displacement to consider
+    stop  : float the last displacement to consider
+    increment : float the step size between displacements
+    to_au : the conversion from your input units to atomic units (or radians)
+
+    Return: a list of displacements
+    """
+    nsteps=int((stop-start)/increment)
+    return [(start+i*increment)*to_au for i in range(0,nsteps+1)]
+
+
 def pes_scan(init_sys,points,scan_range):
     """Performs a potential energy scan (PES) over a range of values.
 
