@@ -2,7 +2,7 @@ import os
 import sys
 import math
 import pulsar as psr
-from pulsar_modules.analysis.PESScan import pes_scan
+from pulsar_modules.analysis.PESScan import make_pes_range,pes_scan
 
 corr_dist_scan=[
 psr.make_system("""
@@ -94,7 +94,7 @@ def run(mm):
         systems[1].insert(water2[i+3])
 
     points=[water2[1],water2[3]]
-    scan_range=[i/0.52917721067 for i in range(2)]
+    scan_range=make_pes_range(0,1,1,1/0.52917721067)
     run_scan(systems,points,scan_range,corr_dist_scan,"Distance stretch",tester)
 
 
