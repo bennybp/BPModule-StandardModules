@@ -3,6 +3,7 @@ from .methods.composite_methods import HelgakerCBS
 from .methods.composite_methods import FellerCBS
 from .methods.composite_methods import FPA
 from .methods.composite_methods import MyCrazyCompositeMethod
+from .methods.optimizer import GeometryOptimizer
 from pulsar import ModuleCreationFuncs
 
 
@@ -14,4 +15,5 @@ def insert_supermodule():
     cf.add_py_creator("FellerCBS",FellerCBS.FellerCBS)
     cf.add_py_creator("FPA",FPA.FPA)
     cf.add_py_creator("MyCrzyCompMeth",MyCrazyCompositeMethod.MyCzyCM)
+    cf.add_py_creator("GeometryOptimizer",GeometryOptimizer.GeometryOptimizer)
     return cf

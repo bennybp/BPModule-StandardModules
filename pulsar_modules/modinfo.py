@@ -2,11 +2,13 @@ from pulsar import OptionType
 
 #Stuff common to many modules
 c_mod,sysfrag,modpath="c_module","SystemFragmenter","pulsar_modules.so"
+py_mod,emethod="python_module","EnergyMethod"
 version="0.1a"
 no_options={}
 no_ref,Ben,Ryan=[""],["Ben Pritchard"],["Ryan Richard"]
 
-sys_frags=["Atomizer","Bondizer","CrystalFragger","CPGhoster","VMFCGhoster",\
+#C++ modules
+cxx_mods=["Atomizer","Bondizer","CrystalFragger","CPGhoster","VMFCGhoster",\
            "NMerizer","MBE"]
 minfo={i:{
     "type":c_mod,
@@ -16,7 +18,7 @@ minfo={i:{
     "authors":Ryan,
     "refs":no_ref,
     "options":no_options} 
-for i in sys_frags}
+for i in cxx_mods}
 
 minfo["Atomizer"]["description"]="Atomizes a System"
 minfo["Atomizer"]["authors"]=Ben
@@ -49,7 +51,7 @@ minfo["NMerizer"]["options"]={
                     "DISTANCE_THRESHOLDS":(OptionType.DictIntFloat,{},False,
                      None,"Maximum distance per truncation order to use") 
                     }
-minfo["MBE"]["base"]="EnergyMethod"
+minfo["MBE"]["base"]=emethod
 minfo["MBE"]["description"]="Runs a many-body expansion"
 minfo["MBE"]["options"]={
                 "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
@@ -58,6 +60,26 @@ minfo["MBE"]["options"]={
                 "EnergyMethod to call"),
                     }
 
+# Now do Python Modules
+py_mods=[ "GeometryOptimizer" ]
+for i in py_mods:
+    minfo[i]={
+    "type":py_mod,
+    "base":emethod,
+    "version":version,
+    "authors":Ryan,
+    "refs":no_ref,
+    "options":no_options}
+
+minfo["GeometryOptimizer"]["description"]="Calls SciPy's minimize fxn"
+minfo["GeometryOptimizer"]["options"]={
+                "MAX_GRAD":(OptionType.Float,3.0e-4,False,None,
+                  "Maximum absolute value of any component of the gradient"),
+                "TYPE":(OptionType.String,"BFGS",False,None,
+                  "Which SciPy optimizer to use"),
+                "METHOD_KEY":(OptionType.String,None,True,None,
+                  "EnergyMethod to call"),
+}
 #  "CP":{
 #    "type"        : "python_module",
 #    "base"        : "EnergyMethod",
