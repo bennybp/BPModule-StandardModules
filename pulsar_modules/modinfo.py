@@ -61,7 +61,7 @@ minfo["MBE"]["options"]={
                     }
 
 # Now do Python Modules
-py_mods=[ "GeometryOptimizer" ]
+py_mods=[ "GeometryOptimizer", "EEQMMM" ]
 for i in py_mods:
     minfo[i]={
     "type":py_mod,
@@ -80,6 +80,17 @@ minfo["GeometryOptimizer"]["options"]={
                 "METHOD_KEY":(OptionType.String,None,True,None,
                   "EnergyMethod to call"),
 }
+minfo["EEQMMM"]["description"]="Runs a QM/MM computation with electrostatic embedding"
+minfo["EEQMMM"]["options"]={
+   "QM_METHOD_KEY":(OptionType.String,None,True,None,"Module for QM energy"),
+   "MM_METHOD_KEY":(OptionType.String,None,True,None,"Module for MM energy"),
+   "MM_CHARGES_KEY":(OptionType.String,None,True,None,"Module for computing MM charges"),
+   "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
+     "Module that defines the QM and MM regions"),
+   "QM_REGION_KEY":(OptionType.Int,0,False,None,"Which fragment is QM?"),
+   "MM_REGION_KEY":(OptionType.Int,1,False,None,"Which fragment is MM?"),
+}
+
 #  "CP":{
 #    "type"        : "python_module",
 #    "base"        : "EnergyMethod",
