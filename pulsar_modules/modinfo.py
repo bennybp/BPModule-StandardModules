@@ -7,7 +7,7 @@ no_options={}
 no_ref,Ben,Ryan=[""],["Ben Pritchard"],["Ryan Richard"]
 
 sys_frags=["Atomizer","Bondizer","CrystalFragger","CPGhoster","VMFCGhoster",\
-           "UserDefined","NMerizer"]
+           "NMerizer","MBE"]
 minfo={i:{
     "type":c_mod,
     "base":sysfrag,
@@ -40,15 +40,6 @@ minfo["CPGhoster"]["options"]={"SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,T
 minfo["VMFCGhoster"]["description"]="Makes fragments with ghost atoms consistent with VMFC"
 minfo["VMFCGhoster"]["options"]={"SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,
                               None,"Fragmenter to call to get frags")}
-minfo["UserDefined"]["description"]="Makes whatever you asked for into fragments"
-minfo["UserDefined"]["options"]={
-                     "FRAGMENT_NAMES":(OptionType.ListString,None,True,None,
-                     'Names of the fragments'),
-                     "ATOMS_PER_FRAG":(OptionType.ListInt,None,True,None,
-                     'Number of atoms in each fragment'),
-                     "FRAGMENTS":(OptionType.ListInt,None,True,None,
-                     'The atoms in each fragment'),
-                    }
 minfo["NMerizer"]["description"]="Makes fragments from union of subfragments"
 minfo["NMerizer"]["options"]={
                     "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
@@ -57,6 +48,14 @@ minfo["NMerizer"]["options"]={
                     "The maximum number of fragments involved in a union"),
                     "DISTANCE_THRESHOLDS":(OptionType.DictIntFloat,{},False,
                      None,"Maximum distance per truncation order to use") 
+                    }
+minfo["MBE"]["base"]="EnergyMethod"
+minfo["MBE"]["description"]="Runs a many-body expansion"
+minfo["MBE"]["options"]={
+                "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
+                "Fragmenter to call for original fragments"),
+                "METHOD_KEY":(OptionType.String,None,True,None,
+                "EnergyMethod to call"),
                     }
 
 #  "CP":{

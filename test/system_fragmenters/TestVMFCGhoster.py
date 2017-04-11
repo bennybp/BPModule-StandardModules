@@ -1,4 +1,4 @@
-from TestFxns import *
+import pulsar as psr
 from itertools import combinations
 
 def make_nmers(corr,waters,n):
@@ -24,7 +24,7 @@ def make_nmers(corr,waters,n):
 
 
 def run(mm):
-    tester = Tester("Testing CPGhoster")
+    tester = psr.PyTester("Testing CPGhoster")
 
     water6=psr.make_system("""
     0 1
@@ -69,10 +69,10 @@ def run(mm):
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",0)
     
     my_mod=mm.get_module("PSR_VMFC_FRAG",0)
-    frags=my_mod.fragmentize(water6)
     
     corr={}
-    tester.test_value("Resulting fragments are correct n=0",corr,frags)
+    tester.test_return("Resulting fragments are correct n=0",True,corr,
+        my_mod.fragmentize,water6)
     key=mm.generate_unique_key()
     mm.duplicate_key("PSR_NMER_FRAG",key)
     mm.change_option(key,"TRUNCATION_ORDER",1)
@@ -82,7 +82,8 @@ def run(mm):
 
     
     frags=my_mod.fragmentize(water6)
-    tester.test_value("Resulting fragments are correct n=1",corr,frags)      
+    tester.test_return("Resulting fragments are correct n=1",True,corr,
+        my_mod.fragmentize,water6)
        
     for n in range(2,7):
         make_nmers(corr,waters,n)
@@ -90,16 +91,15 @@ def run(mm):
         mm.duplicate_key("PSR_NMER_FRAG",key)
         mm.change_option(key,"TRUNCATION_ORDER",n)
         my_mod.options().change("SYSTEM_FRAGMENTER_KEY",key)
-        frags=my_mod.fragmentize(water6)
-        tester.test_value("Resulting fragments are correct n="+str(n),corr,frags)
+        tester.test_return("Resulting fragments are correct n="+str(n),True,
+            corr,my_mod.fragmentize,water6)
     
     tester.print_results()
+    return tester.nfailed()
 
-
-with psr.ModuleAdministrator() as mm:
-    run(mm)
-    
-psr.finalize()
+def run_test():
+    with psr.ModuleAdministrator() as mm:
+        return run(mm)
 
 
 

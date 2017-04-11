@@ -1,4 +1,4 @@
-from TestFxns import *
+import pulsar as psr
 from itertools import combinations
 
 def make_nmers(weights,corr,waters,n):
@@ -17,7 +17,7 @@ def make_nmers(weights,corr,waters,n):
 
 
 def run(mm):
-    tester = Tester("Testing NMerizer")
+    tester = psr.PyTester("Testing NMerizer")
 
     water6=psr.make_system("""
     0 1
@@ -58,15 +58,15 @@ def run(mm):
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",0)
     
     my_mod=mm.get_module("PSR_NMER_FRAG",0)
-    frags=my_mod.fragmentize(water6)
     
     corr={}
-    tester.test_value("Resulting fragments are correct n=0",corr,frags)
+    tester.test_return("Resulting fragments are correct n=0",True,corr,
+        my_mod.fragmentize,water6)
     my_mod.options().change("TRUNCATION_ORDER",1)
     
     corr={str(i)+" ":waters[i] for i in range(0,6)}
-    frags=my_mod.fragmentize(water6)
-    tester.test_value("Resulting fragments are correct n=1",corr,frags)
+    tester.test_return("Resulting fragments are correct n=1",True,corr,
+        my_mod.fragmentize,water6)
     
     #Weights for n=2 to 6 respectively
     cs=[[-4.0],[6.0,-3.0],[-4.0,3.0,-2.0],[1.0,-1.0,1.0,-1.0],
@@ -75,15 +75,13 @@ def run(mm):
     for n,c in enumerate(cs):
         make_nmers(c,corr,waters,n+2)
         my_mod.options().change("TRUNCATION_ORDER",n+2)        
-        frags=my_mod.fragmentize(water6)
-        tester.test_value("Resulting fragments are correct n="+str(n+2),corr,
-             frags)
+        tester.test_return("Resulting fragments are correct n="+str(n+2),True,
+            corr,my_mod.fragmentize,water6)
     
     tester.print_results()
+    return tester.nfailed()
 
-
-with psr.ModuleAdministrator() as mm:
-    run(mm)
-    
-psr.finalize()
+def run_test():
+    with psr.ModuleAdministrator() as mm:
+        return run(mm)
 

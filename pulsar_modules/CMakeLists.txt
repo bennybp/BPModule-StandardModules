@@ -1,5 +1,4 @@
-# Find the pulsar core
-list(APPEND CMAKE_PREFIX_PATH "${PULSAR_PATH}")
+cmake_minimum_required(VERSION 3.0)
 find_package(pulsar REQUIRED)
 
 # Common flags for standard modules
@@ -28,7 +27,12 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     endforeach()
 endif()
 
-include_directories(${PULSAR_MODULE_ROOT})
+#########################################
+# Includes, compile flags, and linking
+#########################################
+# We need to add the parent of this directory
+get_filename_component(PULSAR_STANDARDMODULES_PARENT_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
+include_directories(${PULSAR_STANDARDMODULES_PARENT_DIR})
 
 
 #################################################
@@ -56,9 +60,9 @@ target_include_directories(pulsar_modules PRIVATE pulsar)
 target_link_libraries(pulsar_modules PRIVATE pulsar)
 
 install(TARGETS pulsar_modules
-        LIBRARY DESTINATION modules/pulsar_modules
-        RUNTIME DESTINATION modules/pulsar_modules)
+        LIBRARY DESTINATION ${PULSAR_MODULE_DIR}/pulsar_modules
+)
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
-        DESTINATION modules
+        DESTINATION ${PULSAR_MODULE_DIR}
         FILES_MATCHING PATTERN "*.py"
 )

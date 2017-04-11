@@ -3,7 +3,6 @@
 #include "pulsar_modules/system_fragmenters/CrystalFragger.hpp"
 #include "pulsar_modules/system_fragmenters/CPGhoster.hpp"
 #include "pulsar_modules/system_fragmenters/NMerizer.hpp"
-#include "pulsar_modules/system_fragmenters/UserDefined.hpp"
 #include "pulsar_modules/system_fragmenters/VMFCGhoster.hpp"
 #include "pulsar_modules/methods/mbe/MBE.hpp"
 //#include "methods/scf/Damping.hpp"
@@ -19,7 +18,7 @@ extern "C" {
 
 ModuleCreationFuncs insert_supermodule(void){
     ModuleCreationFuncs cf;
-//    cf.add_cpp_creator<pulsarmethods::MBE>("MBE");
+    cf.add_cpp_creator<MBE>("MBE");
 //    cf.add_cpp_creator<pulsarmethods::Damping>("Damping");
 //    cf.add_cpp_creator<pulsarmethods::DIIS>("DIIS");
 //    cf.add_cpp_creator<pulsarmethods::HFIterate>("HFIterate");
@@ -30,7 +29,6 @@ ModuleCreationFuncs insert_supermodule(void){
     cf.add_cpp_creator<CrystalFragger>("CrystalFragger");
     cf.add_cpp_creator<CPGhoster>("CPGhoster");
     cf.add_cpp_creator<VMFCGhoster>("VMFCGhoster");
-    cf.add_cpp_creator<UserDefined>("UserDefined");
     cf.add_cpp_creator<NMerizer>("NMerizer");
     return cf;
 }

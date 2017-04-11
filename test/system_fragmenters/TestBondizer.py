@@ -1,7 +1,7 @@
-from TestFxns import *
+import pulsar as psr
 
 def run(mm):
-    tester = Tester("Testing Bondizer")
+    tester = psr.PyTester("Testing Bondizer")
 
     water2=psr.make_system("""
     0 1
@@ -15,7 +15,6 @@ def run(mm):
     
     mm.load_module("pulsar_modules","Bondizer","PSR_BOND_FRAG")
     my_mod=mm.get_module("PSR_BOND_FRAG",0)
-    frags=my_mod.fragmentize(water2)
 
     #This will make the right answer
     Frag1,Frag2=psr.NMerInfo(),psr.NMerInfo()
@@ -27,7 +26,8 @@ def run(mm):
     Frag1.sn,Frag2.sn={0},{1}
     corr={str(0)+" ":Frag1,str(1)+" ":Frag2}  
     
-    tester.test_value("Resulting water dimer fragments are correct",corr,frags)
+    tester.test_return("Resulting water dimer fragments are correct",
+        True,corr,my_mod.fragmentize,water2)
     
     ethane=psr.make_system("""
     C 0.00 0.00 0.00
@@ -40,7 +40,6 @@ def run(mm):
     H 0.51 0.88 1.92
     """)
     my_mod.options().change("MAX_NBONDS",2)
-    frags=my_mod.fragmentize(ethane)
     Frag3=psr.NMerInfo()
     Frag1.nmer,Frag2.nmer,Frag3.nmer=[psr.System(ethane,False) for i in range(0,3)]
     for i,ai in enumerate(ethane):
@@ -55,12 +54,11 @@ def run(mm):
     corr["1 "]=Frag2
     corr["2 "]=Frag3
        
-    tester.test_value("Ethane fragmented correctly",corr,frags)
+    tester.test_return("Ethane fragmented correctly",True,corr,my_mod.fragmentize,ethane)
 
     tester.print_results()
+    return tester.nfailed()
 
-
-with psr.ModuleAdministrator() as mm:
-    run(mm)
-    
-psr.finalize()
+def run_test():
+    with psr.ModuleAdministrator() as mm:
+        return run(mm)

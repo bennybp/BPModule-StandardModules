@@ -1,5 +1,6 @@
-from TestFxns import *
-from itertools import combinations
+import pulsar as psr
+from itertools import *
+
 
 def make_nmers(weights,corr,waters,n):
     for i,j in corr.items():
@@ -19,9 +20,8 @@ def make_nmers(weights,corr,waters,n):
         corr[key].weight=1.0
         corr[key].sn=set(comb)
 
-
 def run(mm):
-    tester = Tester("Testing CPGhoster")
+    tester = psr.PyTester("Testing CPGhoster")
 
     water6=psr.make_system("""
     0 1
@@ -66,10 +66,8 @@ def run(mm):
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",0)
     
     my_mod=mm.get_module("PSR_CP_FRAG",0)
-    frags=my_mod.fragmentize(water6)
     
     corr={}
-    tester.test_value("Resulting fragments are correct n=0",corr,frags)
     key=mm.generate_unique_key()
     mm.duplicate_key("PSR_NMER_FRAG",key)
     mm.change_option(key,"TRUNCATION_ORDER",1)
@@ -82,9 +80,8 @@ def run(mm):
             for ai in waters[j].nmer:
                 corr[str(i)+" "].nmer.insert(psr.make_ghost_atom(ai))
 
-    
-    frags=my_mod.fragmentize(water6)
-    tester.test_value("Resulting fragments are correct n=1",corr,frags)      
+    tester.test_return("Resulting fragments are correct n=1",True,corr,
+        my_mod.fragmentize,water6)
     
     #Weights for n=2 to 6 respectively
     cs=[[-4.0],[6.0,-3.0],[-4.0,3.0,-2.0],[1.0,-1.0,1.0,-1.0],
@@ -96,16 +93,13 @@ def run(mm):
         mm.duplicate_key("PSR_NMER_FRAG",key)
         mm.change_option(key,"TRUNCATION_ORDER",n+2)
         my_mod.options().change("SYSTEM_FRAGMENTER_KEY",key)
-        frags=my_mod.fragmentize(water6)
-        tester.test_value("Resulting fragments are correct n="+str(n+2),corr,
-             frags)
+
+        tester.test_return("Resulting fragments are correct n="+str(n+2),True,
+            corr,my_mod.fragmentize,water6)
     
     tester.print_results()
+    return tester.nfailed()
 
-
-with psr.ModuleAdministrator() as mm:
-    run(mm)
-    
-psr.finalize()
-
-
+def run_test():
+    with psr.ModuleAdministrator() as mm:
+        return run(mm)

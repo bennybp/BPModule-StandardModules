@@ -15,16 +15,21 @@ type.
 
 \section main_sec Contents
 
+  - Analysis
+    - [MBE Helper](@ref mbehelper): Functions for analyzing results of a MBE
+      energy computation
+    - [PES Scan](@ref pesscan): Functions for scanning along a potential energy
+      surface
   - Integrals
   - Energy Methods
+    - [Many-Body Expansion](@ref mbe)
   - System Fragmenters
     - [Atomizer](@ref atomizer): One atom per fragment
     - [Bondizer](@ref bondizer): All atoms within n bonds are in a fragment
     - [Crystal Fragger](@ref crystfragger): Fragments periodic systems
-    - [CPGhoster](@ref cpghoster): Applies ghost atoms to a set of fragments in
-      a manner consistent with the Boys and Bernardi counterpoise correction
+    - [CPGhoster](@ref cpghoster): Applies ghost atoms to a set of fragments so
+      each fragment is in the supersystem basis set
     - [NMerizer](@ref nmerizer): Makes unions of up to n fragments
-    - [User Defined](@ref udfragger): Assigns atoms as the user requests
     - [VMFCGhoster](@ref vmfcghoster): Applies ghost atoms in a manner 
       consistent with the Valiron Mayer functional counterpoise scheme
 
