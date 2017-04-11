@@ -57,9 +57,7 @@ def mbe_interactions(mm,wfn,truncation_order,MBEMod,nmerizer_key,sub_keys=[]):
     if not mm.has_key(newkey):
         mm.duplicate_key(nmerizer_key,newkey)
         mm.change_option(newkey,"TRUNCATION_ORDER",i)
-
-    my_mod=mm.get_module(newkey,0)
-    frags= my_mod.fragmentize(wfn.system)
+    frags= mm.get_module(newkey,0).fragmentize(wfn.system)
     newwfn=copy.deepcopy(wfn)
     for sn,mol in frags.items():
         newwfn.system=psr.System(mol.nmer)
