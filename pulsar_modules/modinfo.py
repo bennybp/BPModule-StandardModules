@@ -40,11 +40,11 @@ minfo["CPGhoster"]["description"]="Makes fragments with ghost atoms consistent w
 minfo["CPGhoster"]["options"]={"SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
                             "Fragmenter to call for original fragments")}
 minfo["VMFCGhoster"]["description"]="Makes fragments with ghost atoms consistent with VMFC"
-minfo["VMFCGhoster"]["options"]={"SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,
+minfo["VMFCGhoster"]["options"]={"SYSTEM_FRAGMENTER_KEY":(OptionType.String,"PSR_NMER_FRAG",False,
                               None,"Fragmenter to call to get frags")}
 minfo["NMerizer"]["description"]="Makes fragments from union of subfragments"
 minfo["NMerizer"]["options"]={
-                    "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
+                    "SYSTEM_FRAGMENTER_KEY":(OptionType.String,"PSR_BOND_FRAG",False,None,
                     "The key to generate the first set of fragments"),
                     "TRUNCATION_ORDER":(OptionType.Int,1,False,None,
                     "The maximum number of fragments involved in a union"),
@@ -54,7 +54,7 @@ minfo["NMerizer"]["options"]={
 minfo["MBE"]["base"]=emethod
 minfo["MBE"]["description"]="Runs a many-body expansion"
 minfo["MBE"]["options"]={
-                "SYSTEM_FRAGMENTER_KEY":(OptionType.String,None,True,None,
+                "SYSTEM_FRAGMENTER_KEY":(OptionType.String,"PSR_NMER_FRAG",False,None,
                 "Fragmenter to call for original fragments"),
                 "METHOD_KEY":(OptionType.String,None,True,None,
                 "EnergyMethod to call"),

@@ -52,9 +52,7 @@ def run(mm):
     
 
 
-    mm.load_module("pulsar_modules","NMerizer","PSR_NMER_FRAG")
-    mm.load_module("pulsar_modules","Bondizer","PSR_BOND_FRAG")
-    mm.change_option("PSR_NMER_FRAG","SYSTEM_FRAGMENTER_KEY","PSR_BOND_FRAG")
+    mm.load_supermodule("pulsar_modules")
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",0)
     
     my_mod=mm.get_module("PSR_NMER_FRAG",0)

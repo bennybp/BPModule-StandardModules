@@ -25,7 +25,7 @@ def run(mm):
     H     1.1344683896564345    -1.9649571682424622     0.0720244094544075
     """)
     
-    mm.load_module("pulsar_modules","Atomizer","PSR_ATOM_FRAG")
+    mm.load_supermodule("pulsar_modules")
     my_mod=mm.get_module("PSR_ATOM_FRAG",0)
 
     #This will make the right answer
