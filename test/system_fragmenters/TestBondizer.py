@@ -13,7 +13,7 @@ def run(mm):
     H    -0.3728118210906938    -1.6906361161127510    -0.7569419281358893
     """)
     
-    mm.load_module("pulsar_modules","Bondizer","PSR_BOND_FRAG")
+    mm.load_supermodule("pulsar_modules")
     my_mod=mm.get_module("PSR_BOND_FRAG",0)
 
     #This will make the right answer

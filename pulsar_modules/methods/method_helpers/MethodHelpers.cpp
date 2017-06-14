@@ -23,7 +23,7 @@ class Task{
       Task(const Wavefunction& Wfn,EMethodPtr&& Method, size_t Order,
            size_t TaskNum=0):
          Method_(std::move(Method)),Wfn_(Wfn),Order_(Order),TaskNum_(TaskNum){}
-      DerivReturnType operator()(LibTaskForce::HybridComm&)const{ 
+      DerivReturnType operator()()const{
         return Method_->deriv(Order_,Wfn_);
       }
 };
@@ -93,26 +93,21 @@ vector<DerivReturnType> RunSeriesOfMethods(ModuleManager& MM,
               "The number of coefficients must match the number of methods",
               "NMethods=",Keys.size(),"NCoefficients=",NTasks);
     
-    const LibTaskForce::HybridComm& ParentComm=
-         pulsar::get_env().comm();
-    std::unique_ptr<LibTaskForce::HybridComm> NewComm=ParentComm.split(0,1);
+
 
     
-   vector<LibTaskForce::HybridFuture<DerivReturnType>> TempResults;
+   vector<DerivReturnType> TempResults;
    ProgressBar PB(NTasks,pulsar::get_global_output());
    for(size_t i: Range<0>(NTasks)){
        const Wavefunction& WfnI=(SameSystem?Wfns[0]:Wfns[i]);
        const std::string& Key=(SameMethod?Keys[0]:Keys[i]);
        Task DaTask(WfnI,std::move(MM.get_module<EnergyMethod>(Key,ID)),Deriv);
-       TempResults.push_back(
-         NewComm->add_task<DerivReturnType>(std::move(DaTask))      
-       );
+       TempResults.push_back(DaTask());
        ++PB;
    }
-   NewComm->barrier();
    pulsar::get_global_output()<<std::endl;//For progress bar
    vector<DerivReturnType> Results;
-   for(size_t i: Range<0>(NTasks))Results.push_back(TempResults[i].get());
+   for(size_t i: Range<0>(NTasks))Results.push_back(TempResults[i]);
    return Results;
 }
 

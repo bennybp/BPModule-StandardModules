@@ -58,10 +58,7 @@ def run(mm):
         waters[int((i-i%3)/3)].nmer.insert(atomi)
     
 
-    mm.load_module("pulsar_modules","CPGhoster","PSR_CP_FRAG")
-    mm.load_module("pulsar_modules","NMerizer","PSR_NMER_FRAG")
-    mm.load_module("pulsar_modules","Bondizer","PSR_BOND_FRAG")
-    mm.change_option("PSR_NMER_FRAG","SYSTEM_FRAGMENTER_KEY","PSR_BOND_FRAG")
+    mm.load_supermodule("pulsar_modules")
     mm.change_option("PSR_CP_FRAG","SYSTEM_FRAGMENTER_KEY","PSR_NMER_FRAG")
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",0)
     

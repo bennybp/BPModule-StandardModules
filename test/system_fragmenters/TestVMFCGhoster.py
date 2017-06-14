@@ -59,13 +59,7 @@ def run(mm):
         wateri.sn={i}
     for i,atomi in enumerate(water6):
         waters[int((i-i%3)/3)].nmer.insert(atomi)
-    
-
-    mm.load_module("pulsar_modules","VMFCGhoster","PSR_VMFC_FRAG")
-    mm.load_module("pulsar_modules","NMerizer","PSR_NMER_FRAG")
-    mm.load_module("pulsar_modules","Bondizer","PSR_BOND_FRAG")
-    mm.change_option("PSR_NMER_FRAG","SYSTEM_FRAGMENTER_KEY","PSR_BOND_FRAG")
-    mm.change_option("PSR_VMFC_FRAG","SYSTEM_FRAGMENTER_KEY","PSR_NMER_FRAG")
+    mm.load_supermodule("pulsar_modules")
     mm.change_option("PSR_NMER_FRAG","TRUNCATION_ORDER",0)
     
     my_mod=mm.get_module("PSR_VMFC_FRAG",0)

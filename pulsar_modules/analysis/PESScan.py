@@ -41,7 +41,7 @@ def mid_point(pt1,pt2):
 def angle_scan(un,t,sys_in,orig):
     to_origin=[orig[i]*-1 for i in range(3)]
     from_origin=[orig[i] for i in range(3)]
-    R=rot_mat(un,t)
+    R=rot_mat_(un,t)
     trans_sys=psr.translate(sys_in[0],to_origin)
     rot_sys=psr.rotate(trans_sys,R)
     origin_sys=psr.translate(rot_sys,from_origin)
