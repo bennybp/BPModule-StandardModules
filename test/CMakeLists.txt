@@ -7,7 +7,7 @@ include(CTestMacros)
 
 #Macro for defining a python test
 function(pulsar_sm_py_test dir test_name)
-  pulsar_py_test(${dir} ${test_name} ${STAGE_DIR}${PULSAR_MODULE_DIR})
+  pulsar_py_test(${dir} ${test_name} ${STAGE_DIR}${CMAKE_INSTALL_PREFIX})
 endfunction()
 
 foreach(dir analysis methods system_fragmenters)

@@ -60,9 +60,9 @@ target_include_directories(pulsar_modules PRIVATE pulsar)
 target_link_libraries(pulsar_modules PRIVATE pulsar)
 
 install(TARGETS pulsar_modules
-        LIBRARY DESTINATION ${PULSAR_MODULE_DIR}/pulsar_modules
+        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/pulsar_modules
 )
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
-        DESTINATION ${PULSAR_MODULE_DIR}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
         FILES_MATCHING PATTERN "*.py"
 )
